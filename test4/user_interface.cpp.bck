@@ -1,0 +1,51 @@
+#include "user_interface.h"
+
+user_interface::user_interface(){
+}
+
+user_interface::~user_interface(){
+}
+
+void user_interface::setup_ui(uint8_t (*io_rd)(uint8_t), void (*io_wr)(uint8_t)){
+	io_digital_read  = io_rd;
+	io_digital_write = io_wr;
+}
+
+void user_interface::set_ui(led_matrix *lm, btn_action *ba){
+	_lm = lm;
+	_ba = ba;
+}
+
+void user_interface::scan_ui(uint8_t current){
+	uint8_t val;
+	uint8_t i, j;
+// 	Select current columns
+	io_digital_write(btncolumnpins[current], LOW);
+//	digitalWrite(btncolumnpins[current], LOW);
+	io_digital_write(ledcolumnpins[current], LOW);
+
+//	output LED row values
+	for (i = 0; i < NUM_LED_ROWS; i++){
+		//if (LED_buffer[current][i]){
+		if(_lm->get_pixel_status(current*NUM_LED_ROWS+i) == LED_ON){
+			io_digital_write(colorpins[i], HIGH);
+		}
+	}
+// 	pause a moment, needed???
+	delay(1);
+
+// 	Read the button inputs
+	for ( j = 0; j < NUM_BTN_ROWS; j++){
+		if(btn[current].update(j)){
+			// check wether tn has been pushed or released
+		}
+	}
+	delay(1);
+	
+	io_digital_write(btncolumnpins[current], HIGH);
+	io_digital_write(ledcolumnpins[current], HIGH);
+	
+	for (i = 0; i < NUM_LED_ROWS; i++){
+		io_digital_write(colorpins[i], LOW);
+	}
+}

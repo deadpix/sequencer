@@ -1,0 +1,34 @@
+#ifndef __USER_INTERFACE_H__
+#define __USER_INTERFACE_H__
+
+#if defined(ARDUINO) && ARDUINO >= 100
+	#include <Arduino.h>
+#else
+	#include <WProgram.h>
+#endif
+
+#include "configuration.h"
+#include "led_matrix.h"
+#include "btn_action.h"
+
+class user_interface {
+	private:
+		uint8_t (*io_digital_read)(uint8_t);
+		void 	(*io_digital_write)(uint8_t);
+
+		
+		
+		led_matrix *_lm;
+		btn_action *_ba;
+		
+	public:
+		
+		user_interface();
+		~user_interface();
+
+		void setup_ui(uint8_t (*io_rd)(uint8_t), void (*io_wr)(uint8_t));
+		void scan_ui();
+		void set_ui(led_matrix *lm, btn_action *ba);
+}
+
+#endif
