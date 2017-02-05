@@ -1,11 +1,13 @@
-#ifndef _LIB_CLK_H_
-#define _LIB_CLK_H_
+#ifndef _LIB_GATE_H_
+#define _LIB_GATE_H_
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include <Arduino.h>
 #else
 	#include <WProgram.h>
 #endif
+
+#include <elapsedMillis.h>
 
 #define GATE_HIGH	true
 #define GATE_LOW	false
@@ -35,3 +37,4 @@ class gate {
 
 		
 }
+#endif
