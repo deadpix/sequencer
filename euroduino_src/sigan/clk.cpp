@@ -16,7 +16,7 @@ clk::clk(){
 	_max_step	= 16;
 	_bpm 		= 90;
 	_elapsed_ms = 0;
-	_ms 		= bpm_to_ms(bpm);
+	_ms 		= bpm_to_ms(_bpm);
 	_operation	= 1;
 	_resync 	= false;
 }
@@ -28,7 +28,7 @@ void clk::clk_sync_extern(){
 	_ms = _elapsed_ms;
 	_elapsed_ms = 0;
 	_bpm = ms_to_bpm(_ms);
-	_step_cnt = (step_cnt + 1) % _max_step;
+	_step_cnt = (_step_cnt + 1) % _max_step;
 }
 
 void clk::_sync_intern(uint32_t ms){
@@ -36,7 +36,7 @@ void clk::_sync_intern(uint32_t ms){
 		_ms = ms * abs(_operation);
 		_bpm = ms_to_bpm(_ms);
 	} else {
-		_ms = ms / factor;
+		_ms = ms / _operation;
 		_bpm = ms_to_bpm(_ms);
 	}
 }
@@ -50,11 +50,11 @@ uint16_t clk::clk_get_step_cnt(){
 uint32_t clk::clk_get_elapsed_ms(){
 	return _elapsed_ms;
 }
-uint32_t clk::clk_set_max_step(uint8_t max_step){
+void clk::clk_set_max_step(uint8_t max_step){
 	_max_step = max_step;
 }
 
-int clk_set_ms(uint32_t new_ms){
+int clk::clk_set_ms(uint32_t new_ms){
 	int ret = 0;
 	if(new_ms < _ms)
 		ret = 1;
@@ -64,8 +64,8 @@ int clk_set_ms(uint32_t new_ms){
 	return ret;
 }
 
-int clk_set_bpm(uint16_t new_bpm){
-	int res = 0;
+int clk::clk_set_bpm(uint16_t new_bpm){
+	int ret = 0;
 	if(new_bpm > _bpm)
 		ret = 1;
 	_bpm = new_bpm;
@@ -115,22 +115,22 @@ boolean clk::clk_next_step(){
 void clk::clk_sync_divider(uint32_t ms, uint16_t step){
 	uint8_t divider = abs(_operation);
 //	_ms = ms / divide;
-	sync_intern(ms);
+	_sync_intern(ms);
 	if( (step % divider) == 0 )
 		_resync = true;
 }
 
 void clk::clk_sync_multiplier(uint32_t ms){
 	//TODO neeed to check step number for sync
-	sync_intern(ms);
-	resync = true;
+	_sync_intern(ms);
+	_resync = true;
 }
 
-boolean clk::clk_update(boolean sync_flg, clock* master){
+boolean clk::clk_update(boolean sync_flg, clk* master){
 	uint8_t divider = abs(_operation);	
 	boolean ret = false;
 	uint32_t ms = master->clk_get_ms();
-	uint16_t step = master->get_step_cnt();
+	uint16_t step = master->clk_get_step_cnt();
 	
 	// sync forced by master
 	if(sync_flg){
@@ -143,7 +143,7 @@ boolean clk::clk_update(boolean sync_flg, clock* master){
 				ret = true;
 			}
 		} else {
-			_ms = ms / factor;
+			_ms = ms / _operation;
 			_bpm = ms_to_bpm(_ms);
 			_elapsed_ms = 0;
 			_step_cnt = (_step_cnt + 1) % _max_step;

@@ -13,9 +13,10 @@
  
 //#include <clock.h>
 //#include <burst.h>
+#include <elapsedMillis.h>
 
-#include "clk.h"
 #include "gate.h"
+#include "clk.h"
 
 #define NR_CLOCK		2
 #define NR_BURSTED_TICKS	2
@@ -79,7 +80,7 @@ clk clk_burst[2];
 gate output[NR_OUT];
 
 bool ext_clk_flag;
-ellapsedMillis ext_clk_period;
+elapsedMillis ext_clk_period;
 unsigned int prev_ext_clk_period;
 
 ISR (PCINT0_vect){
@@ -92,7 +93,7 @@ ISR (PCINT1_vect){
 }
 
 ISR (PCINT2_vect){
-	ain_state = ( (digitalRead(ain1) << 0)/* (digitalRead(ain2) << 1)*/;
+	ain_state = (digitalRead(ain1) << 0)/* (digitalRead(ain2) << 1)*/;
 }
 
 static void wr_gate_out(int out, bool val){
@@ -285,14 +286,14 @@ void bank_random(int sw_state){
 
 
 
-int bank_all(){
+int bank_all(unsigned int ms){
 	int sync_mode = 0;
 	/* Save the pot values if not in lock position */
 	if(sw2_state != SW_MID){
 		switch (sw1_state) {
 			case SW_UP:
 				/* Time */
-				sync_mode = bank_time(sw2_state);
+				sync_mode = bank_time(sw2_state,ms);
 				break;
 				
 			case SW_MID:
@@ -347,7 +348,9 @@ int bank_all(){
 
 void loop(){
 //	int state[NR_CLOCK];
-	int sync_mode = bank_all();
+
+	unsigned int ms = ckeck_ext_clk();
+	int sync_mode = bank_all(ms);
 	
 //	c.get_clock_status(state,1);
 //	update_clk(state);

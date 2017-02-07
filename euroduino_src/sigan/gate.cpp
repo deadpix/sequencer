@@ -1,3 +1,12 @@
+#if defined(ARDUINO) && ARDUINO >= 100
+	#include <Arduino.h>
+#else
+	#include <WProgram.h>
+#endif
+
+
+#include <inttypes.h>
+
 #include "gate.h"
 
 static uint8_t (*_hw_wr_cbck)(uint8_t, bool);
@@ -35,7 +44,7 @@ int gate::rst_gate(bool gate_val){
 	_gate_value = gate_val;
 	_elapsed_ms = 0;
 	_hw_wr_cbck(_port, _gate_value);
-	_gate_state = GATE_STARTED
+	_gate_state = GATE_STARTED;
 	
 	return GATE_STARTED;
 }
@@ -52,5 +61,5 @@ int gate::upd_gate(){
 		_hw_wr_cbck(_port, _gate_value);
 		_gate_state = GATE_FINISHED;
 	}
-	return _gate_state;
+	return (int)_gate_state;
 }

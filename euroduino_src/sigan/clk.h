@@ -42,7 +42,7 @@ class clk {
 		boolean clk_next_step();
 		void clk_sync_divider(uint32_t, uint16_t);
 		void clk_sync_multiplier(uint32_t);
-		boolean clk_update(boolean, clock*);
+		boolean clk_update(boolean, clk*);
 };
 
 #endif

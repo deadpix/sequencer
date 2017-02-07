@@ -22,6 +22,7 @@ class gate {
 		uint32_t _gate_len;
 		elapsedMillis _elapsed_ms;
 		uint8_t _port;
+		int	_gate_state;	
 
 	public:
 		gate();
@@ -36,5 +37,5 @@ class gate {
 		int upd_gate();
 
 		
-}
+};
 #endif
