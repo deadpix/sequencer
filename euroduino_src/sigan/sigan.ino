@@ -65,7 +65,7 @@ volatile unsigned char ain_state;
 #define MIN_DIVIDER  		2
 #define MAX_DIVIDER 		16
 
-#define NR_OUT			3
+#define NR_OUT				2
 #define MAX_CLK_PERIOD		(40*60*1000)
 
 /* Global variable */
@@ -74,15 +74,15 @@ volatile unsigned char ain_state;
 //int burst_flag[NR_BURSTED_TICKS];
 //velocity v;
 
-clk master;
+clk  master;
+gate m_gate;
 bool sync_master;
-clk clk_burst[2];
-gate output[NR_OUT];
+clk  clk_burst[NR_OUT];
+gate s_gate[NR_OUT];
+byte trig;
 
 bool ext_clk_flag;
 elapsedMillis ext_clk_period;
-unsigned int prev_ext_clk_period;
-
 ISR (PCINT0_vect){
 	din_state = ( (digitalRead(din1) << 0) | (digitalRead(din2) << 1) );
 }
@@ -141,37 +141,16 @@ int get_pot2(){
 
 void init_var(){
 	ext_clk_flag = false;
-	prev_ext_clk_period = 0;
 	sync_master = false;
-	output[0].set_hw_cbck(aout1, wr_gate_out);
-	output[1].set_hw_cbck(dout1, wr_gate_out);
-	output[2].set_hw_cbck(dout2, wr_gate_out);
+	m_gate.set_hw_cbck(aout1, wr_gate_out);
+	s_gate[0].set_hw_cbck(dout1, wr_gate_out);
+	s_gate[1].set_hw_cbck(dout2, wr_gate_out);
 }
 
-
-/*
-void InitializeVar(){
-	int init_bpm= 90;
-	int temp1[] = {45};
-	int temp2[] = {50};
-	int temp3[] = {2};
-	din_state 	= 0;
-	sw1_state 	= ( (digitalRead(sw1up) << 1) | (digitalRead(sw1dw) << 0) );
-	sw2_state 	= ( (digitalRead(sw2up) << 1) | (digitalRead(sw2dw) << 0) );
-//	clk.initialize(init_bpm,50);
-	c.init_master(init_bpm,50);
-	c.init_slaves(temp1,temp2,1);
-	c.set_slaves_divider(temp3);
-	for(int i=0;i<NR_BURSTED_TICKS;i++){
-		b[i].init_burst(8, 4, init_bpm, 50);
-	}
-	v.init_velocity(1000,1000);
-}
-*/
 void init_io(){
         /* Set up I/O pins */
-        pinMode(din1,  INPUT);
-        pinMode(din2,  INPUT);
+	pinMode(din1,  INPUT);
+	pinMode(din2,  INPUT);
 	pinMode(ain1,  INPUT);
 	pinMode(ain2,  INPUT);
         pinMode(dout1, OUTPUT);
@@ -230,7 +209,12 @@ void setup() {
 	init_io();
 	init_interrupt();
 	init_random();
-//	init_var();
+	init_var();
+}
+
+int check_clk(){
+	
+
 }
 
 int bank_time(int sw_state, unsigned int ms_period){
@@ -250,7 +234,7 @@ int bank_time(int sw_state, unsigned int ms_period){
 			sync_master = master.clk_set_ms(tmp);	
 		}
 		tmp = map(p2, 0, 1023, 0, 99);
-		upd_gate_len(&output[0], &master, tmp);
+		upd_gate_len(&m_gate, &master, tmp);
 
 		//TODO sync / update burst
 
@@ -265,9 +249,10 @@ int bank_time(int sw_state, unsigned int ms_period){
 void bank_burst(int sw_state){
 	int p1 = get_pot1();
 	int p2 = get_pot2();
+
 	if(sw_state == SW_UP){
 	
-	} 
+	}
 	else if(sw_state == SW_DOWN){
 	
 	}
@@ -279,8 +264,9 @@ void bank_random(int sw_state){
 
 	if(sw_state == SW_UP){
 		/* bank something */
-	} 
+	}
 	else if(sw_state == SW_DOWN){
+	
 	}
 }
 
@@ -310,84 +296,37 @@ int bank_all(unsigned int ms){
 	return sync_mode;
 }
 
-//void update_dout_from_clk_state(const int out, int state){
-//	if(state == 1){
-//		digitalWrite(out,HIGH);
-//	}
-//	else if(state == 0){
-//		digitalWrite(out,LOW);		
-//	}
-//}
+void upd_output(unsigned int ms){
+	if(ms != 0){
+		// sync the clock
+		clk_burst[0].clk_sync_slaved(master.clk_get_step_cnt());
+		clk_burst[0].clk_next_step();
 
-//void update_clk(int* status){
-//	for(int i=0;i<NR_CLOCK;i++){
-//		update_dout_from_clk_state(dout_clk[i], status[i]);
-//	}
-//}	
+		clk_burst[1].clk_sync_slaved(master.clk_get_step_cnt());
+		clk_burst[1].clk_next_step();
+		
+		m_gate.rst_gate(true);
+	}
+	else {
+		m_gate.upd_gate(true);
+	}
+}
 
-//void update_burst(int state, int idx){
-//	update_dout_from_clk_state(dout_burst[idx], state);
-//}
 
-//void write_analog(const int aout, int val){
-//	analogWrite(aout, (255-val));
-//}
-
-//void update_velocity(int state, int idx){
-//	if(state == 1){
-//		int vel = v.get_velocity();
-////		Serial.print("vel=");
-////		Serial.println(vel);
-//		write_analog(aout_velocity[idx], vel);
-//	} 
-//	else if(state == 0){
-//		write_analog(aout_velocity[idx], 0);
-//	}
-//	
-//}
 
 void loop(){
-//	int state[NR_CLOCK];
-
 	unsigned int ms = ckeck_ext_clk();
 	int sync_mode = bank_all(ms);
-	
-//	c.get_clock_status(state,1);
-//	update_clk(state);
-	
-	/* update the state of bursted tick when the master clock has been fired	*/
-	/* state of bursted ticks are ONLY updated on new master clock 				*/
-//	if(state[0] == 1){
-//		/* check the state of the digital input for the burst */
-//		for(int i=0;i<NR_BURSTED_TICKS;i++){
-//			burst_flag[i] = (din_state >> i) & 0x1;
-//		}
-//	}
-//	
-//	/* Check bursted tick: 								*/
-//	/*  - synchronize with the master clock (state[0]) 	*/
-//	/* 	- generate a burst if the digital input is high	*/
-//	for(int i=0;i<NR_BURSTED_TICKS;i++){
-//		if(burst_flag[i] == 1){
-//			int burst_state;
-//			/* check whether we need to resync with master clock (state[0]) */
-//			if(state[0] == 1){
-//				/*TODO replace millis() with master sync time */
-//				//b[i].reset_burst(millis());
-//				b[i].reset_burst(c.get_master_sync_time());
-//				burst_state = 1;
-//			}
-//			else {
-//				burst_state = b[i].get_burst_status();
-////				if(state[0] == 1) Serial.println("ouaich");
-//			}
-//			update_burst(burst_state,i);
-//			update_velocity(burst_state,i);
-//		} else {
-//			update_velocity(0,i);
-//		}
-//	}
-//	
+
+	if(!ext_clk_flag){
+		ms = master.clk_elapsed();
+	}
+
+	/* copy state of trig input at each new clock */
+	if(ms > 0)
+		trig = din_state;
+
+	upd_output(ms);
 
 	/* we did a good job, let's rest for 1ms */
 	delay(1);

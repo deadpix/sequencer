@@ -114,16 +114,39 @@ boolean clk::clk_next_step(){
 
 void clk::clk_sync_divider(uint32_t ms, uint16_t step){
 	uint8_t divider = abs(_operation);
-//	_ms = ms / divide;
-	_sync_intern(ms);
+	_ms = ms * divider;
+	_bpm = ms_to_bpm(_ms);
+
 	if( (step % divider) == 0 )
 		_resync = true;
 }
 
 void clk::clk_sync_multiplier(uint32_t ms){
 	//TODO neeed to check step number for sync
-	_sync_intern(ms);
+	_ms = ms / _operation;
+	_bpm = ms_to_bpm(_ms);
+
 	_resync = true;
+}
+
+void clk::clk_sync_slaved(uint16_t step){
+	if(_operation < 0){
+		if( (step % divider) == 0 )
+			_resync = true;
+	}
+	else {
+		_resync = true;
+	}
+}
+
+uint32_t clk::clk_elapsed(){
+	uint32_t ret = 0;
+	if(_elapsed_ms > _ms){
+		_elapsed_ms = 0;
+		_step_cnt = (_step_cnt + 1) % _max_step;
+		ret = _ms;
+	}
+	return ret;
 }
 
 boolean clk::clk_update(boolean sync_flg, clk* master){

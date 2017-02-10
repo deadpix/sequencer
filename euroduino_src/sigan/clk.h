@@ -40,9 +40,11 @@ class clk {
 		void clk_sync_extern();
 		
 		boolean clk_next_step();
+		uint32_t clk_elapsed();
 		void clk_sync_divider(uint32_t, uint16_t);
 		void clk_sync_multiplier(uint32_t);
 		boolean clk_update(boolean, clk*);
+		void clk_sync_slaved(uint16_t);
 };
 
 #endif
