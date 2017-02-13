@@ -31,7 +31,7 @@ void clk::clk_sync_extern(){
 	_step_cnt = (_step_cnt + 1) % _max_step;
 }
 
-void clk::_sync_intern(uint32_t ms){
+void clk::clk_sync_intern(uint32_t ms){
 	if(_operation < 0){
 		_ms = ms * abs(_operation);
 		_bpm = ms_to_bpm(_ms);

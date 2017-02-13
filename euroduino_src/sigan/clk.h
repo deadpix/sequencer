@@ -21,7 +21,6 @@ class clk {
 		int _operation; 
 		boolean _resync;
 		
-		void _sync_intern(uint32_t);
 	
 	public:
 		clk();
@@ -38,6 +37,7 @@ class clk {
 		
 		boolean clk_set_operation(int);
 		void clk_sync_extern();
+		void clk_sync_intern(uint32_t);
 		
 		boolean clk_next_step();
 		uint32_t clk_elapsed();

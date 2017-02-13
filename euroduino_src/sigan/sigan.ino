@@ -68,21 +68,31 @@ volatile unsigned char ain_state;
 #define NR_OUT				2
 #define MAX_CLK_PERIOD		(40*60*1000)
 
+#define EXT_MASTER_CLK		(0<<1)
+#define EXT_SLAVE_CLK		(1<<1)
+
 /* Global variable */
 //clock c;
 //burst b[NR_BURSTED_TICKS];
 //int burst_flag[NR_BURSTED_TICKS];
 //velocity v;
 
-clk  master;
+clk master;
+clk slave;
+
 gate m_gate;
+gate s_gate;
+
 bool sync_master;
 clk  clk_burst[NR_OUT];
 gate s_gate[NR_OUT];
 byte trig;
 
 bool ext_clk_flag;
+bool ext_slave_flag;
 elapsedMillis ext_clk_period;
+elapsedMillis ext_clk_slave_period;
+
 ISR (PCINT0_vect){
 	din_state = ( (digitalRead(din1) << 0) | (digitalRead(din2) << 1) );
 }
@@ -93,7 +103,7 @@ ISR (PCINT1_vect){
 }
 
 ISR (PCINT2_vect){
-	ain_state = (digitalRead(ain1) << 0)/* (digitalRead(ain2) << 1)*/;
+	ain_state = (digitalRead(ain1) << 0) | (digitalRead(ain2) << 1);
 }
 
 static void wr_gate_out(int out, bool val){
@@ -107,13 +117,15 @@ static void upd_rev_out(){
 	digitalWrite( aout2, !(digitalRead(ain2)) );
 }
 
+
+
 static unsigned int ckeck_ext_clk(){
-	unsigned int tmp;
+//	unsigned int tmp;
 	unsigned int ms = 0; 
-	if(ain_state){
+	if(ain_state & EXT_MASTER_CLK){
 		ms = ext_clk_period;
 		ext_clk_period = 0;		
-		ain_state = 0;
+		ain_state &= ~(EXT_MASTER_CLK);
 		
 		if(ext_clk_flag){
 			if(ms > MAX_CLK_PERIOD){
@@ -128,9 +140,36 @@ static unsigned int ckeck_ext_clk(){
 			ms = 0;
 			ext_clk_flag = true;
 		}	
-	}	
+	}
 	return ms;
 }
+
+static unsigned int ckeck_ext_slave_clk(){
+	unsigned int ms = 0; 
+	if(ain_state & EXT_SLAVE_CLK){
+		ms = ext_clk_slave_period;
+		ext_clk_slave_period = 0;
+		ain_state &= ~(EXT_SLAVE_CLK);
+
+		if(ext_slave_flag){
+			if(ms > MAX_CLK_PERIOD){
+				ms = 0;
+				ext_slave_flag = false;
+			}
+			else {
+				ext_slave_flag = true;
+			}
+		}
+		else {
+			ms = 0;
+			ext_slave_flag = true;
+		}
+	}
+	return ms;
+}
+
+
+
 
 int get_pot1(){
 	return analogRead(pot1);
@@ -141,26 +180,28 @@ int get_pot2(){
 
 void init_var(){
 	ext_clk_flag = false;
+	ext_slave_flag = false;
 	sync_master = false;
-	m_gate.set_hw_cbck(aout1, wr_gate_out);
-	s_gate[0].set_hw_cbck(dout1, wr_gate_out);
-	s_gate[1].set_hw_cbck(dout2, wr_gate_out);
+	m_gate.set_hw_cbck(dout1, wr_gate_out);
+	s_gate.set_hw_cbck(dout2, wr_gate_out);
+//	s_gate[0].set_hw_cbck(dout1, wr_gate_out);
+//	s_gate[1].set_hw_cbck(dout2, wr_gate_out);
 }
 
 void init_io(){
-        /* Set up I/O pins */
+	/* Set up I/O pins */
 	pinMode(din1,  INPUT);
 	pinMode(din2,  INPUT);
 	pinMode(ain1,  INPUT);
 	pinMode(ain2,  INPUT);
-        pinMode(dout1, OUTPUT);
-        pinMode(dout2, OUTPUT);
-        pinMode(aout1, OUTPUT);
-        pinMode(aout2, OUTPUT);
-        pinMode(sw1up, INPUT_PULLUP);
-        pinMode(sw1dw, INPUT_PULLUP);
-        pinMode(sw2up, INPUT_PULLUP);
-        pinMode(sw2dw, INPUT_PULLUP);
+	pinMode(dout1, OUTPUT);
+	pinMode(dout2, OUTPUT);
+	pinMode(aout1, OUTPUT);
+	pinMode(aout2, OUTPUT);
+	pinMode(sw1up, INPUT_PULLUP);
+	pinMode(sw1dw, INPUT_PULLUP);
+	pinMode(sw2up, INPUT_PULLUP);
+	pinMode(sw2dw, INPUT_PULLUP);
 }
 
 void init_interrupt(){
@@ -184,10 +225,10 @@ void init_interrupt(){
 
 	PCMSK1 |= (1 << PCINT12); // set PCINT12 to trigger an irq on state change
 	PCMSK1 |= (1 << PCINT13); // set PCINT13 to trigger an irq on state change
-	PCMSK1 |= (1 << PCINT18); // set PCINT18 to trigger an irq on state change
-	PCMSK1 |= (1 << PCINT23); // set PCINT23 to trigger an irq on state change
+	PCMSK2 |= (1 << PCINT18); // set PCINT18 to trigger an irq on state change
+	PCMSK2 |= (1 << PCINT23); // set PCINT23 to trigger an irq on state change
 
-	PCMSK2 |= (1 << PCINT8);
+//	PCMSK2 |= (1 << PCINT8);
 //	PCMSK2 |= (1 << PCINT9);
 
 	sei(); // turn on interrupts
@@ -226,15 +267,21 @@ int bank_time(int sw_state, unsigned int ms_period){
 		int tmp;
 
 		if(ext_clk_flag){
-			tmp = map(p1, 0, 1023, 0, 48) * 2;
+			tmp = map(p1, 0, 1023, 0, 48) * 2;	
 			sync_master = master.clk_set_ms( (ms_period / tmp) );
+			if(!ext_slave_flag)
+				slave.clk_sync_intern((ms_period / tmp));
 		}
 		else {
 			tmp = map(p1, 0, 1023, MIN_BPM, MAX_BPM);
-			sync_master = master.clk_set_ms(tmp);	
+			sync_master = master.clk_set_bpm(tmp);
+			if(!ext_slave_flag)
+				slave.clk_sync_intern(master.clk_get_ms());
 		}
+
 		tmp = map(p2, 0, 1023, 0, 99);
 		upd_gate_len(&m_gate, &master, tmp);
+		upd_gate_len(&s_gate, &slave, tmp);
 
 		//TODO sync / update burst
 
@@ -296,19 +343,26 @@ int bank_all(unsigned int ms){
 	return sync_mode;
 }
 
-void upd_output(unsigned int ms){
-	if(ms != 0){
-		// sync the clock
-		clk_burst[0].clk_sync_slaved(master.clk_get_step_cnt());
-		clk_burst[0].clk_next_step();
+void upd_output(unsigned int master_ms, unsigned int slave_ms){
+	if(ext_slave_flag){
+		if(slave_ms > 0){
+			s_gate.rst_gate(true);
+		} 
+		else {
+			s_gate.upd_gate();
+		}
+	}
+	
 
-		clk_burst[1].clk_sync_slaved(master.clk_get_step_cnt());
-		clk_burst[1].clk_next_step();
-		
+	if(master_ms > 0){
 		m_gate.rst_gate(true);
+		if(!ext_slave_flag){
+			// resync slave
+
+		}
 	}
 	else {
-		m_gate.upd_gate(true);
+		m_gate.upd_gate();
 	}
 }
 
@@ -316,6 +370,7 @@ void upd_output(unsigned int ms){
 
 void loop(){
 	unsigned int ms = ckeck_ext_clk();
+	unsigned int ms_slave = ckeck_ext_slave_clk();
 	int sync_mode = bank_all(ms);
 
 	if(!ext_clk_flag){
@@ -326,7 +381,7 @@ void loop(){
 	if(ms > 0)
 		trig = din_state;
 
-	upd_output(ms);
+	upd_output(ms, ms_slave);
 
 	/* we did a good job, let's rest for 1ms */
 	delay(1);
