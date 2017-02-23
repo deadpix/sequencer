@@ -112,21 +112,26 @@ boolean clk::clk_next_step(){
 	return ret;
 } 
 
-void clk::clk_sync_divider(uint32_t ms, uint16_t step){
+uint32_t clk::clk_sync_divider(uint32_t ms, uint16_t step){
 	uint8_t divider = abs(_operation);
+	uint32_t ret = 0;
 	_ms = ms * divider;
 	_bpm = ms_to_bpm(_ms);
 
-	if( (step % divider) == 0 )
-		_resync = true;
+	if( (step % divider) == 0 ){
+		ret = _ms;
+	}
+	
+	return _ms;
 }
 
-void clk::clk_sync_multiplier(uint32_t ms){
+uint32_t clk::clk_sync_multiplier(uint32_t ms){
 	//TODO neeed to check step number for sync
 	_ms = ms / _operation;
 	_bpm = ms_to_bpm(_ms);
 
-	_resync = true;
+//	_resync = true;
+	return _ms;
 }
 
 void clk::clk_sync_slaved(uint16_t step){
@@ -137,6 +142,17 @@ void clk::clk_sync_slaved(uint16_t step){
 	else {
 		_resync = true;
 	}
+}
+
+uint32_t clk::clk_sync(uint32_t ms, uint16_t step){
+	uint32_t ret;
+	if(_operation < 0){
+		ret = clk_sync_divider(ms, step);
+	}
+	else {
+		ret = clk_sync_multiplier(ms);
+	}
+	return ret;
 }
 
 uint32_t clk::clk_elapsed(){
