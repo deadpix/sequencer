@@ -35,7 +35,7 @@ class clk {
 	
 		void clk_set_max_step(uint8_t);
 		
-		boolean clk_set_operation(int);
+		boolean clk_set_operation(int, uint32_t);
 		void clk_sync_extern();
 		void clk_sync_intern(uint32_t);
 		

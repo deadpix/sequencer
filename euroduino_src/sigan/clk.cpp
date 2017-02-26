@@ -74,16 +74,17 @@ int clk::clk_set_bpm(uint16_t new_bpm){
 	return ret;
 }
 
-boolean clk::clk_set_operation(int op){
+boolean clk::clk_set_operation(int op, uint32_t ms_ref){
 	boolean ret = true;
+
 	if(op < 0){
-		_bpm /= abs(op);
-		_ms = bpm_to_ms(_bpm);
+		_ms = ms_ref * abs(op);
+		_bpm = ms_to_bpm(_ms);
 		_operation = op;
 	} 
 	else if(op > 0){
-		_bpm *= op;
-		_ms = bpm_to_ms(_bpm);
+		_ms = ms_ref / op;
+		_bpm = ms_to_bpm(_ms);
 		_operation = op;
 	}
 	else if(op == 0){
@@ -136,7 +137,7 @@ uint32_t clk::clk_sync_multiplier(uint32_t ms){
 
 void clk::clk_sync_slaved(uint16_t step){
 	if(_operation < 0){
-		if( (step % divider) == 0 )
+		if( (step % abs(_operation)) == 0 )
 			_resync = true;
 	}
 	else {

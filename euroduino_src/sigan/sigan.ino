@@ -68,11 +68,11 @@ volatile unsigned char ain_state;
 #define NR_OUT				2
 #define MAX_CLK_PERIOD		(40*60*1000)
 
-#define EXT_MASTER_CLK		(0<<1)
+#define EXT_MASTER_CLK		(1<<0)
 #define EXT_SLAVE_CLK		(1<<1)
 
 #define MIN_ANALOG_OUT		0
-#define MAX_ANALOG_OUT		256
+#define MAX_ANALOG_OUT		255
 #define MAX_ANALOG_IN		1022
 
 const int clk_rate[] = {-8, -7, -6, -5, -4, -3, -2, 1, 2, 3, 4, 5, 6, 7, 8};
@@ -96,7 +96,7 @@ gate s_gate;
 
 bool sync_master;
 clk  clk_burst[NR_OUT];
-gate s_gate[NR_OUT];
+//gate s_gate[NR_OUT];
 byte trig;
 
 bool ext_clk_flag;
@@ -110,11 +110,10 @@ ISR (PCINT0_vect){
 
 ISR (PCINT1_vect){
 	sw1_state = ( (digitalRead(sw1up) << 1) | (digitalRead(sw1dw) << 0) );
-	sw2_state = ( (digitalRead(sw2up) << 1) | (digitalRead(sw2dw) << 0) );
 }
 
 ISR (PCINT2_vect){
-	ain_state = (digitalRead(ain1) << 0) | (digitalRead(ain2) << 1);
+	sw2_state = ( (digitalRead(sw2up) << 1) | (digitalRead(sw2dw) << 0) );
 }
 
 static void init_rnd(){
@@ -138,11 +137,14 @@ static void upd_rev_out(){
 static unsigned int ckeck_ext_clk(){
 //	unsigned int tmp;
 	unsigned int ms = 0; 
-	if(ain_state & EXT_MASTER_CLK){
+	if(din_state & EXT_MASTER_CLK){
 		ms = ext_clk_period;
 		ext_clk_period = 0;		
-		ain_state &= ~(EXT_MASTER_CLK);
-		
+		din_state &= ~(EXT_MASTER_CLK);
+	
+		Serial.print("ms ");
+		Serial.println(ms);
+	
 		if(ext_clk_flag){
 			if(ms > MAX_CLK_PERIOD){
 				ms = 0;
@@ -205,8 +207,8 @@ static unsigned int get_max_rnd_val(unsigned int in){
 }
 
 static int get_rnd_clk(unsigned int in){
-	int idx = map(in, 0, MAX_ANALOG_IN, 0, MAX_CLK_SLAVE_RATE);
-	return ret;	
+	int idx = map(in, 0, MAX_ANALOG_IN, 0, (MAX_CLK_SLAVE_RATE-1));
+	return clk_rate[idx];	
 }
 
 void init_var(){
@@ -217,6 +219,8 @@ void init_var(){
 	s_gate.set_hw_cbck(dout2, wr_gate_out);
 //	s_gate[0].set_hw_cbck(dout1, wr_gate_out);
 //	s_gate[1].set_hw_cbck(dout2, wr_gate_out);
+	sw1_state = ( (digitalRead(sw1up) << 1) | (digitalRead(sw1dw) << 0) );
+	sw2_state = ( (digitalRead(sw2up) << 1) | (digitalRead(sw2dw) << 0) );
 }
 
 void init_io(){
@@ -227,8 +231,8 @@ void init_io(){
 	pinMode(ain2,  INPUT);
 	pinMode(dout1, OUTPUT);
 	pinMode(dout2, OUTPUT);
-	pinMode(aout1, OUTPUT);
-	pinMode(aout2, OUTPUT);
+//	pinMode(aout1, OUTPUT);
+//	pinMode(aout2, OUTPUT);
 	pinMode(sw1up, INPUT_PULLUP);
 	pinMode(sw1dw, INPUT_PULLUP);
 	pinMode(sw2up, INPUT_PULLUP);
@@ -341,19 +345,14 @@ void bank_random(int sw_state){
 	int p1 = get_rnd_clk(get_pot1() & ~(0x1));
 	unsigned int p2 = get_max_rnd_val(get_pot2() & ~(0x1));
 
-
-//get_rnd_clk
-//get_max_rnd_val
-
 	if(sw_state == SW_UP){
 		/* bank something */
-		rnd_clk[0].clk_set_operation(p1);
+		rnd_clk[0].clk_set_operation(p1, master.clk_get_ms());
 		max_rnd[0] = p2 + 1;			
 	}
 	else if(sw_state == SW_DOWN){
-		rnd_clk[1].clk_set_operation(p1);
+		rnd_clk[1].clk_set_operation(p1, master.clk_get_ms());
 		max_rnd[1] = p2 + 1;			
-	
 	}
 }
 
@@ -371,7 +370,7 @@ int bank_all(unsigned int ms){
 				
 			case SW_MID:
 				/* burst */
-				bank_burst(sw2_state);
+//				bank_burst(sw2_state);
 				break;
 	
 			case SW_DOWN:
@@ -418,11 +417,16 @@ void upd_output(unsigned int master_ms){
 }
 
 static void upd_rnd_output1(){
-	analogWrite(aout1, random((255 - max_rnd[0])));
+	byte rnd = random(max_rnd[0]);
+//	Serial.println(rnd);
+//	analogWrite(aout1, rnd);
+	analogWrite(aout1, (255-rnd));
 }
 
 static void upd_rnd_output2(){
-	analogWrite(aout2, random((255 - max_rnd[1])));
+	byte rnd = random(max_rnd[1]);
+//	analogWrite(aout2, (255 - rnd));
+	analogWrite(aout2, rnd);
 }
 
 void loop(){
@@ -450,13 +454,16 @@ void loop(){
 
 	upd_output(ms);
 	upd_rev_out();
+
 	if(rnd_ms[0] > 0){
 		upd_rnd_output1();
 	}
 	if(rnd_ms[1] > 0){
+//		Serial.println("upd rnd 2");
 		upd_rnd_output2();
 	}
 
+//	analogWrite(aout1, 127);
 	/* we did a good job, let's rest for 1ms */
-	delay(1);
+	delay(5);
 }
