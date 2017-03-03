@@ -79,6 +79,9 @@ const int clk_rate[] = {-8, -7, -6, -5, -4, -3, -2, 1, 2, 3, 4, 5, 6, 7, 8};
 const int MAX_CLK_SLAVE_RATE = sizeof(clk_rate) / sizeof(clk_rate[0]);
 
 
+#define NR_INPUT_SAMPLE		10
+
+
 /* Global variable */
 //clock c;
 //burst b[NR_BURSTED_TICKS];
@@ -103,6 +106,8 @@ bool ext_clk_flag;
 bool ext_slave_flag;
 elapsedMillis ext_clk_period;
 elapsedMillis ext_clk_slave_period;
+
+int rnd_pot[2];
 
 ISR (PCINT0_vect){
 	din_state = ( (digitalRead(din1) << 0) | (digitalRead(din2) << 1) );
@@ -132,6 +137,10 @@ static void upd_rev_out(){
 	digitalWrite( dout2, !(digitalRead(din2)) );
 }
 
+int prev_pot1;
+int prev_pot2;
+int prev_cv1;
+int prev_cv2;
 
 
 static unsigned int ckeck_ext_clk(){
@@ -201,6 +210,38 @@ static unsigned int get_pot_x(int x){
 	return val;
 }
 
+static void init_analog_inputs_var(){
+	for(int i=0;i<NR_INPUT_SAMPLE;i++){
+		prev_pot1 += get_pot1();
+		prev_pot2 += get_pot2();
+		prev_cv1  += get_ain1();
+		prev_cv2  += get_ain2();
+	}
+}
+
+static int get_analog_inputs(){
+	int pot1_avg = 0;
+	int pot2_avg = 0;
+	int cv1_avg = 0;
+	int cv2_avg = 0;
+
+	for(int i=0;i<NR_INPUT_SAMPLE;i++){
+		pot1_avg += get_pot1();
+		pot2_avg += get_pot2();
+		cv1_avg  += get_ain1();
+		cv2_avg  += get_ain2();
+	}
+
+	pot1_avg /= NR_INPUT_SAMPLE;
+	pot2_avg /= NR_INPUT_SAMPLE;
+	cv1_avg  /= NR_INPUT_SAMPLE;
+	cv2_avg  /= NR_INPUT_SAMPLE;
+
+
+}
+
+
+
 static unsigned int get_max_rnd_val(unsigned int in){
 	unsigned int ret = map(in, 0, MAX_ANALOG_IN, MIN_ANALOG_OUT, MAX_ANALOG_OUT);
 	return ret;
@@ -221,6 +262,8 @@ void init_var(){
 //	s_gate[1].set_hw_cbck(dout2, wr_gate_out);
 	sw1_state = ( (digitalRead(sw1up) << 1) | (digitalRead(sw1dw) << 0) );
 	sw2_state = ( (digitalRead(sw2up) << 1) | (digitalRead(sw2dw) << 0) );
+//	rnd_pot[0] = get_pot1();
+//	rnd_pot[1] = get_pot2();	
 }
 
 void init_io(){
@@ -287,6 +330,7 @@ void setup() {
 	init_random();
 	init_var();
 	init_rnd();
+	init_analog_inputs_var();
 }
 
 int check_clk(){
@@ -295,7 +339,7 @@ int check_clk(){
 }
 
 int bank_time(int sw_state, unsigned int ms_period){
-	int ret;
+	int ret = 0;
 	if(sw_state == SW_UP){
 		/* save clock interval and gate len */
 		int p1 = get_pot1();
@@ -320,18 +364,20 @@ int bank_time(int sw_state, unsigned int ms_period){
 		upd_gate_len(&s_gate, &slave, tmp);
 
 		//TODO sync / update burst
-
-		return 1;
 	} 
 	else if(sw_state == SW_DOWN){
 		int p1 = get_pot1();
-		return 0;
 	} 
+	else {
+		ret = 1;
+	}
+	return ret;
 }
 
-void bank_burst(int sw_state){
+int bank_burst(int sw_state){
 	int p1 = get_pot1();
 	int p2 = get_pot2();
+	int ret = 0;
 
 	if(sw_state == SW_UP){
 	
@@ -339,33 +385,45 @@ void bank_burst(int sw_state){
 	else if(sw_state == SW_DOWN){
 	
 	}
+   	else {
+		ret = 2;
+	}
+	return ret;
 }
 
-void bank_random(int sw_state){
-	int p1 = get_rnd_clk(get_pot1() & ~(0x1));
+int bank_random(int sw_state){
+	int pot1 = get_pot1();
+	int p1 = get_rnd_clk(pot1 & ~(0x1));
 	unsigned int p2 = get_max_rnd_val(get_pot2() & ~(0x1));
+	int ret = 0;
 
 	if(sw_state == SW_UP){
 		/* bank something */
 		rnd_clk[0].clk_set_operation(p1, master.clk_get_ms());
 		max_rnd[0] = p2 + 1;			
+		rnd_pot[0] = pot1;
 	}
 	else if(sw_state == SW_DOWN){
 		rnd_clk[1].clk_set_operation(p1, master.clk_get_ms());
-		max_rnd[1] = p2 + 1;			
+		max_rnd[1] = p2 + 1;
+		rnd_pot[1] = pot1;		
 	}
+	else {
+		ret = 3;
+	}
+	return ret;
 }
 
 
 
 int bank_all(unsigned int ms){
-	int sync_mode = 0;
+	int ret = 0;
 	/* Save the pot values if not in lock position */
 	if(sw2_state != SW_MID){
 		switch (sw1_state) {
 			case SW_UP:
 				/* Time */
-				sync_mode = bank_time(sw2_state,ms);
+				ret = bank_time(sw2_state,ms);
 				break;
 				
 			case SW_MID:
@@ -375,11 +433,11 @@ int bank_all(unsigned int ms){
 	
 			case SW_DOWN:
 				/* random */
-				bank_random(sw2_state);
+				ret = bank_random(sw2_state);
 				break;
 		}
 	}
-	return sync_mode;
+	return ret;
 }
 
 /*
@@ -434,14 +492,21 @@ void loop(){
 	uint16_t step = master.clk_get_step_cnt();
 	unsigned int ms = ckeck_ext_clk();
 //	unsigned int ms_slave = ckeck_ext_slave_clk();
-	int sync_mode = bank_all(ms);
+	int cv_target = bank_all(ms);
 
 	if(!ext_clk_flag){
 		ms = master.clk_elapsed();
 	}
 
-//	/* copy state of trig input at each new clock */
 	if(ms > 0){
+		if(cv_target == 3){
+			int temp1 = constrain((rnd_pot[0]+get_ain1()), 0, 1023);
+			int temp2 = constrain((rnd_pot[1]+get_ain2()), 0, 1023);
+			
+			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1, master.clk_get_ms());
+			rnd_clk[1].clk_set_operation(get_rnd_clk(temp2, master.clk_get_ms());			
+		}
+
 		// sync random clock
 		rnd_ms[0] = rnd_clk[0].clk_sync(ms, step);
 		rnd_ms[1] = rnd_clk[1].clk_sync(ms, step);
@@ -450,7 +515,6 @@ void loop(){
 		rnd_ms[0] = rnd_clk[0].clk_elapsed();
 		rnd_ms[1] = rnd_clk[1].clk_elapsed();
 	}
-//		trig = din_state;
 
 	upd_output(ms);
 	upd_rev_out();
@@ -459,11 +523,9 @@ void loop(){
 		upd_rnd_output1();
 	}
 	if(rnd_ms[1] > 0){
-//		Serial.println("upd rnd 2");
 		upd_rnd_output2();
 	}
 
-//	analogWrite(aout1, 127);
 	/* we did a good job, let's rest for 1ms */
 	delay(5);
 }
