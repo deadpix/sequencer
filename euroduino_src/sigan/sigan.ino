@@ -142,6 +142,7 @@ int prev_pot2;
 int prev_cv1;
 int prev_cv2;
 
+int ext_clk_state;
 
 static unsigned int ckeck_ext_clk(){
 //	unsigned int tmp;
@@ -154,6 +155,24 @@ static unsigned int ckeck_ext_clk(){
 		Serial.print("ms ");
 		Serial.println(ms);
 	
+		if(ext_clk_state == 0){
+			ext_clk_flag = true;
+			ext_clk_state = 1;
+			ms = 0;
+		}
+//		else {
+//			
+//		}
+	} 
+	else if(ext_clk_flag){
+		if(ms > MAX_CLK_PERIOD){
+			ms = 0;
+			ext_clk_state = 0;
+			ext_clk_flag = false;
+		}
+	}
+
+/*
 		if(ext_clk_flag){
 			if(ms > MAX_CLK_PERIOD){
 				ms = 0;
@@ -166,8 +185,9 @@ static unsigned int ckeck_ext_clk(){
 		else {
 			ms = 0;
 			ext_clk_flag = true;
-		}	
+		}
 	}
+	*/
 	return ms;
 }
 static unsigned int ckeck_ext_slave_clk(){
@@ -254,6 +274,7 @@ static int get_rnd_clk(unsigned int in){
 
 void init_var(){
 	ext_clk_flag = false;
+	ext_clk_state = 0;
 	ext_slave_flag = false;
 	sync_master = false;
 	m_gate.set_hw_cbck(dout1, wr_gate_out);
