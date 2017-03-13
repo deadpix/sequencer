@@ -119,11 +119,11 @@ uint32_t clk::clk_sync_divider(uint32_t ms, uint16_t step){
 	_ms = ms * divider;
 	_bpm = ms_to_bpm(_ms);
 
-	if( (step % divider) == 0 ){
+	if( ((step +1) % divider) == 0 ){
 		ret = _ms;
 	}
 	
-	return _ms;
+	return ret;
 }
 
 uint32_t clk::clk_sync_multiplier(uint32_t ms){

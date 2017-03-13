@@ -66,7 +66,7 @@ volatile unsigned char ain_state;
 #define MAX_DIVIDER 		16
 
 #define NR_OUT				2
-#define MAX_CLK_PERIOD		(40*60*1000)
+#define MAX_CLK_PERIOD		(1500)
 
 #define EXT_MASTER_CLK		(1<<0)
 #define EXT_SLAVE_CLK		(1<<1)
@@ -92,7 +92,7 @@ clk master;
 clk slave;
 clk rnd_clk[2];
 int max_rnd[2];
-
+int master_rate;
 
 gate m_gate;
 gate s_gate;
@@ -143,51 +143,34 @@ int prev_cv1;
 int prev_cv2;
 
 int ext_clk_state;
+int ext_clk_cnt;
 
 static unsigned int ckeck_ext_clk(){
-//	unsigned int tmp;
 	unsigned int ms = 0; 
 	if(din_state & EXT_MASTER_CLK){
 		ms = ext_clk_period;
 		ext_clk_period = 0;		
 		din_state &= ~(EXT_MASTER_CLK);
 	
-		Serial.print("ms ");
-		Serial.println(ms);
-	
 		if(ext_clk_state == 0){
-			ext_clk_flag = true;
 			ext_clk_state = 1;
 			ms = 0;
 		}
-//		else {
-//			
-//		}
+		else {
+			ext_clk_flag = true;
+			ext_clk_state = (ext_clk_state % master_rate)+1;
+			Serial.println(ext_clk_state);
+			// need to resync master	
+		}
 	} 
-	else if(ext_clk_flag){
-		if(ms > MAX_CLK_PERIOD){
+	else if(ext_clk_state){
+		if(ext_clk_period > MAX_CLK_PERIOD){
+//			Serial.print("max reached...");
 			ms = 0;
 			ext_clk_state = 0;
 			ext_clk_flag = false;
 		}
 	}
-
-/*
-		if(ext_clk_flag){
-			if(ms > MAX_CLK_PERIOD){
-				ms = 0;
-				ext_clk_flag = false;
-			} 
-			else {
-				ext_clk_flag = true;
-			}
-		} 
-		else {
-			ms = 0;
-			ext_clk_flag = true;
-		}
-	}
-	*/
 	return ms;
 }
 static unsigned int ckeck_ext_slave_clk(){
@@ -222,6 +205,14 @@ int get_pot1(){
 }
 int get_pot2(){
 	return analogRead(pot2);
+}
+
+int get_ain1(){
+	return analogRead(ain1);
+}
+
+int get_ain2(){
+	return analogRead(ain2);
 }
 
 static unsigned int get_pot_x(int x){
@@ -285,6 +276,7 @@ void init_var(){
 	sw2_state = ( (digitalRead(sw2up) << 1) | (digitalRead(sw2dw) << 0) );
 //	rnd_pot[0] = get_pot1();
 //	rnd_pot[1] = get_pot2();	
+	master_rate = 1;
 }
 
 void init_io(){
@@ -368,16 +360,28 @@ int bank_time(int sw_state, unsigned int ms_period){
 		int tmp;
 
 		if(ext_clk_flag){
-			tmp = map(p1, 0, 1023, 0, 48) * 2;	
-			sync_master = master.clk_set_ms( (ms_period / tmp) );
-			if(!ext_slave_flag)
-				slave.clk_sync_intern((ms_period / tmp));
+        		tmp = get_rnd_clk(p1);
+
+//			tmp = map(p1, 0, 1023, 0, 48) * 2;	
+//			sync_master = master.clk_set_ms( (ms_period / tmp) );
+			if(tmp < 0)
+				master_rate = abs(tmp);
+			else
+				master_rate = 1;
+			master.clk_set_operation(tmp,ms_period);
+	
+			
+//			Serial.println
+//			Serial.println(tmp);	
+			
+//			if(!ext_slave_flag)
+//				slave.clk_sync_intern((ms_period / tmp));
 		}
 		else {
 			tmp = map(p1, 0, 1023, MIN_BPM, MAX_BPM);
 			sync_master = master.clk_set_bpm(tmp);
-			if(!ext_slave_flag)
-				slave.clk_sync_intern(master.clk_get_ms());
+//			if(!ext_slave_flag)
+//				slave.clk_sync_intern(master.clk_get_ms());
 		}
 
 		tmp = map(p2, 0, 1023, 0, 99);
@@ -517,6 +521,23 @@ void loop(){
 
 	if(!ext_clk_flag){
 		ms = master.clk_elapsed();
+//		if(ms > 0){
+//			Serial.print("internal ");	
+//			Serial.println(ms);
+//			
+//		}
+	} else {
+		if(ms > 0){
+			ms = master.clk_sync(ms, (ext_clk_state - 1));
+		} 
+		else {
+			ms = master.clk_elapsed();
+			if(ms > 0) Serial.println("test ");
+		}
+		if(ms > 0){
+		Serial.print("external ");	
+		Serial.println(ms);
+		}	
 	}
 
 	if(ms > 0){
@@ -524,8 +545,8 @@ void loop(){
 			int temp1 = constrain((rnd_pot[0]+get_ain1()), 0, 1023);
 			int temp2 = constrain((rnd_pot[1]+get_ain2()), 0, 1023);
 			
-			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1, master.clk_get_ms());
-			rnd_clk[1].clk_set_operation(get_rnd_clk(temp2, master.clk_get_ms());			
+			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1), master.clk_get_ms());
+			rnd_clk[1].clk_set_operation(get_rnd_clk(temp2), master.clk_get_ms());			
 		}
 
 		// sync random clock
