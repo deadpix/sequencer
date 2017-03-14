@@ -360,7 +360,7 @@ int bank_time(int sw_state, unsigned int ms_period){
 		int tmp;
 
 		if(ext_clk_flag){
-        		tmp = get_rnd_clk(p1);
+       		tmp = get_rnd_clk(p1);
 
 //			tmp = map(p1, 0, 1023, 0, 48) * 2;	
 //			sync_master = master.clk_set_ms( (ms_period / tmp) );
@@ -368,7 +368,8 @@ int bank_time(int sw_state, unsigned int ms_period){
 				master_rate = abs(tmp);
 			else
 				master_rate = 1;
-			master.clk_set_operation(tmp,ms_period);
+			if(!master.clk_set_operation(tmp,ms_period))
+				Serial.println("error");
 	
 			
 //			Serial.println
@@ -386,7 +387,7 @@ int bank_time(int sw_state, unsigned int ms_period){
 
 		tmp = map(p2, 0, 1023, 0, 99);
 		upd_gate_len(&m_gate, &master, tmp);
-		upd_gate_len(&s_gate, &slave, tmp);
+//		upd_gate_len(&s_gate, &slave, tmp);
 
 		//TODO sync / update burst
 	} 
@@ -533,10 +534,13 @@ void loop(){
 		else {
 			ms = master.clk_elapsed();
 			if(ms > 0) Serial.println("test ");
+			Serial.print("elapsed ");
+			Serial.println(master.clk_get_elapsed_ms());
 		}
+
 		if(ms > 0){
-		Serial.print("external ");	
-		Serial.println(ms);
+			Serial.print("external ");	
+			Serial.println(ms);
 		}	
 	}
 
