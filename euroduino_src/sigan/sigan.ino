@@ -144,6 +144,7 @@ int prev_cv2;
 
 int ext_clk_state;
 int ext_clk_cnt;
+unsigned int ext_clk_ms;
 
 static unsigned int ckeck_ext_clk(){
 	unsigned int ms = 0; 
@@ -159,13 +160,14 @@ static unsigned int ckeck_ext_clk(){
 		else {
 			ext_clk_flag = true;
 			ext_clk_state = (ext_clk_state % master_rate)+1;
-			Serial.println(ext_clk_state);
 			// need to resync master	
+			ext_clk_ms = ms;
 		}
+		
 	} 
 	else if(ext_clk_state){
 		if(ext_clk_period > MAX_CLK_PERIOD){
-//			Serial.print("max reached...");
+			ext_clk_ms = 0;
 			ms = 0;
 			ext_clk_state = 0;
 			ext_clk_flag = false;
@@ -277,6 +279,7 @@ void init_var(){
 //	rnd_pot[0] = get_pot1();
 //	rnd_pot[1] = get_pot2();	
 	master_rate = 1;
+	ext_clk_ms = 0;
 }
 
 void init_io(){
@@ -368,12 +371,11 @@ int bank_time(int sw_state, unsigned int ms_period){
 				master_rate = abs(tmp);
 			else
 				master_rate = 1;
-			if(!master.clk_set_operation(tmp,ms_period))
+		
+			if(!master.clk_set_operation(tmp,ext_clk_ms))
 				Serial.println("error");
 	
 			
-//			Serial.println
-//			Serial.println(tmp);	
 			
 //			if(!ext_slave_flag)
 //				slave.clk_sync_intern((ms_period / tmp));
@@ -502,7 +504,6 @@ void upd_output(unsigned int master_ms){
 
 static void upd_rnd_output1(){
 	byte rnd = random(max_rnd[0]);
-//	Serial.println(rnd);
 //	analogWrite(aout1, rnd);
 	analogWrite(aout1, (255-rnd));
 }
@@ -522,26 +523,15 @@ void loop(){
 
 	if(!ext_clk_flag){
 		ms = master.clk_elapsed();
-//		if(ms > 0){
-//			Serial.print("internal ");	
-//			Serial.println(ms);
-//			
-//		}
 	} else {
 		if(ms > 0){
 			ms = master.clk_sync(ms, (ext_clk_state - 1));
 		} 
 		else {
 			ms = master.clk_elapsed();
-			if(ms > 0) Serial.println("test ");
-			Serial.print("elapsed ");
-			Serial.println(master.clk_get_elapsed_ms());
+	
 		}
 
-		if(ms > 0){
-			Serial.print("external ");	
-			Serial.println(ms);
-		}	
 	}
 
 	if(ms > 0){

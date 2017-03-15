@@ -91,7 +91,7 @@ boolean clk::clk_set_operation(int op, uint32_t ms_ref){
 		_operation = 1;
 		ret = false;
 	}
-	if( abs(op) > _max_step ){
+	if( (abs(op) > _max_step) || (_ms <= 0) ){
 		ret = false;
 	}
 	return ret;
@@ -121,6 +121,7 @@ uint32_t clk::clk_sync_divider(uint32_t ms, uint16_t step){
 
 	if( ((step +1) % divider) == 0 ){
 		ret = _ms;
+		_elapsed_ms = 0;
 	}
 	
 	return ret;
@@ -130,6 +131,7 @@ uint32_t clk::clk_sync_multiplier(uint32_t ms){
 	//TODO neeed to check step number for sync
 	_ms = ms / _operation;
 	_bpm = ms_to_bpm(_ms);
+	_elapsed_ms = 0;
 
 //	_resync = true;
 	return _ms;
