@@ -28,6 +28,10 @@ gate::gate(uint8_t port, uint8_t (*hw_wr)(uint8_t, bool)){
 gate::~gate(){
 }
 
+void gate::set_gate_trig_lvl(bool trig_level){
+	_gate_value = trig_level;
+}
+
 void gate::set_gate_len(uint32_t ms){
 	_gate_len = ms;
 }

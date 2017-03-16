@@ -175,6 +175,17 @@ static unsigned int ckeck_ext_clk(){
 	}
 	return ms;
 }
+
+static bool check_slave_trig(){
+	bool ret = false;
+	if(din_state & EXT_SLAVE_CLK){
+		din_state &= ~(EXT_SLAVE_CLK);
+		ret = true;
+	}
+	return ret;
+}
+
+/*
 static unsigned int ckeck_ext_slave_clk(){
 	unsigned int ms = 0; 
 	if(ain_state & EXT_SLAVE_CLK){
@@ -198,7 +209,7 @@ static unsigned int ckeck_ext_slave_clk(){
 	}
 	return ms;
 }
-
+*/
 
 
 
@@ -402,13 +413,16 @@ int bank_time(int sw_state, unsigned int ms_period){
 	return ret;
 }
 
-int bank_burst(int sw_state){
+int bank_trig_level(int sw_state){
 	int p1 = get_pot1();
 	int p2 = get_pot2();
 	int ret = 0;
 
 	if(sw_state == SW_UP){
-	
+		int trig_lvl1 = map(p1, 0, MAX_ANALOG_IN, 0, 1);
+		int trig_lvl2 = map(p2, 0, MAX_ANALOG_IN, 0, 1);
+		m_gate.set_gate_trig_lvl((bool) trig_lvl1);
+//		
 	}
 	else if(sw_state == SW_DOWN){
 	
@@ -456,7 +470,7 @@ int bank_all(unsigned int ms){
 				
 			case SW_MID:
 				/* burst */
-//				bank_burst(sw2_state);
+				ret = bank_trig_level(sw2_state);
 				break;
 	
 			case SW_DOWN:
@@ -520,6 +534,10 @@ void loop(){
 	unsigned int ms = ckeck_ext_clk();
 //	unsigned int ms_slave = ckeck_ext_slave_clk();
 	int cv_target = bank_all(ms);
+	bool slv_clk_triggered = check_slave_trig();
+
+
+	if(slv_clk_triggered) Serial.println("slave clk trig");
 
 	if(!ext_clk_flag){
 		ms = master.clk_elapsed();

@@ -32,7 +32,8 @@ class gate {
 //		void set_gate_value(boolean);
 		void set_gate_len(uint32_t);
 		void set_hw_cbck(uint8_t, uint8_t (*hw_wr)(uint8_t, bool));	
-	
+		void set_gate_trig_lvl(bool);
+
 		int rst_gate(bool);
 		int upd_gate();
 
