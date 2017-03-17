@@ -52,7 +52,16 @@ int gate::rst_gate(bool gate_val){
 	
 	return GATE_STARTED;
 }
+int gate::rst_gate(){
+	if(!_hw_wr_cbck)	
+		return GATE_ERROR;
 
+	_elapsed_ms = 0;
+	_hw_wr_cbck(_port, _gate_value);
+	_gate_state = GATE_STARTED;
+	
+	return GATE_STARTED;
+}
 int gate::upd_gate(){
 	if(!_hw_wr_cbck)	
 		return GATE_ERROR;

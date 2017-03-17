@@ -106,6 +106,8 @@ bool ext_clk_flag;
 bool ext_slave_flag;
 elapsedMillis ext_clk_period;
 elapsedMillis ext_clk_slave_period;
+byte percent_gate_len[2];
+
 
 int rnd_pot[2];
 
@@ -126,7 +128,7 @@ static void init_rnd(){
 	max_rnd[1] = MAX_ANALOG_OUT + 1;
 }
 
-static void wr_gate_out(int out, bool val){
+static byte wr_gate_out(int out, bool val){
 	if(val)
 		digitalWrite(out,HIGH);
 	else
@@ -291,6 +293,13 @@ void init_var(){
 //	rnd_pot[1] = get_pot2();	
 	master_rate = 1;
 	ext_clk_ms = 0;
+
+	percent_gate_len[0] = 1;
+	percent_gate_len[1] = 1;
+
+	upd_gate_len(&m_gate, &master, percent_gate_len[0]);
+	upd_gate_len(&s_gate, &slave, percent_gate_len[1]);
+
 }
 
 void init_io(){
@@ -385,8 +394,6 @@ int bank_time(int sw_state, unsigned int ms_period){
 		
 			if(!master.clk_set_operation(tmp,ext_clk_ms))
 				Serial.println("error");
-	
-			
 			
 //			if(!ext_slave_flag)
 //				slave.clk_sync_intern((ms_period / tmp));
@@ -398,14 +405,19 @@ int bank_time(int sw_state, unsigned int ms_period){
 //				slave.clk_sync_intern(master.clk_get_ms());
 		}
 
-		tmp = map(p2, 0, 1023, 0, 99);
-		upd_gate_len(&m_gate, &master, tmp);
+		int idx = map(get_pot2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1));
+	  	slave.clk_set_operation(clk_rate[idx],master.clk_get_ms());
+
+
 //		upd_gate_len(&s_gate, &slave, tmp);
 
 		//TODO sync / update burst
 	} 
 	else if(sw_state == SW_DOWN){
-		int p1 = get_pot1();
+		percent_gate_len[0] = map(get_pot1(), 0, 1023, 0, 99);
+		percent_gate_len[1] = map(get_pot2(), 0, 1023, 0, 99);
+		upd_gate_len(&m_gate, &master, percent_gate_len[0]);
+		upd_gate_len(&s_gate,  &slave, percent_gate_len[1]);
 	} 
 	else {
 		ret = 1;
@@ -507,12 +519,20 @@ void upd_output(unsigned int master_ms, unsigned int slave_ms){
 }
 */
 
-void upd_output(unsigned int master_ms){
+void upd_output(unsigned int master_ms, unsigned int slave_ms){
 	if(master_ms > 0){
-		m_gate.rst_gate(true);
+//		m_gate.rst_gate(true);
+		m_gate.rst_gate();
 	}
 	else {
 		m_gate.upd_gate();
+	}
+
+	if(slave_ms > 0){
+		s_gate.rst_gate();
+	} 
+	else {
+		s_gate.upd_gate();
 	}
 }
 
@@ -528,6 +548,24 @@ static void upd_rnd_output2(){
 	analogWrite(aout2, rnd);
 }
 
+void set_slv_cv_gate_len(){
+	int tmp = map(get_ain2(), 0, 1023, 0, 99);
+	upd_gate_len(&s_gate, &slave, constrain((percent_gate_len[1]+tmp), 0, 99));
+}
+
+void set_slv_cv_mult(){
+
+	int rate = clk_rate[map(get_pot2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1))];
+	slave.clk_set_operation((abs(slave.clk_get_operator())+rate),master.clk_get_ms());
+}
+
+void set_mst_cv_gate_len(){
+	int tmp = map(get_ain1(), 0, 1023, 0, 99);
+	upd_gate_len(&m_gate, &master, constrain((percent_gate_len[0]+tmp), 0, 99));
+}
+
+
+
 void loop(){
 	uint32_t rnd_ms[2];
 	uint16_t step = master.clk_get_step_cnt();
@@ -535,9 +573,13 @@ void loop(){
 //	unsigned int ms_slave = ckeck_ext_slave_clk();
 	int cv_target = bank_all(ms);
 	bool slv_clk_triggered = check_slave_trig();
+	unsigned int slave_ms;
+	unsigned int clv_clk_cnt;
 
+	if(slv_clk_triggered){
+	   	Serial.println("slave clk trig");
 
-	if(slv_clk_triggered) Serial.println("slave clk trig");
+	}
 
 	if(!ext_clk_flag){
 		ms = master.clk_elapsed();
@@ -559,6 +601,9 @@ void loop(){
 			
 			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1), master.clk_get_ms());
 			rnd_clk[1].clk_set_operation(get_rnd_clk(temp2), master.clk_get_ms());			
+		} 
+		else if(cv_target == 1){
+			set_mst_cv_gate_len();
 		}
 
 		// sync random clock
@@ -570,8 +615,36 @@ void loop(){
 		rnd_ms[1] = rnd_clk[1].clk_elapsed();
 	}
 
-	upd_output(ms);
-	upd_rev_out();
+	if(slv_clk_triggered){
+		slave_ms = slave.clk_reset();
+		if(cv_target == 1){
+			set_slv_cv_gate_len();
+		}
+		else if(cv_target == 2){
+			set_slv_cv_mult();
+			set_slv_cv_gate_len();
+		}
+	} 
+	else if(slave.clk_get_step_cnt() < abs(slave.clk_get_operator())){
+		slave_ms = slave.clk_elapsed();
+		if(cv_target == 1){
+			set_slv_cv_gate_len();
+		}
+		else if(cv_target == 2){
+			set_slv_cv_gate_len();
+		}
+	} 
+	else {
+		slave_ms = 0;
+	}
+
+
+
+
+
+	// Update output
+
+	upd_output(ms, slave_ms);
 
 	if(rnd_ms[0] > 0){
 		upd_rnd_output1();

@@ -50,6 +50,10 @@ uint16_t clk::clk_get_step_cnt(){
 uint32_t clk::clk_get_elapsed_ms(){
 	return _elapsed_ms;
 }
+int clk::clk_get_operator(){
+	return _operation;
+}
+
 void clk::clk_set_max_step(uint8_t max_step){
 	_max_step = max_step;
 }
@@ -134,6 +138,12 @@ uint32_t clk::clk_sync_multiplier(uint32_t ms){
 	_elapsed_ms = 0;
 
 //	_resync = true;
+	return _ms;
+}
+
+uint32_t clk::clk_reset(){
+	_elapsed_ms = 0;
+	_step_cnt = 0;
 	return _ms;
 }
 

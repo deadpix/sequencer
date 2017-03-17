@@ -35,6 +35,7 @@ class gate {
 		void set_gate_trig_lvl(bool);
 
 		int rst_gate(bool);
+		int rst_gate();
 		int upd_gate();
 
 		

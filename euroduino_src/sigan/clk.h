@@ -32,13 +32,15 @@ class clk {
 
 		int clk_set_ms(uint32_t);
 		int clk_set_bpm(uint16_t);	
-	
+		int clk_get_operator();
+
 		void clk_set_max_step(uint8_t);
 		
 		boolean clk_set_operation(int, uint32_t);
 		void clk_sync_extern();
 		void clk_sync_intern(uint32_t);
-		
+		uint32_t clk_reset();
+
 		boolean clk_next_step();
 		uint32_t clk_elapsed();
 		uint32_t clk_sync_divider(uint32_t, uint16_t);
