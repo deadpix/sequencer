@@ -473,7 +473,7 @@ int bank_random(int sw_state){
 int bank_all(unsigned int ms){
 	int ret = 0;
 	/* Save the pot values if not in lock position */
-	if(sw2_state != SW_MID){
+//	if(sw2_state != SW_MID){
 		switch (sw1_state) {
 			case SW_UP:
 				/* Time */
@@ -490,7 +490,7 @@ int bank_all(unsigned int ms){
 				ret = bank_random(sw2_state);
 				break;
 		}
-	}
+//	} 
 	return ret;
 }
 
@@ -544,8 +544,8 @@ static void upd_rnd_output1(){
 
 static void upd_rnd_output2(){
 	byte rnd = random(max_rnd[1]);
-//	analogWrite(aout2, (255 - rnd));
-	analogWrite(aout2, rnd);
+	analogWrite(aout2, (255 - rnd));
+//	analogWrite(aout2, rnd);
 }
 
 void set_slv_cv_gate_len(){
@@ -563,6 +563,7 @@ void set_mst_cv_gate_len(){
 	int tmp = map(get_ain1(), 0, 1023, 0, 99);
 	upd_gate_len(&m_gate, &master, constrain((percent_gate_len[0]+tmp), 0, 99));
 }
+
 
 
 
@@ -598,7 +599,7 @@ void loop(){
 		if(cv_target == 3){
 			int temp1 = constrain((rnd_pot[0]+get_ain1()), 0, 1023);
 			int temp2 = constrain((rnd_pot[1]+get_ain2()), 0, 1023);
-			
+		
 			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1), master.clk_get_ms());
 			rnd_clk[1].clk_set_operation(get_rnd_clk(temp2), master.clk_get_ms());			
 		} 
@@ -607,8 +608,8 @@ void loop(){
 		}
 
 		// sync random clock
-		rnd_ms[0] = rnd_clk[0].clk_sync(ms, step);
-		rnd_ms[1] = rnd_clk[1].clk_sync(ms, step);
+		/*rnd_ms[0] = */rnd_clk[0].clk_sync(ms, step);
+		/*rnd_ms[1] = */rnd_clk[1].clk_sync(ms, step);
 	}
 	else {
 		rnd_ms[0] = rnd_clk[0].clk_elapsed();
