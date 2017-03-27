@@ -178,6 +178,22 @@ uint32_t clk::clk_elapsed(){
 	return ret;
 }
 
+uint32_t clk::master_sync(uint32_t mst_ms, uint16_t mst_cnt){
+	uint32_t ret = 0;
+
+	/* master has been synced or received new tick */
+	if(mst_ms > 0){
+		ret = clk_sync(mst_ms, mst_cnt);
+	}
+	/* "multiplied" slave clk sync itself until _step_cnt = _operation     */
+	/* when _step_cnt = _operation, slave clk has to be synced with master */
+	else if( (_operation > 0) && (_step_cnt < (_operation - 1)) ){
+		ret = clk_elapsed(); 
+	}
+	
+	return ret;
+}
+
 boolean clk::clk_update(boolean sync_flg, clk* master){
 	uint8_t divider = abs(_operation);	
 	boolean ret = false;

@@ -407,7 +407,8 @@ int bank_time(int sw_state, unsigned int ms_period){
 
 		int idx = map(get_pot2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1));
 	  	slave.clk_set_operation(clk_rate[idx],master.clk_get_ms());
-
+		rnd_clk[0].clk_sync_intern(master.clk_get_ms());
+		rnd_clk[1].clk_sync_intern(master.clk_get_ms());
 
 //		upd_gate_len(&s_gate, &slave, tmp);
 
@@ -608,13 +609,16 @@ void loop(){
 		}
 
 		// sync random clock
-		/*rnd_ms[0] = */rnd_clk[0].clk_sync(ms, step);
-		/*rnd_ms[1] = */rnd_clk[1].clk_sync(ms, step);
+//		/*rnd_ms[0] = */rnd_clk[0].clk_sync(ms, step);
+//		/*rnd_ms[1] = */rnd_clk[1].clk_sync(ms, step);
 	}
 	else {
-		rnd_ms[0] = rnd_clk[0].clk_elapsed();
-		rnd_ms[1] = rnd_clk[1].clk_elapsed();
+//		rnd_ms[0] = rnd_clk[0].clk_elapsed();
+//		rnd_ms[1] = rnd_clk[1].clk_elapsed();
 	}
+	rnd_ms[0] = rnd_clk[0].master_sync(ms, step);
+	rnd_ms[1] = rnd_clk[1].master_sync(ms, step);
+
 
 	if(slv_clk_triggered){
 		slave_ms = slave.clk_reset();
@@ -638,8 +642,6 @@ void loop(){
 	else {
 		slave_ms = 0;
 	}
-
-
 
 
 
