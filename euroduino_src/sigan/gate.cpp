@@ -12,13 +12,13 @@
 static uint8_t (*_hw_wr_cbck)(uint8_t, bool);
 
 gate::gate(){
-	_gate_value = GATE_LOW;
+	_gate_value = GATE_HIGH;
 	_gate_len = 0;
 	_gate_state = GATE_FINISHED;
 }
 
 gate::gate(uint8_t port, uint8_t (*hw_wr)(uint8_t, bool)){
-	_gate_value = GATE_LOW;
+	_gate_value = GATE_HIGH;
 	_gate_len = 0;
 	_gate_state = GATE_FINISHED;
 	_port = port;
@@ -70,8 +70,8 @@ int gate::upd_gate(){
 		return GATE_FINISHED;
 
 	if(_elapsed_ms > _gate_len){
-		_gate_value = !_gate_value;
-		_hw_wr_cbck(_port, _gate_value);
+//		_gate_value = !_gate_value;
+		_hw_wr_cbck(_port, !_gate_value);
 		_gate_state = GATE_FINISHED;
 	}
 	return (int)_gate_state;

@@ -178,12 +178,49 @@ static unsigned int ckeck_ext_clk(){
 	return ms;
 }
 
+int din2_state;
+
+byte din2_prev_status;
 static bool check_slave_trig(){
 	bool ret = false;
 	if(din_state & EXT_SLAVE_CLK){
 		din_state &= ~(EXT_SLAVE_CLK);
 		ret = true;
 	}
+/*
+	int flg = digitalRead(din2);
+	if( flg == HIGH ){
+		Serial.println("trig ");
+		
+		if(flg == din2_state)
+			ret = false;
+		else {
+			ret = true;
+			Serial.println("test");
+		}
+		din2_state = flg;
+
+	} else {
+		Serial.println("rel ");
+		din2_state = false;
+		ret = false;
+	}
+
+	return ret;
+*/
+/*
+	bool ret = false;
+	byte curr_status = digitalRead(din2);
+	if(curr_status == HIGH){
+		if(curr_status != din2_prev_status){
+			ret = true;
+		}
+	}
+	else {
+
+	}
+	din2_prev_status = curr_status;
+*/
 	return ret;
 }
 
@@ -294,8 +331,8 @@ void init_var(){
 	master_rate = 1;
 	ext_clk_ms = 0;
 
-	percent_gate_len[0] = 1;
-	percent_gate_len[1] = 1;
+	percent_gate_len[0] = 50;
+	percent_gate_len[1] = 50;
 
 	upd_gate_len(&m_gate, &master, percent_gate_len[0]);
 	upd_gate_len(&s_gate, &slave, percent_gate_len[1]);
@@ -406,11 +443,15 @@ int bank_time(int sw_state, unsigned int ms_period){
 		}
 
 		int idx = map(get_pot2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1));
+
+//		Serial.println(clk_rate[idx]);		
+
 	  	slave.clk_set_operation(clk_rate[idx],master.clk_get_ms());
 		rnd_clk[0].clk_sync_intern(master.clk_get_ms());
 		rnd_clk[1].clk_sync_intern(master.clk_get_ms());
 
-//		upd_gate_len(&s_gate, &slave, tmp);
+		upd_gate_len(&m_gate, &master, percent_gate_len[0]);
+		upd_gate_len(&s_gate, &slave, percent_gate_len[1]);
 
 		//TODO sync / update burst
 	} 
@@ -435,6 +476,7 @@ int bank_trig_level(int sw_state){
 		int trig_lvl1 = map(p1, 0, MAX_ANALOG_IN, 0, 1);
 		int trig_lvl2 = map(p2, 0, MAX_ANALOG_IN, 0, 1);
 		m_gate.set_gate_trig_lvl((bool) trig_lvl1);
+		s_gate.set_gate_trig_lvl((bool) trig_lvl2);
 //		
 	}
 	else if(sw_state == SW_DOWN){
@@ -578,10 +620,10 @@ void loop(){
 	unsigned int slave_ms;
 	unsigned int clv_clk_cnt;
 
-	if(slv_clk_triggered){
-	   	Serial.println("slave clk trig");
-
-	}
+//	if(slv_clk_triggered){
+//	   	Serial.println("slave clk trig");
+//
+//	}
 
 	if(!ext_clk_flag){
 		ms = master.clk_elapsed();
@@ -607,7 +649,6 @@ void loop(){
 		else if(cv_target == 1){
 			set_mst_cv_gate_len();
 		}
-
 		// sync random clock
 //		/*rnd_ms[0] = */rnd_clk[0].clk_sync(ms, step);
 //		/*rnd_ms[1] = */rnd_clk[1].clk_sync(ms, step);
@@ -622,6 +663,9 @@ void loop(){
 
 	if(slv_clk_triggered){
 		slave_ms = slave.clk_reset();
+		Serial.println(slave_ms);
+
+/*
 		if(cv_target == 1){
 			set_slv_cv_gate_len();
 		}
@@ -629,15 +673,18 @@ void loop(){
 			set_slv_cv_mult();
 			set_slv_cv_gate_len();
 		}
+*/
 	} 
-	else if(slave.clk_get_step_cnt() < abs(slave.clk_get_operator())){
+	else if(slave.clk_get_step_cnt() < (abs(slave.clk_get_operator()) - 1)){
 		slave_ms = slave.clk_elapsed();
+/*
 		if(cv_target == 1){
 			set_slv_cv_gate_len();
 		}
 		else if(cv_target == 2){
 			set_slv_cv_gate_len();
 		}
+*/
 	} 
 	else {
 		slave_ms = 0;
@@ -657,5 +704,5 @@ void loop(){
 	}
 
 	/* we did a good job, let's rest for 1ms */
-	delay(5);
+	delay(10);
 }
