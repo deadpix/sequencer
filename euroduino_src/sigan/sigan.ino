@@ -110,6 +110,7 @@ elapsedMillis ext_clk_slave_period;
 byte percent_gate_len[2];
 
 
+byte slv_mult;
 byte slv_prev_status;
 byte ext_prev_status;
 
@@ -187,7 +188,7 @@ static bool ckeck_ext_trig(){
 
 static bool check_slv_trig(){
 	bool ret = false;
-	byte curr_status = digitalRead(din1);
+	byte curr_status = digitalRead(din2);
 	if(curr_status == slv_trig_level){
 		if(curr_status != slv_prev_status){
 			ret = true;
@@ -500,7 +501,8 @@ int bank_time(int sw_state, unsigned int ms_period){
 		int idx = map(get_pot2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1));
 
 //		Serial.println(clk_rate[idx]);		
-
+		
+		slv_mult = clk_rate[idx];
 	  	slave.clk_set_operation(clk_rate[idx],master.clk_get_ms());
 		rnd_clk[0].clk_sync_intern(master.clk_get_ms());
 		rnd_clk[1].clk_sync_intern(master.clk_get_ms());
@@ -661,8 +663,13 @@ void set_slv_cv_gate_len(){
 
 void set_slv_cv_mult(){
 
-	int rate = clk_rate[map(get_pot2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1))];
-	slave.clk_set_operation((abs(slave.clk_get_operator())+rate),master.clk_get_ms());
+	int rate = clk_rate[map(get_ain2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1))];
+
+	Serial.print("rate ");
+	Serial.println(slv_mult+rate);	
+	
+	slave.clk_set_operation(abs(slv_mult+rate),master.clk_get_ms());
+	upd_gate_len(&s_gate, &slave, percent_gate_len[1]);
 }
 
 void set_mst_cv_gate_len(){
@@ -719,10 +726,18 @@ void loop(){
 
 
 	if(slv_clk_triggered){
+		if(cv_target == 1)
+			set_slv_cv_gate_len();		
+		else if(cv_target == 2)
+			set_slv_cv_mult();
+
 		slave_ms = slave.clk_reset();
+
 	} 
 	else if(slave.clk_get_step_cnt() < (abs(slave.clk_get_operator()) - 1)){
 		slave_ms = slave.clk_elapsed();
+		if(cv_target == 1)
+                        set_slv_cv_gate_len();
 	} 
 	else {
 		slave_ms = 0;
