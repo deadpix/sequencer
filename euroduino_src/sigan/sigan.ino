@@ -3,7 +3,10 @@
  Circuit Abbey EuroDuino
  Arduino EuroRack Module
  
- sigan: tick - burst generator
+ sigan: 
+ 	- tick generator 
+	- random CV generator
+	- syncable with digital input
  
  V0.00
 
@@ -42,8 +45,6 @@ const int sw1dw = A5;   // Switch 1 Dwn
 const int sw2up = 7;    // Switch 2 Up
 const int sw2dw = 2;    // Switch 2 Dwn
 
-
-/* contains dout1, dout2, etc in function of the number of clock output */
 //const int dout_clk[NR_CLOCK] = {dout1,dout2};
 //const int dout_burst[NR_BURSTED_TICKS] = {aout1,aout2};
 
@@ -109,6 +110,14 @@ elapsedMillis ext_clk_slave_period;
 byte percent_gate_len[2];
 
 
+byte slv_prev_status;
+byte ext_prev_status;
+
+byte slv_trig_level;
+byte ext_trig_level;
+
+
+
 int rnd_pot[2];
 
 ISR (PCINT0_vect){
@@ -148,9 +157,49 @@ int ext_clk_state;
 int ext_clk_cnt;
 unsigned int ext_clk_ms;
 
+
+
+
+
+
+
+
+//byte slv_prev_status;
+//byte ext_prev_status;
+
+//byte slv_trig_level;
+//byte ext_trig_level;
+
+
+
+static bool ckeck_ext_trig(){
+	bool ret = false;
+
+	byte curr_status = digitalRead(din1);
+	if(curr_status == ext_trig_level){
+		if(curr_status != ext_prev_status){
+			ret = true;
+		}
+	}
+	ext_prev_status = curr_status;
+	return ret;
+}
+
+static bool check_slv_trig(){
+	bool ret = false;
+	byte curr_status = digitalRead(din1);
+	if(curr_status == slv_trig_level){
+		if(curr_status != slv_prev_status){
+			ret = true;
+		}
+	}
+	slv_prev_status = curr_status;
+	return ret;
+}
+
 static unsigned int ckeck_ext_clk(){
 	unsigned int ms = 0; 
-	if(din_state & EXT_MASTER_CLK){
+	if(ckeck_ext_trig()){
 		ms = ext_clk_period;
 		ext_clk_period = 0;		
 		din_state &= ~(EXT_MASTER_CLK);
@@ -178,51 +227,54 @@ static unsigned int ckeck_ext_clk(){
 	return ms;
 }
 
-int din2_state;
 
-byte din2_prev_status;
-static bool check_slave_trig(){
-	bool ret = false;
-	if(din_state & EXT_SLAVE_CLK){
-		din_state &= ~(EXT_SLAVE_CLK);
-		ret = true;
-	}
-/*
-	int flg = digitalRead(din2);
-	if( flg == HIGH ){
-		Serial.println("trig ");
+
+//int din2_state;
+//
+
+/*byte din2_prev_status;*/
+//static bool check_slave_trig(){
+	//bool ret = false;
+	//if(din_state & EXT_SLAVE_CLK){
+		//din_state &= ~(EXT_SLAVE_CLK);
+		//ret = true;
+	//}
+//[>
+	//int flg = digitalRead(din2);
+	//if( flg == HIGH ){
+		//Serial.println("trig ");
 		
-		if(flg == din2_state)
-			ret = false;
-		else {
-			ret = true;
-			Serial.println("test");
-		}
-		din2_state = flg;
+		//if(flg == din2_state)
+			//ret = false;
+		//else {
+			//ret = true;
+			//Serial.println("test");
+		//}
+		//din2_state = flg;
 
-	} else {
-		Serial.println("rel ");
-		din2_state = false;
-		ret = false;
-	}
+	//} else {
+		//Serial.println("rel ");
+		//din2_state = false;
+		//ret = false;
+	//}
 
-	return ret;
-*/
-/*
-	bool ret = false;
-	byte curr_status = digitalRead(din2);
-	if(curr_status == HIGH){
-		if(curr_status != din2_prev_status){
-			ret = true;
-		}
-	}
-	else {
+	//return ret;
+//*/
+//[>
+	//bool ret = false;
+	//byte curr_status = digitalRead(din2);
+	//if(curr_status == HIGH){
+		//if(curr_status != din2_prev_status){
+			//ret = true;
+		//}
+	//}
+	//else {
 
-	}
-	din2_prev_status = curr_status;
-*/
-	return ret;
-}
+	//}
+	//din2_prev_status = curr_status;
+//*/
+	//return ret;
+/*}*/
 
 /*
 static unsigned int ckeck_ext_slave_clk(){
@@ -330,6 +382,9 @@ void init_var(){
 //	rnd_pot[1] = get_pot2();	
 	master_rate = 1;
 	ext_clk_ms = 0;
+
+	slv_trig_level = HIGH;
+	ext_trig_level = HIGH;
 
 	percent_gate_len[0] = 50;
 	percent_gate_len[1] = 50;
@@ -477,10 +532,17 @@ int bank_trig_level(int sw_state){
 		int trig_lvl2 = map(p2, 0, MAX_ANALOG_IN, 0, 1);
 		m_gate.set_gate_trig_lvl((bool) trig_lvl1);
 		s_gate.set_gate_trig_lvl((bool) trig_lvl2);
-//		
 	}
 	else if(sw_state == SW_DOWN){
-	
+		if(map(p1, 0, MAX_ANALOG_IN, 0, 1))
+			ext_trig_level = HIGH;
+		else 
+			ext_trig_level = LOW;
+
+		if(map(p2, 0, MAX_ANALOG_IN, 0, 1))
+			slv_trig_level = HIGH;
+		else 
+			slv_trig_level = LOW;
 	}
    	else {
 		ret = 2;
@@ -491,14 +553,15 @@ int bank_trig_level(int sw_state){
 int bank_random(int sw_state){
 	int pot1 = get_pot1();
 	int p1 = get_rnd_clk(pot1 & ~(0x1));
-	unsigned int p2 = get_max_rnd_val(get_pot2() & ~(0x1));
+	int pot2 = get_pot2();
+	unsigned int p2 = get_max_rnd_val(pot2 & ~(0x1));
 	int ret = 0;
 
 	if(sw_state == SW_UP){
 		/* bank something */
 		rnd_clk[0].clk_set_operation(p1, master.clk_get_ms());
 		max_rnd[0] = p2 + 1;			
-		rnd_pot[0] = pot1;
+		rnd_pot[0] = pot2;
 	}
 	else if(sw_state == SW_DOWN){
 		rnd_clk[1].clk_set_operation(p1, master.clk_get_ms());
@@ -616,7 +679,7 @@ void loop(){
 	unsigned int ms = ckeck_ext_clk();
 //	unsigned int ms_slave = ckeck_ext_slave_clk();
 	int cv_target = bank_all(ms);
-	bool slv_clk_triggered = check_slave_trig();
+	bool slv_clk_triggered = check_slv_trig();
 	unsigned int slave_ms;
 	unsigned int clv_clk_cnt;
 
@@ -643,19 +706,13 @@ void loop(){
 			int temp1 = constrain((rnd_pot[0]+get_ain1()), 0, 1023);
 			int temp2 = constrain((rnd_pot[1]+get_ain2()), 0, 1023);
 		
-			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1), master.clk_get_ms());
+//			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1), master.clk_get_ms());
+			max_rnd[0] = temp1 + 1;		
 			rnd_clk[1].clk_set_operation(get_rnd_clk(temp2), master.clk_get_ms());			
 		} 
 		else if(cv_target == 1){
 			set_mst_cv_gate_len();
 		}
-		// sync random clock
-//		/*rnd_ms[0] = */rnd_clk[0].clk_sync(ms, step);
-//		/*rnd_ms[1] = */rnd_clk[1].clk_sync(ms, step);
-	}
-	else {
-//		rnd_ms[0] = rnd_clk[0].clk_elapsed();
-//		rnd_ms[1] = rnd_clk[1].clk_elapsed();
 	}
 	rnd_ms[0] = rnd_clk[0].master_sync(ms, step);
 	rnd_ms[1] = rnd_clk[1].master_sync(ms, step);
@@ -663,28 +720,9 @@ void loop(){
 
 	if(slv_clk_triggered){
 		slave_ms = slave.clk_reset();
-		Serial.println(slave_ms);
-
-/*
-		if(cv_target == 1){
-			set_slv_cv_gate_len();
-		}
-		else if(cv_target == 2){
-			set_slv_cv_mult();
-			set_slv_cv_gate_len();
-		}
-*/
 	} 
 	else if(slave.clk_get_step_cnt() < (abs(slave.clk_get_operator()) - 1)){
 		slave_ms = slave.clk_elapsed();
-/*
-		if(cv_target == 1){
-			set_slv_cv_gate_len();
-		}
-		else if(cv_target == 2){
-			set_slv_cv_gate_len();
-		}
-*/
 	} 
 	else {
 		slave_ms = 0;
@@ -703,6 +741,6 @@ void loop(){
 		upd_rnd_output2();
 	}
 
-	/* we did a good job, let's rest for 1ms */
-	delay(10);
+	/* we did a good job, let's rest for 5ms */
+	delay(5);
 }
