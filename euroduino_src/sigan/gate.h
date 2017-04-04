@@ -9,10 +9,10 @@
 
 #include <elapsedMillis.h>
 
-#define GATE_HIGH	true
-#define GATE_LOW	false
+#define GATE_HIGH		true
+#define GATE_LOW		false
 
-#define GATE_ERROR	0
+#define GATE_ERROR		0
 #define GATE_STARTED	1
 #define GATE_FINISHED	2
 
@@ -36,8 +36,6 @@ class gate {
 
 		int rst_gate(bool);
 		int rst_gate();
-		int upd_gate();
-
-		
+		int upd_gate();		
 };
 #endif

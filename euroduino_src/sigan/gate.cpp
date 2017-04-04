@@ -70,7 +70,6 @@ int gate::upd_gate(){
 		return GATE_FINISHED;
 
 	if(_elapsed_ms > _gate_len){
-//		_gate_value = !_gate_value;
 		_hw_wr_cbck(_port, !_gate_value);
 		_gate_state = GATE_FINISHED;
 	}
