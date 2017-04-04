@@ -32,6 +32,8 @@ byte j;
 //storage variable
 byte dataToSend;
 
+IntervalTimer myTimer;
+
 void setup() {
   //set pins as output
   pinMode(latchPin, OUTPUT);
@@ -39,13 +41,26 @@ void setup() {
   pinMode(dataPin, OUTPUT);
 }
 
-void set_test(){
-	uint32_t x = 61936; // blue led!!! 272: 0x V-V-V-V gr-gr-gr-gr B-B-B-B - - - -
+void set_test1(){
+//	uint32_t x = 61936; // blue led!!! 272: 0x V-V-V-V gr-gr-gr-gr B-B-B-B - - - -
 //	uint32_t x = 496; // blue led!!! 272: 0x V-V-V-V gr-gr-gr-gr B-B-B-B - - - -
+	uint32_t x = 0x1F00;
 	digitalWrite(latchPin, LOW);
 	shiftOut(dataPin, clockPin, LSBFIRST, x);
 	shiftOut(dataPin, clockPin, LSBFIRST, x >> 8);
 	digitalWrite(latchPin, HIGH);
+	delay(500);
+}
+
+void set_test2(){
+//	uint32_t x = 61936; // blue led!!! 272: 0x V-V-V-V gr-gr-gr-gr B-B-B-B - - - -
+//	uint32_t x = 496; // blue led!!! 272: 0x V-V-V-V gr-gr-gr-gr B-B-B-B - - - -
+	uint32_t x = 0xF100;
+	digitalWrite(latchPin, LOW);
+	shiftOut(dataPin, clockPin, LSBFIRST, x);
+	shiftOut(dataPin, clockPin, LSBFIRST, x >> 8);
+	digitalWrite(latchPin, HIGH);
+	delay(500);
 }
 
 void set_led_x(int x){
@@ -147,7 +162,8 @@ void test1(){
 void loop() {
 //	test2(); 
 //	all_leds();
-	set_test();
+	set_test1();
+	set_test2();
 	delay(100);
 }
 
