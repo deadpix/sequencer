@@ -303,7 +303,7 @@ int bank_time(int sw_state, unsigned int ms_period){
 		int tmp;
 
 		if(ext_clk_flag){
-       		tmp = get_rnd_clk(p1);
+       			tmp = get_rnd_clk(p1);
 
 			if(tmp < 0)
 				master_rate = abs(tmp);
@@ -447,19 +447,19 @@ static void upd_rnd_output2(){
 //	analogWrite(aout2, rnd);
 }
 
-void set_slv_cv_gate_len(){
+static void set_slv_cv_gate_len(){
 	int tmp = map(get_ain2(), 0, 1023, 0, 99);
 	upd_gate_len(&s_gate, &slave, constrain((percent_gate_len[1]+tmp), 0, 99));
 }
 
-void set_slv_cv_mult(){
+static void set_slv_cv_mult(){
 
 	int rate = clk_rate[map(get_ain2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1))];
 	slave.clk_set_operation(abs(slv_mult+rate),master.clk_get_ms());
 	upd_gate_len(&s_gate, &slave, percent_gate_len[1]);
 }
 
-void set_mst_cv_gate_len(){
+static void set_mst_cv_gate_len(){
 	int tmp = map(get_ain1(), 0, 1023, 0, 99);
 	upd_gate_len(&m_gate, &master, constrain((percent_gate_len[0]+tmp), 0, 99));
 }
