@@ -73,29 +73,38 @@ struct gated_clock_t {
 
 clk master;
 clk slave;
-
 gate m_gate;
 gate s_gate;
+byte percent_gate_len[2];
+byte slv_trig_level;
+byte ext_trig_level;
 
+
+struct rnd_t {
+	clk rnd_clk;
+	int rnd_max;
+	int rnd_pot;		
+};
 clk rnd_clk[NR_ANALOG_OUTPUT];
 int max_rnd[NR_ANALOG_OUTPUT];
 int rnd_pot[NR_ANALOG_OUTPUT];
+
 
 int master_rate;
 bool sync_master;
 
 bool ext_clk_flag;
 elapsedMillis ext_clk_period;
-elapsedMillis ext_clk_slave_period;
-byte percent_gate_len[2];
+//elapsedMillis ext_clk_slave_period;
 
 byte slv_mult;
 byte slv_prev_status;
 byte ext_prev_status;
 
-byte slv_trig_level;
-byte ext_trig_level;
-
+struct ext_clock_t {
+	int state;
+	int ms;	
+};
 int ext_clk_state;
 unsigned int ext_clk_ms;
 
@@ -121,10 +130,6 @@ static byte wr_gate_out(int out, bool val){
 		digitalWrite(out,HIGH);
 	else
 		digitalWrite(out,LOW);	
-}
-
-static void upd_rev_out(){
-	digitalWrite( dout2, !(digitalRead(din2)) );
 }
 
 static bool ckeck_ext_trig(){
@@ -453,9 +458,17 @@ static void set_slv_cv_gate_len(){
 }
 
 static void set_slv_cv_mult(){
+	int rate;
+	int mult_idx = map(get_ain2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1));
+	if(mult_idx > 7)
+		rate = clk_rate[mult_idx];
+	else
+		rate = abs(slv_mult);
 
-	int rate = clk_rate[map(get_ain2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1))];
-	slave.clk_set_operation(abs(slv_mult+rate),master.clk_get_ms());
+//	int rate = clk_rate[map(get_ain2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1))];
+//	slave.clk_set_operation(abs(slv_mult+rate),master.clk_get_ms());
+
+	slave.clk_set_operation(abs(rate),master.clk_get_ms());
 	upd_gate_len(&s_gate, &slave, percent_gate_len[1]);
 }
 
