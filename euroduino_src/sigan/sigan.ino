@@ -37,6 +37,10 @@
 #define NR_DIGITAL_OUTPUT	2
 #define NR_ANALOG_OUTPUT	2
 
+//TODO
+//	- random bank does not work
+//	- trig level and gate type (HIGH or LOW) reading are strange 
+
 // Default Const used from Circuit Abbey Dual LFO Sketch - Tank
 // These constants won't change.
 // They're used to give names to the pins used
