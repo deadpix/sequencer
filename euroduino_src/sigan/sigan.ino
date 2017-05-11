@@ -38,7 +38,6 @@
 #define NR_ANALOG_OUTPUT	2
 
 //TODO
-//	- random bank does not work
 //	- trig level and gate type (HIGH or LOW) reading are strange 
 
 // Default Const used from Circuit Abbey Dual LFO Sketch - Tank
@@ -89,6 +88,8 @@ struct rnd_t {
 	int rnd_max;
 	int rnd_pot;		
 };
+struct rnd_t rnds[NR_ANALOG_OUTPUT];
+
 clk rnd_clk[NR_ANALOG_OUTPUT];
 int max_rnd[NR_ANALOG_OUTPUT];
 int rnd_pot[NR_ANALOG_OUTPUT];
@@ -298,11 +299,6 @@ void setup() {
 	init_rnd();
 }
 
-int check_clk(){
-	
-
-}
-
 int bank_time(int sw_state, unsigned int ms_period){
 	int ret = 0;
 	if(sw_state == SW_UP){
@@ -312,7 +308,7 @@ int bank_time(int sw_state, unsigned int ms_period){
 		int tmp;
 
 		if(ext_clk_flag){
-       			tmp = get_rnd_clk(p1);
+			tmp = get_rnd_clk(p1);
 
 			if(tmp < 0)
 				master_rate = abs(tmp);
@@ -352,24 +348,28 @@ int bank_time(int sw_state, unsigned int ms_period){
 	return ret;
 }
 
+bool map_pot_to_bool(int mid, int pot){
+	return (pot < (mid/2) ? 0 : 1);
+}
+
 int bank_trig_level(int sw_state){
 	int p1 = get_pot1();
 	int p2 = get_pot2();
 	int ret = 0;
 
 	if(sw_state == SW_UP){
-		int trig_lvl1 = map(p1, 0, MAX_ANALOG_IN, 0, 1);
-		int trig_lvl2 = map(p2, 0, MAX_ANALOG_IN, 0, 1);
-		m_gate.set_gate_trig_lvl((bool) trig_lvl1);
-		s_gate.set_gate_trig_lvl((bool) trig_lvl2);
+//		bool trig_lvl1 = (p1 < 512) ? 0 : 1;
+//		bool trig_lvl2 = (p2 < 512) ? 0 : 1;
+		m_gate.set_gate_trig_lvl(map_pot_to_bool(MAX_ANALOG_IN), p1);
+		s_gate.set_gate_trig_lvl(map_pot_to_bool(MAX_ANALOG_IN), p2);
 	}
 	else if(sw_state == SW_DOWN){
-		if(map(p1, 0, MAX_ANALOG_IN, 0, 1))
+		if(map_pot_to_bool(MAX_ANALOG_IN), p1)
 			ext_trig_level = HIGH;
 		else 
 			ext_trig_level = LOW;
 
-		if(map(p2, 0, MAX_ANALOG_IN, 0, 1))
+		if(map_pot_to_bool(MAX_ANALOG_IN), p2)
 			slv_trig_level = HIGH;
 		else 
 			slv_trig_level = LOW;
@@ -381,19 +381,33 @@ int bank_trig_level(int sw_state){
 }
 
 int bank_random(int sw_state){
+
+	/* old code */
+//	int pot1 = get_pot1();
+//	int p1 = get_rnd_clk(pot1 & ~(0x1));
+//	int pot2 = get_pot2();
+//	unsigned int p2 = get_max_rnd_val(pot2 & ~(0x1));
 	int pot1 = get_pot1();
-	int p1 = get_rnd_clk(pot1 & ~(0x1));
 	int pot2 = get_pot2();
-	unsigned int p2 = get_max_rnd_val(pot2 & ~(0x1));
+
+	int p1 = get_rnd_clk(pot1);
+	int p2 = get_max_rnd_val(pot2);
 	int ret = 0;
 
 	if(sw_state == SW_UP){
-		/* bank something */
+		rnds[0].rnd_clk.clk_set_operation(p1, master.clk_get_ms());
+		rnds[0].rnd_max = p2;
+		rnds[0].rnd_pot = pot2;
+		/* old code  */
 		rnd_clk[0].clk_set_operation(p1, master.clk_get_ms());
 		max_rnd[0] = p2 + 1;			
 		rnd_pot[0] = pot2;
 	}
 	else if(sw_state == SW_DOWN){
+		rnds[1].rnd_clk.clk_set_operation(p1, master.clk_get_ms());
+		rnds[1].rnd_max = p2;
+		rnds[1].rnd_pot = pot2;
+		/* old code */
 		rnd_clk[1].clk_set_operation(p1, master.clk_get_ms());
 		max_rnd[1] = p2 + 1;
 		rnd_pot[1] = pot1;		
@@ -403,8 +417,6 @@ int bank_random(int sw_state){
 	}
 	return ret;
 }
-
-
 
 int bank_all(unsigned int ms){
 	int ret = 0;
@@ -481,6 +493,11 @@ static void set_mst_cv_gate_len(){
 	upd_gate_len(&m_gate, &master, constrain((percent_gate_len[0]+tmp), 0, 99));
 }
 
+static void handle_rnd_cv(struct rnd_t *r, int cv_in){
+	int tmp = constrain((r->rnd_pot+cv_in), 0, MAX_ANALOG_IN);
+	r->rnd_clk.clk_set_operation(get_rnd_clk(tmp), master.clk_get_ms());	
+}
+
 void loop(){
 	uint32_t rnd_ms[2];
 	uint16_t step = master.clk_get_step_cnt();
@@ -503,19 +520,31 @@ void loop(){
 
 	if(ms > 0){
 		if(cv_target == 3){
+
+			handle_rnd_cv(&rnds[0], get_ain1());
+			handle_rnd_cv(&rnds[1], get_ain2());
+
+			/* old code start */
 			int temp1 = constrain((rnd_pot[0]+get_ain1()), 0, 1023);
 			int temp2 = constrain((rnd_pot[1]+get_ain2()), 0, 1023);
 		
-//			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1), master.clk_get_ms());
-			max_rnd[0] = temp1 + 1;		
-			rnd_clk[1].clk_set_operation(get_rnd_clk(temp2), master.clk_get_ms());			
+			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1), master.clk_get_ms());
+//			max_rnd[0] = temp1 + 1;		
+			rnd_clk[1].clk_set_operation(get_rnd_clk(temp2), master.clk_get_ms());
+			/* old code end */
 		} 
 		else if(cv_target == 1){
 			set_mst_cv_gate_len();
 		}
 	}
+	
+	rnd_ms[0] = rnds[0].rnd_clk.master_sync(ms, step);
+	rnd_ms[1] = rnds[1].rnd_clk.master_sync(ms, step);
+
+	/* old code start */
 	rnd_ms[0] = rnd_clk[0].master_sync(ms, step);
 	rnd_ms[1] = rnd_clk[1].master_sync(ms, step);
+	/* old code end */
 
 	if(slv_clk_triggered){
 		if(cv_target == 1) set_slv_cv_gate_len();		
