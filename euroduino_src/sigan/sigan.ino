@@ -1,17 +1,37 @@
 /*
+ *	Copyright (c) 2017 Vincent "deadpix" Dupre
  *
+ *	Author: Vincent Dupre (vdupre@gmail.com)
+ *  
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */ 
+
+/*
  *  Circuit Abbey EuroDuino
  *  Arduino EuroRack Module
  *
  *  sigan: 
- *	- tick generator 
- *	- random CV generator
- *	- syncable with digital input
+ *	- gates generator with variable gate length (digital out)
+ *	- random CV generator synced with gate generator (analog out)
+ *	- syncable via digital input with rising / falling sync configurable
  *
  *  V1.00
- *
- *  Vincent 'deadpix' Dupre
- *
  */
  
 #include <elapsedMillis.h>
@@ -32,17 +52,8 @@
 #define MAX_ANALOG_OUT		255
 #define MAX_ANALOG_IN		1022
 
-#define NR_INPUT_SAMPLE		10
-
-#define NR_DIGITAL_OUTPUT	2
 #define NR_ANALOG_OUTPUT	2
 
-//TODO
-//	- trig level and gate type (HIGH or LOW) reading are strange 
-
-// Default Const used from Circuit Abbey Dual LFO Sketch - Tank
-// These constants won't change.
-// They're used to give names to the pins used
 const int ain1  = A0;	// Analog Input 1
 const int ain2  = A1;  	// Analog Input 2
 const int pot1  = A2;   // Pot 1
@@ -90,10 +101,11 @@ struct rnd_t {
 };
 struct rnd_t rnds[NR_ANALOG_OUTPUT];
 
+/* old code start */
 clk rnd_clk[NR_ANALOG_OUTPUT];
 int max_rnd[NR_ANALOG_OUTPUT];
 int rnd_pot[NR_ANALOG_OUTPUT];
-
+/* old code end */
 
 int master_rate;
 bool sync_master;
@@ -113,6 +125,8 @@ struct ext_clock_t {
 int ext_clk_state;
 unsigned int ext_clk_ms;
 
+
+
 ISR (PCINT0_vect){
 //	din_state = ( (digitalRead(din1) << 0) | (digitalRead(din2) << 1) );
 }
@@ -125,9 +139,17 @@ ISR (PCINT2_vect){
 	sw2_state = ( (digitalRead(sw2up) << 1) | (digitalRead(sw2dw) << 0) );
 }
 
-static void init_rnd(){
-	max_rnd[0] = MAX_ANALOG_OUT + 1;
-	max_rnd[1] = MAX_ANALOG_OUT + 1;
+
+
+static void rnd_init(){
+	
+	rnds[0].rnd_max = MAX_ANALOG_OUT + 1;
+	rnds[1].rnd_max = MAX_ANALOG_OUT + 1;
+
+	/* old code start */
+//	max_rnd[0] = MAX_ANALOG_OUT + 1;
+//	max_rnd[1] = MAX_ANALOG_OUT + 1;
+	/* old code end */
 }
 
 static byte wr_gate_out(int out, bool val){
@@ -296,7 +318,7 @@ void setup() {
 	init_interrupt();
 	init_random();
 	init_var();
-	init_rnd();
+	rnd_init();
 }
 
 int bank_time(int sw_state, unsigned int ms_period){
@@ -348,8 +370,9 @@ int bank_time(int sw_state, unsigned int ms_period){
 	return ret;
 }
 
-bool map_pot_to_bool(int mid, int pot){
-	return (pot < (mid/2) ? 0 : 1);
+bool map_uint_to_bool(int mid, unsigned int val){
+//	return (val < (mid/2) ? 0 : 1);
+	return ((unsigned int) (val / (mid/2)));
 }
 
 int bank_trig_level(int sw_state){
@@ -360,16 +383,16 @@ int bank_trig_level(int sw_state){
 	if(sw_state == SW_UP){
 //		bool trig_lvl1 = (p1 < 512) ? 0 : 1;
 //		bool trig_lvl2 = (p2 < 512) ? 0 : 1;
-		m_gate.set_gate_trig_lvl(map_pot_to_bool(MAX_ANALOG_IN), p1);
-		s_gate.set_gate_trig_lvl(map_pot_to_bool(MAX_ANALOG_IN), p2);
+		m_gate.set_gate_trig_lvl(map_uint_to_bool(MAX_ANALOG_IN), p1);
+		s_gate.set_gate_trig_lvl(map_uint_to_bool(MAX_ANALOG_IN), p2);
 	}
 	else if(sw_state == SW_DOWN){
-		if(map_pot_to_bool(MAX_ANALOG_IN), p1)
+		if(map_uint_to_bool(MAX_ANALOG_IN), p1)
 			ext_trig_level = HIGH;
 		else 
 			ext_trig_level = LOW;
 
-		if(map_pot_to_bool(MAX_ANALOG_IN), p2)
+		if(map_uint_to_bool(MAX_ANALOG_IN), p2)
 			slv_trig_level = HIGH;
 		else 
 			slv_trig_level = LOW;
@@ -398,19 +421,21 @@ int bank_random(int sw_state){
 		rnds[0].rnd_clk.clk_set_operation(p1, master.clk_get_ms());
 		rnds[0].rnd_max = p2;
 		rnds[0].rnd_pot = pot2;
-		/* old code  */
-		rnd_clk[0].clk_set_operation(p1, master.clk_get_ms());
-		max_rnd[0] = p2 + 1;			
-		rnd_pot[0] = pot2;
+		/* old code start */
+//		rnd_clk[0].clk_set_operation(p1, master.clk_get_ms());
+//		max_rnd[0] = p2 + 1;
+//		rnd_pot[0] = pot2;
+		/* old code end */
 	}
 	else if(sw_state == SW_DOWN){
 		rnds[1].rnd_clk.clk_set_operation(p1, master.clk_get_ms());
 		rnds[1].rnd_max = p2;
 		rnds[1].rnd_pot = pot2;
-		/* old code */
-		rnd_clk[1].clk_set_operation(p1, master.clk_get_ms());
-		max_rnd[1] = p2 + 1;
-		rnd_pot[1] = pot1;		
+		/* old code start */
+//		rnd_clk[1].clk_set_operation(p1, master.clk_get_ms());
+//		max_rnd[1] = p2 + 1;
+//		rnd_pot[1] = pot1;		
+		/* old code end */
 	}
 	else {
 		ret = 3;
@@ -456,17 +481,22 @@ void upd_output(unsigned int master_ms, unsigned int slave_ms){
 	}
 }
 
-static void upd_rnd_output1(){
-	byte rnd = random(max_rnd[0]);
-//	analogWrite(aout1, rnd);
-	analogWrite(aout1, (255-rnd));
+static void rnd_upd_output(struct rnd_t *r, int pin){
+	byte rnd = random(r->rnd_max);
+	analogWrite(pin, (255-rnd));
 }
 
-static void upd_rnd_output2(){
-	byte rnd = random(max_rnd[1]);
-	analogWrite(aout2, (255 - rnd));
-//	analogWrite(aout2, rnd);
-}
+/* old code start */
+//static void upd_rnd_output1(){
+//	byte rnd = random(max_rnd[0]);
+//	analogWrite(aout1, (255-rnd));
+//}
+//
+//static void upd_rnd_output2(){
+//	byte rnd = random(max_rnd[1]);
+//	analogWrite(aout2, (255 - rnd));
+//}
+/* old code end */
 
 static void set_slv_cv_gate_len(){
 	int tmp = map(get_ain2(), 0, 1023, 0, 99);
@@ -520,17 +550,19 @@ void loop(){
 
 	if(ms > 0){
 		if(cv_target == 3){
-
+			
+			/* new code start */
 			handle_rnd_cv(&rnds[0], get_ain1());
 			handle_rnd_cv(&rnds[1], get_ain2());
+			/* new code end */
 
 			/* old code start */
-			int temp1 = constrain((rnd_pot[0]+get_ain1()), 0, 1023);
-			int temp2 = constrain((rnd_pot[1]+get_ain2()), 0, 1023);
-		
-			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1), master.clk_get_ms());
+//			int temp1 = constrain((rnd_pot[0]+get_ain1()), 0, 1023);
+//			int temp2 = constrain((rnd_pot[1]+get_ain2()), 0, 1023);
+//		
+//			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1), master.clk_get_ms());
 //			max_rnd[0] = temp1 + 1;		
-			rnd_clk[1].clk_set_operation(get_rnd_clk(temp2), master.clk_get_ms());
+//			rnd_clk[1].clk_set_operation(get_rnd_clk(temp2), master.clk_get_ms());
 			/* old code end */
 		} 
 		else if(cv_target == 1){
@@ -538,14 +570,6 @@ void loop(){
 		}
 	}
 	
-	rnd_ms[0] = rnds[0].rnd_clk.master_sync(ms, step);
-	rnd_ms[1] = rnds[1].rnd_clk.master_sync(ms, step);
-
-	/* old code start */
-	rnd_ms[0] = rnd_clk[0].master_sync(ms, step);
-	rnd_ms[1] = rnd_clk[1].master_sync(ms, step);
-	/* old code end */
-
 	if(slv_clk_triggered){
 		if(cv_target == 1) set_slv_cv_gate_len();		
 		else if(cv_target == 2) set_slv_cv_mult();
@@ -563,12 +587,25 @@ void loop(){
 	// Update output
 	upd_output(ms, slave_ms);
 
-	if(rnd_ms[0] > 0){
-		upd_rnd_output1();
+	/* new code start */	
+	if(rnds[0].rnd_clk.master_sync(ms, step) > 0){
+		rnd_upd_output(&rnds[0],aout1);
 	}
-	if(rnd_ms[1] > 0){
-		upd_rnd_output2();
-	}
+	if(rnds[1].rnd_clk.master_sync(ms, step) > 0){
+		rnd_upd_output(&rnds[0],aout2);	
+	};
+	/* new code end */
+
+	/* old code start  */
+//	rnd_ms[0] = rnd_clk[0].master_sync(ms, step);
+//	rnd_ms[1] = rnd_clk[1].master_sync(ms, step);
+//	if(rnd_ms[0] > 0){
+//		upd_rnd_output1();
+//	}
+//	if(rnd_ms[1] > 0){
+//		upd_rnd_output2();
+//	}
+	/* old code end  */
 
 	/* we did a good job, let's rest for 5ms */
 	delay(5);
