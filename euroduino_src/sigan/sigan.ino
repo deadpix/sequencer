@@ -78,12 +78,20 @@ volatile unsigned char sw2_state;
 const int clk_rate[] = {-8, -7, -6, -5, -4, -3, -2, 1, 2, 3, 4, 5, 6, 7, 8};
 const int MAX_CLK_SLAVE_RATE = sizeof(clk_rate) / sizeof(clk_rate[0]);
 
+
 struct gated_clock_t {
-	clk c;
-	gate g;
-	byte trig_level;
-	byte gate_len;
+	/* class */
+	clk c;				// clock data structure
+	gate g;				// control pw of clock
+	/* data to be save (pot or cv) */
+	byte clk_trig_lvl;	// rising or falling edge
+	byte clk_gate_len;	// express as a percentage
+	int  clk_rate;		// base clock div/mult
 };
+
+struct gated_clock_t mst_clk;
+struct gated_clock_t slv_clk;
+
 
 clk master;
 clk slave;
@@ -92,38 +100,64 @@ gate s_gate;
 byte percent_gate_len[2];
 byte slv_trig_level;
 byte ext_trig_level;
+int master_rate;
+byte slv_mult;
 
 
+
+/************************** RANDOM **************************/
 struct rnd_t {
 	clk rnd_clk;
 	int rnd_max;
-	int rnd_pot;		
+	int rnd_pot;
 };
 struct rnd_t rnds[NR_ANALOG_OUTPUT];
-
 /* old code start */
-clk rnd_clk[NR_ANALOG_OUTPUT];
-int max_rnd[NR_ANALOG_OUTPUT];
-int rnd_pot[NR_ANALOG_OUTPUT];
+//clk rnd_clk[NR_ANALOG_OUTPUT];
+//int max_rnd[NR_ANALOG_OUTPUT];
+//int rnd_pot[NR_ANALOG_OUTPUT];
 /* old code end */
+/************************************************************/
 
-int master_rate;
+
+
 bool sync_master;
-
-bool ext_clk_flag;
-elapsedMillis ext_clk_period;
 //elapsedMillis ext_clk_slave_period;
 
-byte slv_mult;
-byte slv_prev_status;
-byte ext_prev_status;
 
+/***************** DIGITAL INPUT SYNC ***********************/
+// save state of digital input (HIGH or LOW)
+// so that ckeck_..._trig(trig_lvl) can determine 
+// rising or fallig edge of digital input incoming data 
+// TODO: might be simpler with IRQ
+// save status of digital input 1
+byte ext_trig_status;
+// save status of digital input 2
+byte slv_trig_status;
+/************************************************************/
+
+
+/******* EXTERNAL CLOCK connected via digital input 1 *******/
+// data structure used for determining if mst_clk is driven
+// externally (via digital input 1) or internally
 struct ext_clock_t {
-	int state;
-	int ms;	
+	int ext_state;	// count number of ext clock trig
+					//  ==> used for sync
+	int ext_ms;		// store ext clock period in ms
 };
+ext_clock_t ext_clk;
+// store mst_clk feeding
+// 	true:  mst_clk feed externally 
+// 	false: mst_clk feed internally
+bool ext_clk_flag;
+// calculate time between two digital input 1 trig
+elapsedMillis ext_clk_period;
+
+/* ext clk: old code start */
 int ext_clk_state;
 unsigned int ext_clk_ms;
+/* ext clk: old code end */
+/************************************************************/
 
 
 
@@ -159,58 +193,99 @@ static byte wr_gate_out(int out, bool val){
 		digitalWrite(out,LOW);	
 }
 
-static bool ckeck_ext_trig(){
+
+/* 
+ * polling digital input 1: 
+ * 	==> previous read saved in ext_trig_status 
+ */
+static bool ckeck_ext_trig(byte trig_lvl){
 	bool ret = false;
 
 	byte curr_status = digitalRead(din1);
-	if(curr_status == ext_trig_level){
-		if(curr_status != ext_prev_status){
+	if(curr_status == trig_lvl){
+		if(curr_status != ext_trig_status){
 			ret = true;
 		}
 	}
-	ext_prev_status = curr_status;
+	ext_trig_status = curr_status;
 	return ret;
 }
 
-static bool check_slv_trig(){
+/* 
+ * polling digital input 2: 
+ * 	==> previous read saved in slv_trig_status 
+ */
+static bool check_slv_trig(byte trig_lvl){
 	bool ret = false;
 	byte curr_status = digitalRead(din2);
-	if(curr_status == slv_trig_level){
-		if(curr_status != slv_prev_status){
+	if(curr_status == trig_lvl){
+		if(curr_status != slv_trig_status){
 			ret = true;
 		}
 	}
-	slv_prev_status = curr_status;
+	slv_trig_status = curr_status;
 	return ret;
 }
 
 static unsigned int ckeck_ext_clk(){
 	unsigned int ms = 0; 
-	if(ckeck_ext_trig()){
+	if(ckeck_ext_trig(ext_trig_level)){
 		ms = ext_clk_period;
 		ext_clk_period = 0;		
 		din_state &= ~(EXT_MASTER_CLK);
-	
-		if(ext_clk_state == 0){
-			ext_clk_state = 1;
+
+		/* ext clk: new code start */
+		if(ext_clk.ext_state == 0){
+			ext_clk.ext_state = 1;
 			ms = 0;
 		}
 		else {
 			ext_clk_flag = true;
-			ext_clk_state = (ext_clk_state % master_rate)+1;
+			ext_clk.ext_state = (ext_clk.ext_state % master_rate)+1;
 			// need to resync master	
-			ext_clk_ms = ms;
+			ext_clk.ext_ms = ms;
 		}
+		/* ext clk: new code end */
+
+
+		/* ext clk: old code start */	
+//		if(ext_clk_state == 0){
+//			ext_clk_state = 1;
+//			ms = 0;
+//		}
+//		else {
+//			ext_clk_flag = true;
+//			ext_clk_state = (ext_clk_state % master_rate)+1;
+//			// need to resync master	
+//			ext_clk_ms = ms;
+//		}
+		/* ext clk: old code end */	
 		
 	} 
-	else if(ext_clk_state){
+
+	/* ext clk: new code start */
+	else if(ext_clk.ext_state){
 		if(ext_clk_period > MAX_CLK_PERIOD){
-			ext_clk_ms = 0;
+			ext_clk.ext_ms = 0;
 			ms = 0;
-			ext_clk_state = 0;
+			ext_clk.ext_state = 0;
 			ext_clk_flag = false;
 		}
 	}
+	/* ext clk: new code end */
+
+	/* ext clk: old code start */	
+//	else if(ext_clk_state){
+//		if(ext_clk_period > MAX_CLK_PERIOD){
+//			ext_clk_ms = 0;
+//			ms = 0;
+//			ext_clk_state = 0;
+//			ext_clk_flag = false;
+//		}
+//	}
+	/* ext clk: old code end */	
+
+
 	return ms;
 }
 
@@ -232,14 +307,21 @@ static unsigned int get_max_rnd_val(unsigned int in){
 	return ret;
 }
 
-static int get_rnd_clk(unsigned int in){
+static int get_clk_rate(unsigned int in){
 	int idx = map(in, 0, MAX_ANALOG_IN, 0, (MAX_CLK_SLAVE_RATE-1));
 	return clk_rate[idx];	
 }
 
 void init_var(){
 	ext_clk_flag = false;
-	ext_clk_state = 0;
+	
+	/* ext clk: old code start */
+	ext_clk.ext_state = 0;
+	/* ext clk: old code end */
+	/* ext clk: old code start */
+//	ext_clk_state = 0;
+	/* ext clk: old code end */
+
 	sync_master = false;
 	m_gate.set_hw_cbck(dout1, wr_gate_out);
 	s_gate.set_hw_cbck(dout2, wr_gate_out);
@@ -330,7 +412,7 @@ int bank_time(int sw_state, unsigned int ms_period){
 		int tmp;
 
 		if(ext_clk_flag){
-			tmp = get_rnd_clk(p1);
+			tmp = get_clk_rate(p1);
 
 			if(tmp < 0)
 				master_rate = abs(tmp);
@@ -350,8 +432,16 @@ int bank_time(int sw_state, unsigned int ms_period){
 		
 		slv_mult = clk_rate[idx];
 	  	slave.clk_set_operation(clk_rate[idx],master.clk_get_ms());
-		rnd_clk[0].clk_sync_intern(master.clk_get_ms());
-		rnd_clk[1].clk_sync_intern(master.clk_get_ms());
+		
+		/* new code start */
+		rnds[0].rnd_clk.clk_sync_intern(master.clk_get_ms());
+		rnds[1].rnd_clk.clk_sync_intern(master.clk_get_ms());
+		/* new code end */
+
+		/* old code start */
+//		rnd_clk[0].clk_sync_intern(master.clk_get_ms());
+//		rnd_clk[1].clk_sync_intern(master.clk_get_ms());
+		/* old code end */
 
 		upd_gate_len(&m_gate, &master, percent_gate_len[0]);
 		upd_gate_len(&s_gate, &slave, percent_gate_len[1]);
@@ -381,18 +471,16 @@ int bank_trig_level(int sw_state){
 	int ret = 0;
 
 	if(sw_state == SW_UP){
-//		bool trig_lvl1 = (p1 < 512) ? 0 : 1;
-//		bool trig_lvl2 = (p2 < 512) ? 0 : 1;
-		m_gate.set_gate_trig_lvl(map_uint_to_bool(MAX_ANALOG_IN), p1);
-		s_gate.set_gate_trig_lvl(map_uint_to_bool(MAX_ANALOG_IN), p2);
+		m_gate.set_gate_trig_lvl(map_uint_to_bool(MAX_ANALOG_IN, p1));
+		s_gate.set_gate_trig_lvl(map_uint_to_bool(MAX_ANALOG_IN, p2));
 	}
 	else if(sw_state == SW_DOWN){
-		if(map_uint_to_bool(MAX_ANALOG_IN), p1)
+		if(map_uint_to_bool(MAX_ANALOG_IN, p1))
 			ext_trig_level = HIGH;
 		else 
 			ext_trig_level = LOW;
 
-		if(map_uint_to_bool(MAX_ANALOG_IN), p2)
+		if(map_uint_to_bool(MAX_ANALOG_IN, p2))
 			slv_trig_level = HIGH;
 		else 
 			slv_trig_level = LOW;
@@ -407,13 +495,13 @@ int bank_random(int sw_state){
 
 	/* old code */
 //	int pot1 = get_pot1();
-//	int p1 = get_rnd_clk(pot1 & ~(0x1));
+//	int p1 = get_clk_rate(pot1 & ~(0x1));
 //	int pot2 = get_pot2();
 //	unsigned int p2 = get_max_rnd_val(pot2 & ~(0x1));
 	int pot1 = get_pot1();
 	int pot2 = get_pot2();
 
-	int p1 = get_rnd_clk(pot1);
+	int p1 = get_clk_rate(pot1);
 	int p2 = get_max_rnd_val(pot2);
 	int ret = 0;
 
@@ -525,7 +613,7 @@ static void set_mst_cv_gate_len(){
 
 static void handle_rnd_cv(struct rnd_t *r, int cv_in){
 	int tmp = constrain((r->rnd_pot+cv_in), 0, MAX_ANALOG_IN);
-	r->rnd_clk.clk_set_operation(get_rnd_clk(tmp), master.clk_get_ms());	
+	r->rnd_clk.clk_set_operation(get_clk_rate(tmp), master.clk_get_ms());	
 }
 
 void loop(){
@@ -533,7 +621,7 @@ void loop(){
 	uint16_t step = master.clk_get_step_cnt();
 	unsigned int ms = ckeck_ext_clk();
 	int cv_target = bank_all(ms);
-	bool slv_clk_triggered = check_slv_trig();
+	bool slv_clk_triggered = check_slv_trig(slv_trig_level);
 	unsigned int slave_ms;
 	unsigned int clv_clk_cnt;
 
@@ -541,7 +629,15 @@ void loop(){
 		ms = master.clk_elapsed();
 	} else {
 		if(ms > 0){
-			ms = master.clk_sync(ms, (ext_clk_state - 1));
+			
+			/* ext clk: new code start */
+			ms = master.clk_sync(ms, (ext_clk.ext_state - 1));
+			/* ext clk: new code end */
+
+			/* ext clk: old code start */
+//			ms = master.clk_sync(ms, (ext_clk_state - 1));
+			/* ext clk: old code end */
+
 		} 
 		else {
 			ms = master.clk_elapsed();
@@ -560,9 +656,9 @@ void loop(){
 //			int temp1 = constrain((rnd_pot[0]+get_ain1()), 0, 1023);
 //			int temp2 = constrain((rnd_pot[1]+get_ain2()), 0, 1023);
 //		
-//			rnd_clk[0].clk_set_operation(get_rnd_clk(temp1), master.clk_get_ms());
+//			rnd_clk[0].clk_set_operation(get_clk_rate(temp1), master.clk_get_ms());
 //			max_rnd[0] = temp1 + 1;		
-//			rnd_clk[1].clk_set_operation(get_rnd_clk(temp2), master.clk_get_ms());
+//			rnd_clk[1].clk_set_operation(get_clk_rate(temp2), master.clk_get_ms());
 			/* old code end */
 		} 
 		else if(cv_target == 1){
