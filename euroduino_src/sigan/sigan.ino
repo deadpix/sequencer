@@ -46,7 +46,7 @@
 
 #define MAX_CLK_PERIOD		(1500)
 #define EXT_MASTER_CLK		(1<<0)
-#define EXT_SLAVE_CLK		(1<<1)
+//#define EXT_SLAVE_CLK		(1<<1)
 
 #define MIN_ANALOG_OUT		0
 #define MAX_ANALOG_OUT		255
@@ -141,8 +141,7 @@ byte slv_trig_status;
 // data structure used for determining if mst_clk is driven
 // externally (via digital input 1) or internally
 struct ext_clock_t {
-	int ext_state;	// count number of ext clock trig
-					//  ==> used for sync
+	int ext_state;	// count number of ext clock trig => used for sync
 	int ext_ms;		// store ext clock period in ms
 };
 ext_clock_t ext_clk;
@@ -175,17 +174,6 @@ ISR (PCINT2_vect){
 
 
 
-static void rnd_init(){
-	
-	rnds[0].rnd_max = MAX_ANALOG_OUT + 1;
-	rnds[1].rnd_max = MAX_ANALOG_OUT + 1;
-
-	/* old code start */
-//	max_rnd[0] = MAX_ANALOG_OUT + 1;
-//	max_rnd[1] = MAX_ANALOG_OUT + 1;
-	/* old code end */
-}
-
 static byte wr_gate_out(int out, bool val){
 	if(val)
 		digitalWrite(out,HIGH);
@@ -193,9 +181,21 @@ static byte wr_gate_out(int out, bool val){
 		digitalWrite(out,LOW);	
 }
 
+static int get_pot1(){
+	return analogRead(pot1);
+}
+static int get_pot2(){
+	return analogRead(pot2);
+}
+static int get_ain1(){
+	return analogRead(ain1);
+}
+static int get_ain2(){
+	return analogRead(ain2);
+}
 
 /* 
- * polling digital input 1: 
+ * poll digital input 1: 
  * 	==> previous read saved in ext_trig_status 
  */
 static bool ckeck_ext_trig(byte trig_lvl){
@@ -212,7 +212,7 @@ static bool ckeck_ext_trig(byte trig_lvl){
 }
 
 /* 
- * polling digital input 2: 
+ * poll digital input 2: 
  * 	==> previous read saved in slv_trig_status 
  */
 static bool check_slv_trig(byte trig_lvl){
@@ -285,38 +285,24 @@ static unsigned int ckeck_ext_clk(){
 //	}
 	/* ext clk: old code end */	
 
-
 	return ms;
 }
-
-static int get_pot1(){
-	return analogRead(pot1);
-}
-static int get_pot2(){
-	return analogRead(pot2);
-}
-static int get_ain1(){
-	return analogRead(ain1);
-}
-static int get_ain2(){
-	return analogRead(ain2);
-}
-
-static unsigned int get_max_rnd_val(unsigned int in){
-	unsigned int ret = map(in, 0, MAX_ANALOG_IN, MIN_ANALOG_OUT, MAX_ANALOG_OUT);
-	return ret;
-}
-
 static int get_clk_rate(unsigned int in){
 	int idx = map(in, 0, MAX_ANALOG_IN, 0, (MAX_CLK_SLAVE_RATE-1));
 	return clk_rate[idx];	
 }
 
-void init_var(){
+void init_ext_clk(){
 	ext_clk_flag = false;
-	
-	/* ext clk: old code start */
 	ext_clk.ext_state = 0;
+	ext_clk.ext_ms = 0;
+}
+
+void init_var(){
+//	ext_clk_flag = false;
+//	
+//	/* ext clk: old code start */
+//	ext_clk.ext_state = 0;
 	/* ext clk: old code end */
 	/* ext clk: old code start */
 //	ext_clk_state = 0;
@@ -328,7 +314,7 @@ void init_var(){
 	sw1_state = ( (digitalRead(sw1up) << 1) | (digitalRead(sw1dw) << 0) );
 	sw2_state = ( (digitalRead(sw2up) << 1) | (digitalRead(sw2dw) << 0) );
 	master_rate = 1;
-	ext_clk_ms = 0;
+//	ext_clk_ms = 0;
 
 	slv_trig_level = HIGH;
 	ext_trig_level = HIGH;
@@ -383,24 +369,13 @@ void init_interrupt(){
 	sei(); // turn on interrupts
 }
 
-void init_random(){
-	randomSeed(analogRead(0));
-}
+//void init_random(){
+//	randomSeed(analogRead(0));
+//}
 
 static void upd_gate_len(gate* g, clk* c, int percent){
 	unsigned int ms = c->clk_get_ms() * percent / 100;
 	g->set_gate_len(ms);
-}
-
-void setup() {
-	Serial.begin(9600);
-	Serial.println("Begin");
-
-	init_io();
-	init_interrupt();
-	init_random();
-	init_var();
-	rnd_init();
 }
 
 int bank_time(int sw_state, unsigned int ms_period){
@@ -419,7 +394,7 @@ int bank_time(int sw_state, unsigned int ms_period){
 			else
 				master_rate = 1;
 		
-			if(!master.clk_set_operation(tmp,ext_clk_ms))
+			if(!master.clk_set_operation(tmp, ext_clk.ext_ms))
 				Serial.println("error");
 			
 		}
@@ -497,12 +472,12 @@ int bank_random(int sw_state){
 //	int pot1 = get_pot1();
 //	int p1 = get_clk_rate(pot1 & ~(0x1));
 //	int pot2 = get_pot2();
-//	unsigned int p2 = get_max_rnd_val(pot2 & ~(0x1));
+//	unsigned int p2 = rnd_get_max_val(pot2 & ~(0x1));
 	int pot1 = get_pot1();
 	int pot2 = get_pot2();
 
 	int p1 = get_clk_rate(pot1);
-	int p2 = get_max_rnd_val(pot2);
+	int p2 = rnd_get_max_val(pot2);
 	int ret = 0;
 
 	if(sw_state == SW_UP){
@@ -569,10 +544,40 @@ void upd_output(unsigned int master_ms, unsigned int slave_ms){
 	}
 }
 
+
+
+/********************** RANDOM FUNCTIONS *********************************/
+
+static void rnd_init(){
+	randomSeed(analogRead(0));	
+
+	rnds[0].rnd_max = MAX_ANALOG_OUT + 1;
+	rnds[1].rnd_max = MAX_ANALOG_OUT + 1;
+
+	/* old code start */
+//	max_rnd[0] = MAX_ANALOG_OUT + 1;
+//	max_rnd[1] = MAX_ANALOG_OUT + 1;
+	/* old code end */
+}
+
 static void rnd_upd_output(struct rnd_t *r, int pin){
 	byte rnd = random(r->rnd_max);
 	analogWrite(pin, (255-rnd));
 }
+
+static void rnd_handle_cv(struct rnd_t *r, int cv_in){
+	int tmp = constrain((r->rnd_pot+cv_in), 0, MAX_ANALOG_IN);
+	r->rnd_clk.clk_set_operation(get_clk_rate(tmp), master.clk_get_ms());	
+}
+
+static unsigned int rnd_get_max_val(unsigned int in){
+	unsigned int ret = map(in, 0, MAX_ANALOG_IN, MIN_ANALOG_OUT, MAX_ANALOG_OUT);
+	return ret;
+}
+
+/*************************************************************************/
+
+
 
 /* old code start */
 //static void upd_rnd_output1(){
@@ -611,9 +616,20 @@ static void set_mst_cv_gate_len(){
 	upd_gate_len(&m_gate, &master, constrain((percent_gate_len[0]+tmp), 0, 99));
 }
 
-static void handle_rnd_cv(struct rnd_t *r, int cv_in){
-	int tmp = constrain((r->rnd_pot+cv_in), 0, MAX_ANALOG_IN);
-	r->rnd_clk.clk_set_operation(get_clk_rate(tmp), master.clk_get_ms());	
+
+
+
+
+void setup() {
+	Serial.begin(9600);
+	Serial.println("Begin");
+
+	init_io();
+	init_interrupt();
+//	init_random();
+	init_ext_clk();
+	init_var();
+	rnd_init();
 }
 
 void loop(){
@@ -648,8 +664,8 @@ void loop(){
 		if(cv_target == 3){
 			
 			/* new code start */
-			handle_rnd_cv(&rnds[0], get_ain1());
-			handle_rnd_cv(&rnds[1], get_ain2());
+			rnd_handle_cv(&rnds[0], get_ain1());
+			rnd_handle_cv(&rnds[1], get_ain2());
 			/* new code end */
 
 			/* old code start */
