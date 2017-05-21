@@ -704,7 +704,7 @@ void loop(){
 		rnd_upd_output(&rnds[0],aout1);
 	}
 	if(rnds[1].rnd_clk.master_sync(ms, step) > 0){
-		rnd_upd_output(&rnds[0],aout2);	
+		rnd_upd_output(&rnds[1],aout2);	
 	};
 	/* new code end */
 
