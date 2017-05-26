@@ -54,6 +54,11 @@
 
 #define NR_ANALOG_OUTPUT	2
 
+#define RANDOM_CV			3
+#define PWM_CV				1
+#define SLV_CV				2
+
+
 const int ain1  = A0;	// Analog Input 1
 const int ain2  = A1;  	// Analog Input 2
 const int pot1  = A2;   // Pot 1
@@ -112,11 +117,6 @@ struct rnd_t {
 	int rnd_pot;
 };
 struct rnd_t rnds[NR_ANALOG_OUTPUT];
-/* old code start */
-//clk rnd_clk[NR_ANALOG_OUTPUT];
-//int max_rnd[NR_ANALOG_OUTPUT];
-//int rnd_pot[NR_ANALOG_OUTPUT];
-/* old code end */
 /************************************************************/
 
 
@@ -369,10 +369,6 @@ void init_interrupt(){
 	sei(); // turn on interrupts
 }
 
-//void init_random(){
-//	randomSeed(analogRead(0));
-//}
-
 static void upd_gate_len(gate* g, clk* c, int percent){
 	unsigned int ms = c->clk_get_ms() * percent / 100;
 	g->set_gate_len(ms);
@@ -408,15 +404,8 @@ int bank_time(int sw_state, unsigned int ms_period){
 		slv_mult = clk_rate[idx];
 	  	slave.clk_set_operation(clk_rate[idx],master.clk_get_ms());
 		
-		/* new code start */
 		rnds[0].rnd_clk.clk_sync_intern(master.clk_get_ms());
 		rnds[1].rnd_clk.clk_sync_intern(master.clk_get_ms());
-		/* new code end */
-
-		/* old code start */
-//		rnd_clk[0].clk_sync_intern(master.clk_get_ms());
-//		rnd_clk[1].clk_sync_intern(master.clk_get_ms());
-		/* old code end */
 
 		upd_gate_len(&m_gate, &master, percent_gate_len[0]);
 		upd_gate_len(&s_gate, &slave, percent_gate_len[1]);
@@ -430,7 +419,7 @@ int bank_time(int sw_state, unsigned int ms_period){
 		upd_gate_len(&s_gate,  &slave, percent_gate_len[1]);
 	} 
 	else {
-		ret = 1;
+		ret = PWM_CV;
 	}
 	return ret;
 }
@@ -461,21 +450,15 @@ int bank_trig_level(int sw_state){
 			slv_trig_level = LOW;
 	}
    	else {
-		ret = 2;
+		ret = SLV_CV;
 	}
 	return ret;
 }
 
 int bank_random(int sw_state){
 
-	/* old code */
-//	int pot1 = get_pot1();
-//	int p1 = get_clk_rate(pot1 & ~(0x1));
-//	int pot2 = get_pot2();
-//	unsigned int p2 = rnd_get_max_val(pot2 & ~(0x1));
 	int pot1 = get_pot1();
 	int pot2 = get_pot2();
-
 	int p1 = get_clk_rate(pot1);
 	int p2 = rnd_get_max_val(pot2);
 	int ret = 0;
@@ -484,24 +467,14 @@ int bank_random(int sw_state){
 		rnds[0].rnd_clk.clk_set_operation(p1, master.clk_get_ms());
 		rnds[0].rnd_max = p2;
 		rnds[0].rnd_pot = pot2;
-		/* old code start */
-//		rnd_clk[0].clk_set_operation(p1, master.clk_get_ms());
-//		max_rnd[0] = p2 + 1;
-//		rnd_pot[0] = pot2;
-		/* old code end */
 	}
 	else if(sw_state == SW_DOWN){
 		rnds[1].rnd_clk.clk_set_operation(p1, master.clk_get_ms());
 		rnds[1].rnd_max = p2;
 		rnds[1].rnd_pot = pot2;
-		/* old code start */
-//		rnd_clk[1].clk_set_operation(p1, master.clk_get_ms());
-//		max_rnd[1] = p2 + 1;
-//		rnd_pot[1] = pot1;		
-		/* old code end */
 	}
 	else {
-		ret = 3;
+		ret = RANDOM_CV;
 	}
 	return ret;
 }
@@ -626,7 +599,6 @@ void setup() {
 
 	init_io();
 	init_interrupt();
-//	init_random();
 	init_ext_clk();
 	init_var();
 	rnd_init();
@@ -661,36 +633,29 @@ void loop(){
 	}
 
 	if(ms > 0){
-		if(cv_target == 3){
-			
-			/* new code start */
+		if(cv_target == RANDOM_CV){
 			rnd_handle_cv(&rnds[0], get_ain1());
 			rnd_handle_cv(&rnds[1], get_ain2());
-			/* new code end */
-
-			/* old code start */
-//			int temp1 = constrain((rnd_pot[0]+get_ain1()), 0, 1023);
-//			int temp2 = constrain((rnd_pot[1]+get_ain2()), 0, 1023);
-//		
-//			rnd_clk[0].clk_set_operation(get_clk_rate(temp1), master.clk_get_ms());
-//			max_rnd[0] = temp1 + 1;		
-//			rnd_clk[1].clk_set_operation(get_clk_rate(temp2), master.clk_get_ms());
-			/* old code end */
 		} 
-		else if(cv_target == 1){
+		else if(cv_target == PWM_CV){
 			set_mst_cv_gate_len();
 		}
 	}
 	
 	if(slv_clk_triggered){
-		if(cv_target == 1) set_slv_cv_gate_len();		
-		else if(cv_target == 2) set_slv_cv_mult();
+		
+//		if(cv_target == PWM_CV) set_slv_cv_gate_len();		
+//		else if(cv_target == SLV_CV) set_slv_cv_mult();
+		Serial.println("slave reset");
+		
 
 		slave_ms = slave.clk_reset();
 	} 
 	else if(slave.clk_get_step_cnt() < (abs(slave.clk_get_operator()) - 1)){
 		slave_ms = slave.clk_elapsed();
-		if(cv_target == 1) set_slv_cv_gate_len();
+		// update gate len on new clock
+		if( (cv_target == PWM_CV) && slave_ms ) 
+			set_slv_cv_gate_len();
 	} 
 	else {
 		slave_ms = 0;
@@ -699,25 +664,12 @@ void loop(){
 	// Update output
 	upd_output(ms, slave_ms);
 
-	/* new code start */	
 	if(rnds[0].rnd_clk.master_sync(ms, step) > 0){
 		rnd_upd_output(&rnds[0],aout1);
 	}
 	if(rnds[1].rnd_clk.master_sync(ms, step) > 0){
 		rnd_upd_output(&rnds[1],aout2);	
 	};
-	/* new code end */
-
-	/* old code start  */
-//	rnd_ms[0] = rnd_clk[0].master_sync(ms, step);
-//	rnd_ms[1] = rnd_clk[1].master_sync(ms, step);
-//	if(rnd_ms[0] > 0){
-//		upd_rnd_output1();
-//	}
-//	if(rnd_ms[1] > 0){
-//		upd_rnd_output2();
-//	}
-	/* old code end  */
 
 	/* we did a good job, let's rest for 5ms */
 	delay(5);
