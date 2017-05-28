@@ -32,13 +32,49 @@ byte j;
 //storage variable
 byte dataToSend;
 
-IntervalTimer myTimer;
+IntervalTimer ui_timer;
+
+volatile char check_ui;
+
+int row_counter;
+void led_next_row(){
+//	uint32_t data = 0xFF000000 | (1 << (16+row_counter));
+	uint32_t data = 0x000000ff | (1 << (24+row_counter));
+//	uint32_t data = 0xF0F0 | (1 << (8+row_counter));
+//	digitalWrite(latchPin, LOW);
+//	shiftOut(dataPin, clockPin, LSBFIRST, data);
+//	shiftOut(dataPin, clockPin, LSBFIRST, data >> 8);
+//	digitalWrite(latchPin, HIGH);
+
+	digitalWrite(latchPin, LOW);
+	shiftOut(dataPin, clockPin, LSBFIRST, data);
+	shiftOut(dataPin, clockPin, LSBFIRST, data >> 8);
+	shiftOut(dataPin, clockPin, LSBFIRST, data >> 16);
+	shiftOut(dataPin, clockPin, LSBFIRST, data >> 24);
+	digitalWrite(latchPin, HIGH);
+	row_counter = (row_counter + 1) % 8;
+}
+
+void upd_ui(){
+//	if(check_ui){
+	led_next_row();
+//	Serial.println("IRQ");		
+//		check_ui = false;	
+//	}	
+}
+
+
+
 
 void setup() {
   //set pins as output
+	  Serial.begin(9600);
   pinMode(latchPin, OUTPUT);
   pinMode(clockPin, OUTPUT);
   pinMode(dataPin, OUTPUT);
+	check_ui = false;
+	row_counter = 0;
+	ui_timer.begin(upd_ui, 1000);
 }
 
 void set_test1(){
@@ -56,12 +92,41 @@ void set_test2(){
 //	uint32_t x = 61936; // blue led!!! 272: 0x V-V-V-V gr-gr-gr-gr B-B-B-B - - - -
 //	uint32_t x = 496; // blue led!!! 272: 0x V-V-V-V gr-gr-gr-gr B-B-B-B - - - -
 	uint32_t x = 0xF100;
+//	uint32_t x = 272;
 	digitalWrite(latchPin, LOW);
 	shiftOut(dataPin, clockPin, LSBFIRST, x);
 	shiftOut(dataPin, clockPin, LSBFIRST, x >> 8);
 	digitalWrite(latchPin, HIGH);
+	delay(50);
+}
+void set_test3(){
+//	uint32_t x = 61936; // blue led!!! 272: 0x V-V-V-V gr-gr-gr-gr B-B-B-B - - - -
+//	uint32_t x = 496; // blue led!!! 272: 0x V-V-V-V gr-gr-gr-gr B-B-B-B - - - -
+	uint32_t x = 0xffff0000; // gr: off 24
+//	uint32_t x = 0xf00f0000; // gr: off 24
+//	uint32_t x = 0x00;
+	digitalWrite(latchPin, LOW);
+	shiftOut(dataPin, clockPin, LSBFIRST, x);
+	shiftOut(dataPin, clockPin, LSBFIRST, x >> 8);
+	shiftOut(dataPin, clockPin, LSBFIRST, x >> 16);
+	shiftOut(dataPin, clockPin, LSBFIRST, x >> 24);
+	digitalWrite(latchPin, HIGH);
 	delay(500);
 }
+
+void set_test4(){
+//	uint32_t x = 61936; // blue led!!! 272: 0x V-V-V-V gr-gr-gr-gr B-B-B-B - - - -
+//	uint32_t x = 496; // blue led!!! 272: 0x V-V-V-V gr-gr-gr-gr B-B-B-B - - - -
+	byte x = 0x7;
+//	uint32_t x = 0x00;
+	digitalWrite(latchPin, LOW);
+	shiftOut(dataPin, clockPin, LSBFIRST, x);
+	shiftOut(dataPin, clockPin, LSBFIRST, x >> 8);
+	digitalWrite(latchPin, HIGH);
+//	delay(50);
+}
+
+
 
 void set_led_x(int x){
 	uint32_t dataToSend = (1 << ((x/NR_ROW)+4)) | (0xf & ~(1 << (x%NR_ROW)));
@@ -122,7 +187,7 @@ void all_leds(){
 	digitalWrite(latchPin, LOW);
 	shiftOut(dataPin, clockPin, LSBFIRST, dataToSend);
 	digitalWrite(latchPin, HIGH);
-      		delay(400);//wait
+      //		delay(400);//wait
 
 }
 
@@ -159,11 +224,19 @@ void test1(){
 }
 
 
+int x;
 void loop() {
 //	test2(); 
 //	all_leds();
-	set_test1();
-	set_test2();
-	delay(100);
+//	set_test1();
+//	set_test3();
+//	set_test4();
+//	if(x==16)
+//		x=0;	
+//	set_led_x(x);
+//	x++;
+//	all_leds();
+//erial.println(x);
+	delay(5);
 }
 
