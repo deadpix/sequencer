@@ -23,6 +23,7 @@
  */
 
 #include "types.h"
+#include "led_matrix.h"
 
 #define latchPin 22
 #define clockPin 23
@@ -50,31 +51,37 @@ static void write_shift_reg(uint32_t val){
 static void upd_shift_reg(led_matrix* lm){
 	uint32_t tmp = (1<<grd_cnt) << GRD_OFFSET;
 	led_t l = lm->get_led(grd_cnt);	
-	tmp |= (l[LED_COLOR_RED_INDEX] << RED_OFFSET)
-		 | (l[LED_COLOR_GREEN_INDEX] << GREEN_OFFSET)
-		 | (l[LED_COLOR_BLUE_INDEX] << BLUE_OFFSET);
+	tmp |= (l.bitmap[LED_COLOR_RED_INDEX] << RED_OFFSET)
+		 | (l.bitmap[LED_COLOR_GREEN_INDEX] << GREEN_OFFSET)
+		 | (l.bitmap[LED_COLOR_BLUE_INDEX] << BLUE_OFFSET);
 
 	Serial.println(tmp);
 	write_shift_reg(tmp);
 
-	grd_cnt = (grd_cnt + 1) % LED_MATRIX_NR_GROUND;
+	grd_cnt = (grd_cnt + 1) % LED_MATRIX_NR_LEDS;
 }
 
 static void upd_gui(){
 	upd_shift_reg(&current_lm);
 }
 
+static void all_leds(uint8_t color){
+	for(int i=0;i<NR_LEDS;i++){
+		current_lm.set_led_x(color, i);
+	}
+}
+
 static void test_setup(){
-	current_lm.set_led_x(2);
-	current_lm.set_led_x(5);
-	current_lm.set_led_x(6);
-	current_lm.set_led_x(2);
-	current_lm.set_led_x(8);
-	current_lm.set_led_x(14);
-	current_lm.set_led_x(17);
-	current_lm.set_led_x(23);
-	current_lm.set_led_x(31);
-	current_lm.set_led_x(56);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,2);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,5);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,6);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,22);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,8);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,14);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,17);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,23);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,31);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,56);
 }
 
 void setup_gui(){

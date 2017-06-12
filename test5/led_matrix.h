@@ -34,11 +34,11 @@
 #include "types.h" 
 
 #if LED_MATRIX_NR_GROUND <= 8
-typedef uint8_t  led_bitmap_t
+typedef volatile uint8_t  led_bitmap_t;
 #elif LED_MATRIX_NR_GROUND <= 16
-typedef uint16_t led_bitmap_t
+typedef volatile uint16_t led_bitmap_t;
 #elif LED_MATRIX_NR_GROUND <= 32
-typedef uint32_t led_bitmap_t
+typedef volatile uint32_t led_bitmap_t;
 #endif
 
 typedef struct {
@@ -47,7 +47,7 @@ typedef struct {
 
 class led_matrix {
 	private:
-		volatile led_t led_arr[LED_MATRIX_NR_LEDS];
+		led_t led_arr[LED_MATRIX_NR_LEDS];
 
 	public:
 		led_matrix();
@@ -61,7 +61,7 @@ class led_matrix {
 		int set_led_x_coor(uint8_t, uint16_t, uint16_t);
 		int clr_led_x_coor(uint8_t, uint16_t, uint16_t);
 
-		led_t  get_led(uint8_t);
+		led_t get_led(uint8_t);
 };
 
 

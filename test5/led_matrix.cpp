@@ -35,7 +35,7 @@ led_matrix::led_matrix(){
 led_matrix::~led_matrix(){
 }
 
-led_t led_matrix::get_led_arr(){
+led_t* led_matrix::get_led_arr(){
 	return led_arr;
 }
 
@@ -66,5 +66,7 @@ int led_matrix::clr_led_x(uint8_t color, uint16_t nr){
 }
 
 led_t led_matrix::get_led(uint8_t x){
-	return led_arr[x];
+	led_t tmp = led_arr[x];
+	return tmp;
+//	return led_arr[x];
 }
