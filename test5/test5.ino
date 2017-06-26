@@ -25,14 +25,14 @@
 #include "types.h"
 #include "led_matrix.h"
 
-#define latchPin 22
-#define clockPin 23
-#define dataPin  21
+#define latchPin 		22
+#define clockPin 		23
+#define dataPin  		21
 
 #define GRD_OFFSET		24
-#define RED_OFFSET		16
-#define BLUE_OFFSET		 8
-#define GREEN_OFFSET	 0
+#define BLUE_OFFSET		16
+#define GREEN_OFFSET	 8
+#define RED_OFFSET		 0
 
 led_matrix 	current_lm;
 uint8_t		grd_cnt;
@@ -55,10 +55,10 @@ static void upd_shift_reg(led_matrix* lm){
 		 | (l.bitmap[LED_COLOR_GREEN_INDEX] << GREEN_OFFSET)
 		 | (l.bitmap[LED_COLOR_BLUE_INDEX] << BLUE_OFFSET);
 
-	Serial.println(tmp);
+//	Serial.println(tmp);
 	write_shift_reg(tmp);
 
-	grd_cnt = (grd_cnt + 1) % LED_MATRIX_NR_LEDS;
+	grd_cnt = (grd_cnt + 1) % LED_MATRIX_NR_GROUND;
 }
 
 static void upd_gui(){
@@ -75,28 +75,69 @@ static void test_setup(){
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,2);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,5);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,6);
-	current_lm.set_led_x(LED_COLOR_RED_INDEX,22);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,8);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,14);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,17);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,22);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,23);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,31);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,56);
 }
 
-void setup_gui(){
+static void setup_gui(){
 	grd_cnt = 0;
 }
+
+static void test_toogle_led(int color, int led_idx){
+	current_lm.toogle_led_x(color,led_idx);
+}
+
+
+
+
+
+int cnt;
+int color_idx;
+int toogle_idx;
+int color_array[LED_MATRIX_NR_COLORS] = {LED_COLOR_BLUE_INDEX,LED_COLOR_BLUE_INDEX,LED_COLOR_BLUE_INDEX};
 
 void setup(){
 	pinMode(latchPin, OUTPUT);
 	pinMode(clockPin, OUTPUT);
 	pinMode(dataPin, OUTPUT);
 	setup_gui();
-	test_setup();
+//	test_setup();
 	ui_timer.begin(upd_gui, 1000);
+	
+	
+	cnt = 0;
+	color_idx = 0;
+	toogle_idx = 0;
 }
 
+
 void loop(){
-	delay(5);
+//	test_setup();
+	
+//	Serial.println("START");
+	while(color_idx < LED_MATRIX_NR_COLORS){
+		Serial.print("color ");
+		Serial.println(color_idx);
+		while(toogle_idx < 2){
+			Serial.print("toogle ");
+			Serial.println(toogle_idx);
+			while(cnt < NR_LEDS){
+				test_toogle_led(color_array[color_idx],cnt);
+				delay(50);
+				cnt++;
+			}
+			cnt = 0;
+			toogle_idx++;
+		}
+		toogle_idx = 0;
+		color_idx++;
+	}
+	color_idx = 0;
+	delay(1000);
+//	current_lm.dump_led_matrix();
 }

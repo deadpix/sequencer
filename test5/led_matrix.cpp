@@ -25,7 +25,7 @@
 #include "led_matrix.h"
 
 led_matrix::led_matrix(){
-	for(int i=0;i<LED_MATRIX_NR_LEDS;i++){
+	for(int i=0;i<LED_MATRIX_NR_GROUND;i++){
 		for(int j=0;j<LED_MATRIX_NR_COLORS;j++){
 			led_arr[i].bitmap[j] = 0x0;
 		}
@@ -51,22 +51,48 @@ int led_matrix::clr_led_x_coor(uint8_t color, uint16_t x, uint16_t y){
 	return res;
 }
 
-int led_matrix::set_led_x(uint8_t color, uint16_t nr){
-	int x = nr / LED_MATRIX_NR_COLORS;
-	int y = nr % LED_MATRIX_NR_GROUND;
+int led_matrix::toogle_led_x_coor(uint8_t color, uint16_t x, uint16_t y){
+	int res = 0;
+	led_arr[x].bitmap[color] ^= (1<<y);
+	return res;
+}
 
+int led_matrix::set_led_x(uint8_t color, uint16_t nr){
+	uint16_t x = nr / LED_MATRIX_NR_GROUND;
+	uint16_t y = nr % LED_MATRIX_NR_LEDS;
+	
 	return set_led_x_coor(color,x,y);
 }
 
 int led_matrix::clr_led_x(uint8_t color, uint16_t nr){
-	int x = nr / LED_MATRIX_NR_COLORS;
-	int y = nr % LED_MATRIX_NR_GROUND;
+	uint16_t x = nr / LED_MATRIX_NR_GROUND;
+	uint16_t y = nr % LED_MATRIX_NR_LEDS;
 
 	return clr_led_x_coor(color,x,y);
 }
 
+int led_matrix::toogle_led_x(uint8_t color, uint16_t nr){
+	uint16_t x = nr / LED_MATRIX_NR_GROUND;
+	uint16_t y = nr % LED_MATRIX_NR_LEDS;
+
+	return toogle_led_x_coor(color,x,y);
+}
+
 led_t led_matrix::get_led(uint8_t x){
-	led_t tmp = led_arr[x];
-	return tmp;
-//	return led_arr[x];
+//	led_t tmp = led_arr[x];
+//	return tmp;
+	return led_arr[x];
+}
+
+void led_matrix::dump_led_matrix(){
+	for(int i=0;i<LED_MATRIX_NR_GROUND;i++){
+		for(int j=0;j<LED_MATRIX_NR_COLORS;j++){
+			Serial.print("led_arr[");
+			Serial.print(i);
+			Serial.print("].bitmap[");
+			Serial.print(j);
+			Serial.print("] = ");
+			Serial.println(led_arr[i].bitmap[j]);
+		}
+	}	
 }

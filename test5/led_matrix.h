@@ -33,11 +33,17 @@
 
 #include "types.h" 
 
-#if LED_MATRIX_NR_GROUND <= 8
+#define LED_MATRIX_NR_LEDS		8
+#define LED_MATRIX_NR_GROUND	8
+#define LED_MATRIX_NR_COLORS	3
+#define NR_LEDS					(LED_MATRIX_NR_LEDS*LED_MATRIX_NR_GROUND)
+
+
+#if LED_MATRIX_NR_LEDS <= 8
 typedef volatile uint8_t  led_bitmap_t;
-#elif LED_MATRIX_NR_GROUND <= 16
+#elif LED_MATRIX_NR_LEDS <= 16
 typedef volatile uint16_t led_bitmap_t;
-#elif LED_MATRIX_NR_GROUND <= 32
+#elif LED_MATRIX_NR_LEDS <= 32
 typedef volatile uint32_t led_bitmap_t;
 #endif
 
@@ -47,22 +53,24 @@ typedef struct {
 
 class led_matrix {
 	private:
-		led_t led_arr[LED_MATRIX_NR_LEDS];
+		led_t led_arr[LED_MATRIX_NR_GROUND];
 
 	public:
 		led_matrix();
 		~led_matrix();
 
 		led_t* get_led_arr(void);
+		led_t get_led(uint8_t);
 
 		int set_led_x(uint8_t, uint16_t);
 		int clr_led_x(uint8_t, uint16_t);
+		int toogle_led_x(uint8_t, uint16_t);
 
 		int set_led_x_coor(uint8_t, uint16_t, uint16_t);
 		int clr_led_x_coor(uint8_t, uint16_t, uint16_t);
+		int toogle_led_x_coor(uint8_t, uint16_t, uint16_t);
 
-		led_t get_led(uint8_t);
+		void dump_led_matrix(void);
 };
-
 
 #endif
