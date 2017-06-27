@@ -29,5 +29,8 @@
 #define LED_COLOR_GREEN_INDEX	1
 #define LED_COLOR_BLUE_INDEX	2
 
+#define BTN_MATRIX_NR_COL_GND	8
+#define BTN_MATRIX_NR_ROW_SW	8
+#define BOUNCE_TIME				5
 
 #endif
