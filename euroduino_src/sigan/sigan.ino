@@ -83,7 +83,6 @@ volatile unsigned char sw2_state;
 const int clk_rate[] = {-8, -7, -6, -5, -4, -3, -2, 1, 2, 3, 4, 5, 6, 7, 8};
 const int MAX_CLK_SLAVE_RATE = sizeof(clk_rate) / sizeof(clk_rate[0]);
 
-
 struct gated_clock_t {
 	/* class */
 	clk c;				// clock data structure
@@ -97,7 +96,6 @@ struct gated_clock_t {
 struct gated_clock_t mst_clk;
 struct gated_clock_t slv_clk;
 
-
 clk master;
 clk slave;
 gate m_gate;
@@ -107,7 +105,6 @@ byte slv_trig_level;
 byte ext_trig_level;
 int master_rate;
 byte slv_mult;
-
 
 
 /************************** RANDOM **************************/
@@ -192,6 +189,10 @@ static int get_ain1(){
 }
 static int get_ain2(){
 	return analogRead(ain2);
+}
+
+static int attenuate_input(int in, int attenuator){
+	return (in * attenuator / MAX_ANALOG_IN);
 }
 
 /* 
@@ -565,13 +566,18 @@ static unsigned int rnd_get_max_val(unsigned int in){
 /* old code end */
 
 static void set_slv_cv_gate_len(){
-	int tmp = map(get_ain2(), 0, 1023, 0, 99);
+	int att_in = attenuate_input(get_ain2(), get_pot2());
+
+//	int tmp = map(get_ain2(), 0, 1023, 0, 99);
+	int tmp = map(att_in, 0, 1023, 0, 99);
 	upd_gate_len(&s_gate, &slave, constrain((percent_gate_len[1]+tmp), 0, 99));
 }
 
 static void set_slv_cv_mult(){
 	int rate;
-	int mult_idx = map(get_ain2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1));
+	int att_in = attenuate_input(get_ain2(), get_pot2());
+//	int mult_idx = map(get_ain2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1));
+	int mult_idx = map(att_in, 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1));
 	if(mult_idx > 7)
 		rate = clk_rate[mult_idx];
 	else
@@ -585,7 +591,10 @@ static void set_slv_cv_mult(){
 }
 
 static void set_mst_cv_gate_len(){
-	int tmp = map(get_ain1(), 0, 1023, 0, 99);
+	int att_in = attenuate_input(get_ain1(), get_pot1());
+	
+//	int tmp = map(get_ain1(), 0, 1023, 0, 99);
+	int tmp = map(att_in, 0, 1023, 0, 99);
 	upd_gate_len(&m_gate, &master, constrain((percent_gate_len[0]+tmp), 0, 99));
 }
 
@@ -617,15 +626,12 @@ void loop(){
 		ms = master.clk_elapsed();
 	} else {
 		if(ms > 0){
-			
 			/* ext clk: new code start */
 			ms = master.clk_sync(ms, (ext_clk.ext_state - 1));
 			/* ext clk: new code end */
-
 			/* ext clk: old code start */
 //			ms = master.clk_sync(ms, (ext_clk_state - 1));
 			/* ext clk: old code end */
-
 		} 
 		else {
 			ms = master.clk_elapsed();
@@ -634,8 +640,11 @@ void loop(){
 
 	if(ms > 0){
 		if(cv_target == RANDOM_CV){
-			rnd_handle_cv(&rnds[0], get_ain1());
-			rnd_handle_cv(&rnds[1], get_ain2());
+//			rnd_handle_cv(&rnds[0], get_ain1());
+//			rnd_handle_cv(&rnds[1], get_ain2());
+			rnd_handle_cv(&rnds[0], attenuate_input(get_ain1(), get_pot1()));
+			rnd_handle_cv(&rnds[1], attenuate_input(get_ain2(), get_pot2()));
+
 		} 
 		else if(cv_target == PWM_CV){
 			set_mst_cv_gate_len();
@@ -643,12 +652,8 @@ void loop(){
 	}
 	
 	if(slv_clk_triggered){
-		
-//		if(cv_target == PWM_CV) set_slv_cv_gate_len();		
-//		else if(cv_target == SLV_CV) set_slv_cv_mult();
-		Serial.println("slave reset");
-		
-
+		if(cv_target == PWM_CV) set_slv_cv_gate_len();		
+		else if(cv_target == SLV_CV) set_slv_cv_mult();
 		slave_ms = slave.clk_reset();
 	} 
 	else if(slave.clk_get_step_cnt() < (abs(slave.clk_get_operator()) - 1)){
@@ -671,6 +676,4 @@ void loop(){
 		rnd_upd_output(&rnds[1],aout2);	
 	};
 
-	/* we did a good job, let's rest for 5ms */
-	delay(5);
 }

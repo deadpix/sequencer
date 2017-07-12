@@ -22,22 +22,38 @@
  *  SOFTWARE.
  */
 
+#include <Wire.h>
+#include <Adafruit_MCP23017.h>
+
+#include "Bounce_array.h"
 #include "types.h"
 #include "led_matrix.h"
 
-#define latchPin 22
-#define clockPin 23
-#define dataPin  21
+#define latchPin 		22
+#define clockPin 		23
+#define dataPin  		21
 
 #define GRD_OFFSET		24
-#define RED_OFFSET		16
-#define BLUE_OFFSET		 8
-#define GREEN_OFFSET	 0
+#define BLUE_OFFSET		16
+#define GREEN_OFFSET	 8
+#define RED_OFFSET		 0
 
 led_matrix 	current_lm;
 uint8_t		grd_cnt;
 
 IntervalTimer ui_timer;
+
+Adafruit_MCP23017 mcp;
+IntervalTimer btn_timer;
+
+uint8_t	drive_cnt;
+static uint8_t btn_drive_pins[BTN_MATRIX_NR_COL_GND] = {12,13,14,15};
+static uint8_t btn_read_pins[BTN_MATRIX_NR_ROW_SW] = {3, 2, 1, 0};
+static ArrBounce btn[BTN_MATRIX_NR_COL_GND];
+volatile bool flg_btn_matrix;
+
+
+/* LEDS MATRIX */
 
 static void write_shift_reg(uint32_t val){
 	digitalWrite(latchPin, LOW);
@@ -55,15 +71,85 @@ static void upd_shift_reg(led_matrix* lm){
 		 | (l.bitmap[LED_COLOR_GREEN_INDEX] << GREEN_OFFSET)
 		 | (l.bitmap[LED_COLOR_BLUE_INDEX] << BLUE_OFFSET);
 
-	Serial.println(tmp);
 	write_shift_reg(tmp);
-
-	grd_cnt = (grd_cnt + 1) % LED_MATRIX_NR_LEDS;
+	grd_cnt = (grd_cnt + 1) % LED_MATRIX_NR_GROUND;
 }
 
+
+/* BUTTONS MATRIX */
+static uint8_t btn_digitalRead(uint8_t pin){
+	return mcp.digitalRead(pin);
+}
+static void scan_btn_matrix(){
+	if(flg_btn_matrix){
+		mcp.digitalWrite(btn_drive_pins[drive_cnt], LOW);
+		for(int i=0;i<BTN_MATRIX_NR_ROW_SW;i++){
+			if(btn[drive_cnt].update(i)){
+				if(btn[drive_cnt].read(i) == LOW){
+					Serial.print("btn ");
+					Serial.print((drive_cnt*i));
+					Serial.print(" released");
+				}
+				else {
+					Serial.print("btn ");
+					Serial.print((drive_cnt*i));
+					Serial.print(" pushed");	
+				}
+			}
+		}
+		mcp.digitalWrite(btn_drive_pins[drive_cnt], HIGH);
+
+		drive_cnt = (drive_cnt + 1) % BTN_MATRIX_NR_COL_GND;
+		flg_btn_matrix = false;
+	}
+}
+static void init_btn_matrix(){
+	int i;
+
+	/* init IO expander */
+	mcp.begin(0);
+	Wire.setClock(1000000);
+
+	for (i = 0; i < BTN_MATRIX_NR_COL_GND; i++){ 
+		mcp.pinMode(btn_drive_pins[i], OUTPUT);
+		mcp.digitalWrite(btn_drive_pins[i], HIGH);
+	}
+	for (i = 0; i < BTN_MATRIX_NR_ROW_SW; i++){ 
+		mcp.pinMode(btn_read_pins[i], INPUT);
+		mcp.pullUp(btn_read_pins[i], HIGH);
+	}
+	for(i=0; i<BTN_MATRIX_NR_COL_GND; i++){
+		btn[i].init_ArrBounce(btn_read_pins, BOUNCE_TIME, BTN_MATRIX_NR_ROW_SW, &btn_digitalRead);
+	}
+	flg_btn_matrix = false;
+}
+
+
+/* IRQ callback functions */
 static void upd_gui(){
 	upd_shift_reg(&current_lm);
 }
+static void scan_btns(){
+	if(!flg_btn_matrix)
+		flg_btn_matrix = true;
+}
+static void init_interrupt(){
+	ui_timer.priority(128);
+	btn_timer.priority(255);	
+	ui_timer.begin(upd_gui, 1000);	
+	btn_timer.begin(scan_btns, 10000);
+}
+
+
+
+
+
+
+
+
+
+
+
 
 static void all_leds(uint8_t color){
 	for(int i=0;i<NR_LEDS;i++){
@@ -75,28 +161,73 @@ static void test_setup(){
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,2);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,5);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,6);
-	current_lm.set_led_x(LED_COLOR_RED_INDEX,22);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,8);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,14);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,17);
+	current_lm.set_led_x(LED_COLOR_RED_INDEX,22);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,23);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,31);
 	current_lm.set_led_x(LED_COLOR_RED_INDEX,56);
 }
 
-void setup_gui(){
+static void setup_gui(){
 	grd_cnt = 0;
 }
+
+static void test_toogle_led(int color, int led_idx){
+	current_lm.toogle_led_x(color,led_idx);
+}
+
+
+
+
+
+int cnt;
+int color_idx;
+int toogle_idx;
+int color_array[LED_MATRIX_NR_COLORS] = {LED_COLOR_BLUE_INDEX,LED_COLOR_BLUE_INDEX,LED_COLOR_BLUE_INDEX};
 
 void setup(){
 	pinMode(latchPin, OUTPUT);
 	pinMode(clockPin, OUTPUT);
 	pinMode(dataPin, OUTPUT);
 	setup_gui();
-	test_setup();
-	ui_timer.begin(upd_gui, 1000);
+//	test_setup();
+
+	init_btn_matrix();
+	init_interrupt();
+	
+	cnt = 0;
+	color_idx = 0;
+	toogle_idx = 0;
+}
+
+static void test_led_matrix(){
+	while(color_idx < LED_MATRIX_NR_COLORS){
+		Serial.print("color ");
+		Serial.println(color_idx);
+		while(toogle_idx < 2){
+			Serial.print("toogle ");
+			Serial.println(toogle_idx);
+			while(cnt < NR_LEDS){
+				test_toogle_led(color_array[color_idx],cnt);
+				delay(50);
+				cnt++;
+			}
+			cnt = 0;
+			toogle_idx++;
+		}
+		toogle_idx = 0;
+		color_idx++;
+	}
+	color_idx = 0;
+	delay(1000);
 }
 
 void loop(){
-	delay(5);
+//	test_setup();	
+//	Serial.println("START");
+//	current_lm.dump_led_matrix();
+	scan_btn_matrix();
+
 }
