@@ -50,7 +50,7 @@
 
 #define MIN_ANALOG_OUT		0
 #define MAX_ANALOG_OUT		255
-#define MAX_ANALOG_IN		1022
+#define MAX_ANALOG_IN		1023
 
 #define NR_ANALOG_OUTPUT	2
 
@@ -178,21 +178,24 @@ static byte wr_gate_out(int out, bool val){
 		digitalWrite(out,LOW);	
 }
 
-static int get_pot1(){
+static unsigned int get_pot1(){
 	return analogRead(pot1);
 }
-static int get_pot2(){
+static unsigned int get_pot2(){
 	return analogRead(pot2);
 }
-static int get_ain1(){
+static unsigned int get_ain1(){
 	return analogRead(ain1);
 }
-static int get_ain2(){
+static unsigned int get_ain2(){
 	return analogRead(ain2);
 }
 
-static int attenuate_input(int in, int attenuator){
-	return (in * attenuator / MAX_ANALOG_IN);
+// uin32_t ==> 32bit positive integer
+// unsigned int ==> 16bit positive integer >= 0!!!
+static unsigned int attenuate_input(unsigned int in, unsigned int attenuator){
+	uint32_t tmp = (uint32_t) in * (uint32_t) attenuator / MAX_ANALOG_IN;
+	return (unsigned int) tmp;
 }
 
 /* 
@@ -593,7 +596,6 @@ static void set_slv_cv_mult(){
 static void set_mst_cv_gate_len(){
 	int att_in = attenuate_input(get_ain1(), get_pot1());
 	
-//	int tmp = map(get_ain1(), 0, 1023, 0, 99);
 	int tmp = map(att_in, 0, 1023, 0, 99);
 	upd_gate_len(&m_gate, &master, constrain((percent_gate_len[0]+tmp), 0, 99));
 }
