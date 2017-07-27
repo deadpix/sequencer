@@ -241,7 +241,7 @@ static unsigned int ckeck_ext_clk(){
 		}
 		else {
 			ext_clk_flag = true;
-			ext_clk.ext_state = (ext_clk.ext_state % mst_clk.clk_trig_lvl)+1;
+			ext_clk.ext_state = (ext_clk.ext_state % mst_clk.clk_rate)+1;
 			// need to resync master	
 			ext_clk.ext_ms = ms;
 		}
@@ -274,8 +274,9 @@ void init_var(){
 	slv_clk.g.set_hw_cbck(dout2, wr_gate_out);
 	sw1_state = ( (digitalRead(sw1up) << 1) | (digitalRead(sw1dw) << 0) );
 	sw2_state = ( (digitalRead(sw2up) << 1) | (digitalRead(sw2dw) << 0) );
-	mst_clk.clk_trig_lvl = 1;
-
+	mst_clk.clk_rate = 1;
+	slv_clk.clk_rate = 1;
+	
 	slv_clk.clk_trig_lvl = HIGH;
 	mst_clk.clk_trig_lvl = HIGH;
 
@@ -346,9 +347,9 @@ int bank_time(int sw_state, unsigned int ms_period){
 			tmp = get_clk_rate(p1);
 
 			if(tmp < 0)
-				mst_clk.clk_trig_lvl = abs(tmp);
+				mst_clk.clk_rate = abs(tmp);
 			else
-				mst_clk.clk_trig_lvl = 1;
+				mst_clk.clk_rate = 1;
 		
 			if(!mst_clk.c.clk_set_operation(tmp, ext_clk.ext_ms))
 				Serial.println("error");
@@ -361,7 +362,7 @@ int bank_time(int sw_state, unsigned int ms_period){
 
 		int idx = map(get_pot2(), 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1));
 		
-		slv_clk.clk_trig_lvl = clk_rate[idx];
+		slv_clk.clk_rate = clk_rate[idx];
 	  	slv_clk.c.clk_set_operation(clk_rate[idx],mst_clk.c.clk_get_ms());
 		
 		rnds[0].rnd_clk.clk_sync_intern(mst_clk.c.clk_get_ms());
@@ -424,12 +425,12 @@ int bank_random(int sw_state){
 	if(sw_state == SW_UP){
 		rnds[0].rnd_clk.clk_set_operation(p1, mst_clk.c.clk_get_ms());
 		rnds[0].rnd_max = p2;
-		rnds[0].rnd_pot = pot2;
+		rnds[0].rnd_pot = pot1;
 	}
 	else if(sw_state == SW_DOWN){
 		rnds[1].rnd_clk.clk_set_operation(p1, mst_clk.c.clk_get_ms());
 		rnds[1].rnd_max = p2;
-		rnds[1].rnd_pot = pot2;
+		rnds[1].rnd_pot = pot1;
 	}
 	else {
 		ret = RANDOM_CV;
@@ -504,26 +505,26 @@ static unsigned int rnd_get_max_val(unsigned int in){
 
 
 static void set_slv_cv_gate_len(){
-	int att_in = attenuate_input(get_ain2(), get_pot2());
+	unsigned int att_in = attenuate_input(get_ain2(), get_pot2());
 	int tmp = map(att_in, 0, MAX_ANALOG_IN, 0, 99);
 	upd_gate_len(&slv_clk.g, &slv_clk.c, constrain((slv_clk.clk_gate_len+tmp), 0, 99));
 }
 
 static void set_slv_cv_mult(){
 	int rate;
-	int att_in = attenuate_input(get_ain2(), get_pot2());
+	unsigned int att_in = attenuate_input(get_ain1(), get_pot1());
 	int mult_idx = map(att_in, 0, MAX_ANALOG_IN, 7, (MAX_CLK_SLAVE_RATE-1));
 	if(mult_idx > 7)
 		rate = clk_rate[mult_idx];
 	else
-		rate = abs(slv_clk.clk_trig_lvl);
+		rate = abs(slv_clk.clk_rate);
 
 	slv_clk.c.clk_set_operation(abs(rate),mst_clk.c.clk_get_ms());
 	upd_gate_len(&slv_clk.g, &slv_clk.c, slv_clk.clk_gate_len);
 }
 
 static void set_mst_cv_gate_len(){
-	int att_in = attenuate_input(get_ain1(), get_pot1());
+	unsigned int att_in = attenuate_input(get_ain1(), get_pot1());
 	
 	int tmp = map(att_in, 0, MAX_ANALOG_IN, 0, 99);
 	upd_gate_len(&mst_clk.g, &mst_clk.c, constrain((mst_clk.clk_gate_len+tmp), 0, 99));
@@ -573,13 +574,16 @@ void loop(){
 	
 	if(slv_clk_triggered){
 		if(cv_target == PWM_CV) set_slv_cv_gate_len();		
-		else if(cv_target == SLV_CV) set_slv_cv_mult();
+		else if(cv_target == SLV_CV){
+			set_slv_cv_mult();
+			set_slv_cv_gate_len();
+		} 
 		slave_ms = slv_clk.c.clk_reset();
 	} 
 	else if(slv_clk.c.clk_get_step_cnt() < (abs(slv_clk.c.clk_get_operator()) - 1)){
 		slave_ms = slv_clk.c.clk_elapsed();
 		// update gate len on new clock
-		if( (cv_target == PWM_CV) && slave_ms ) 
+		if( ((cv_target == PWM_CV) || (cv_target == SLV_CV)) && slave_ms ) 
 			set_slv_cv_gate_len();
 	} 
 	else {
