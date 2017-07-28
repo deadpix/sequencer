@@ -1,0 +1,18 @@
+sigan is a clock utility program on euroduino module which uses the two knobs for contolling several parameters. It provides two clocks via digital inputs, the first is called master clock and can be feed internally of externally via first digital input. The second has its frequency slaved to a multiple of the master clock frequency but is triggered via the second digital input. Each clock pulse width is configurable and can be driven via CV input (analog input). The digital inputs can be configured to detect incoming gate on rising or falling edges. Similarly, digital outputs can generate gate on high voltage or low voltage. Finally, as you never have enough randoms, analog outputs generate step random voltage whose frequencies are slaved to a multiple of the master clock frequency.
+
+For configuring all functions, combination of the two 3-positions switches are used as follow
+	- switch 1 (functions switch): 
+		+ upper position (clock) for the configuration of master and slave clock: pulse width (option 2) and frequency (option 1)
+		+ middle position (io) for the configuration of outputs (option 1) and inputs (option 2)
+		+ lower position (random) for the configuration of random voltages (frequency and amplitude) for channel 1 (option 1) and channel 2 (option 2)
+	- switch 2 (options switch):
+		+ upper position for option 1
+		+ lower position for option 2
+		+ middle position: CV (read incoming voltage from analog inputs), analog inputs are attenuated by knobs   
+
+Parameters controlled by CV depends on functions switch
+	- clock: CV1 controls PW of master clock and CV2 controls PW of slave clock
+	- io: CV1 controls slave clock multiplier and CV2 controls PW of slave clock
+	- random: CV1 controls rate of step random of channel1 and CV2 controls rate of step random of channel2
+
+Patch idea
