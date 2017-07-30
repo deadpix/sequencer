@@ -232,3 +232,142 @@ void loop(){
 		scan();
 	}
 }
+
+
+
+/*
+
+#include <i2c_t3.h>
+#include <Adafruit_MCP23017.h>
+
+#define latchPin 		22
+#define clockPin 		23
+#define dataPin  		21
+
+#define BTN1			7
+#define BTN2			6
+#define BTN3			5
+#define BTN4			4
+#define LED				3
+
+
+Adafruit_MCP23017 mcp;
+Adafruit_MCP23017 mcp2;
+
+byte arduinoIntPin=17;
+byte arduinoInterrupt=1;
+
+boolean btn1_status;
+boolean btn2_status;
+boolean btn3_status;
+boolean btn4_status;
+
+static void init_btn(){
+	int i;
+	mcp.begin(0);	
+//	mcp2.begin(4);
+	
+	Wire.setClock(1000000);
+
+
+	mcp.pinMode(BTN1, INPUT);
+	mcp.pullUp(BTN1, HIGH);
+	mcp.pinMode(BTN2, INPUT);
+	mcp.pullUp(BTN2, HIGH);
+	mcp.pinMode(BTN3, INPUT);
+	mcp.pullUp(BTN3, HIGH);
+	mcp.pinMode(BTN4, INPUT);
+	mcp.pullUp(BTN4, HIGH);
+	mcp.pinMode(LED, OUTPUT);
+
+	mcp.setupInterrupts(true, false, LOW);
+	mcp.setupInterruptPin(BTN1,CHANGE); 
+//	mcp.setupInterruptPin(BTN2,CHANGE); 
+//	mcp.setupInterruptPin(BTN3,CHANGE); 
+//	mcp.setupInterruptPin(BTN4,CHANGE); 
+	pinMode(arduinoIntPin, INPUT);
+
+	btn1_status = false;
+	btn2_status = false;
+	btn3_status = false;
+	btn4_status = false;
+	
+	
+}
+
+boolean flag_irq;
+void intCallBack(){
+	cli();
+	flag_irq=true;
+	sei();
+}
+
+
+
+void handle_irq(){
+	boolean flag = mcp.digitalRead(BTN1);
+	if(!flag){
+		btn1_status = !btn1_status;
+	}
+	mcp.digitalWrite(LED, btn1_status);
+	
+	
+	
+	uint8_t pin=mcp.getLastInterruptPin();
+	uint8_t val=mcp.getLastInterruptPinValue();
+	Serial.print("IRQ ");
+	Serial.println(val);
+	Serial.print(" pin ");
+	Serial.println(pin);
+	
+//	Serial.println(mcp.digitalRead(BTN2));
+//	mcp2.digitalWrite(1,mcp2.digitalRead(0));
+}
+
+void setup(){
+	init_btn();
+	attachInterrupt(arduinoIntPin,intCallBack,FALLING);
+	mcp.digitalWrite(LED,0);
+}
+
+void test01(){
+	int val = mcp.digitalRead(BTN1);
+	Serial.print("BTN1: ");
+	Serial.println(val);
+	mcp.digitalWrite(LED,!val);
+	
+	Serial.print("BTN2: ");
+	Serial.println(mcp.digitalRead(BTN2));
+
+	Serial.print("BTN3: ");
+	Serial.println(mcp.digitalRead(BTN3));
+	
+	Serial.print("BTN4: ");
+	Serial.println(mcp.digitalRead(BTN4));
+	
+}
+
+void loop(){
+	
+//	Serial.println("LOOP");
+//	test01();
+//	delay(100);
+	
+//		Serial.println("LOOP");
+	
+	if(flag_irq){
+		cli();
+		handle_irq();
+		flag_irq = false;
+		sei();
+	} 
+
+	
+//	Serial.println("mcp ");
+//	Serial.println(mcp.digitalRead(0));
+	//Serial.println("mcp2 ");
+//	Serial.println(mcp2.digitalRead(0));
+}
+
+
+*/
