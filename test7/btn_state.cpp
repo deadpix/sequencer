@@ -33,34 +33,30 @@ btn_state::~btn_state(){
 }
 
 
-int btn_state::set_btn_active_coor(uint8_t x, uint8_t y){
+int btn_state::set_btn_active_coor(uint16_t x, uint16_t y){
 	int res = 0;
 	btn_arr[x].bitmap |= (1<<y);
-
 
 	return res;
 }
 
-int btn_state::clr_btn_active_coor(uint8_t x, uint8_t y){
+int btn_state::clr_btn_active_coor(uint16_t x, uint16_t y){
 	int res = 0;
 	btn_arr[x].bitmap &= ~(1<<y);
-
 	
 	return res;
 }
 
-int btn_state::set_btn_active(uint8_t id){
+int btn_state::set_btn_active(uint16_t id){
 	uint16_t x = id / BTN_MATRIX_ROW;	
 	uint16_t y = id % BTN_MATRIX_ROW;	
 	
 	return set_btn_active_coor(x, y);
-
 }
 
-int btn_state::clr_btn_active(uint8_t id){
+int btn_state::clr_btn_active(uint16_t id){
 	uint16_t x = id / BTN_MATRIX_ROW;	
 	uint16_t y = id % BTN_MATRIX_ROW;	
 
 	return clr_btn_active_coor(x, y);
 }
-

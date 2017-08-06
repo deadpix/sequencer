@@ -31,7 +31,7 @@
 #endif
 
 #include "types.h"
-#include <LinkedList.h>
+//#include <LinkedList.h>
 
 #define BTN_MATRIX_ROW	MATRIX_NR_ROW
 #define BTN_MATRIX_COL	MATRIX_NR_COL
@@ -48,7 +48,7 @@ typedef struct {
 class btn_state {
 	private:
 		btn_t btn_arr[BTN_MATRIX_COL];
-		LinkedList<active_btn_t*> list_active_btns;
+//		LinkedList<active_btn_t*> list_active_btns;
 	
 	public:
 		btn_state();
@@ -59,6 +59,6 @@ class btn_state {
 
 		int set_btn_active(uint16_t id);
 		int clr_btn_active(uint16_t id);
-}
+};
 
 #endif

@@ -66,7 +66,7 @@ static uint8_t btn_matrix_digitalRead(uint8_t pin){
 }
 
 
-static void check_scan(){
+static void check_btn(){
 	if(!btn_flag)
 		btn_flag = true;
 }
@@ -92,7 +92,6 @@ static void init_matrix_btn(){
 		mcp.pinMode(btn_read_pins[i], INPUT);
 		mcp.pullUp(btn_read_pins[i], HIGH);
 	}
-	
 }
 
 static void scan(){
@@ -103,8 +102,6 @@ static void scan(){
 
 // 	Read the button inputs
 	for (i=0; i<BTN_NUM_ROW; i++){
-//		Serial.println(btn_matrix_digitalRead(btn_read_pins[i]));
-//		Serial.println(btn_row[0].update(0));
 		if(btn_row[btn_col_idx].update(i)){
 
 			if(btn_row[btn_col_idx].read(i) == LOW){
@@ -121,8 +118,7 @@ static void scan(){
 		}
 		
 	}
-	mcp.digitalWrite(btn_select_pins[btn_col_idx], HIGH);
-	
+	mcp.digitalWrite(btn_select_pins[btn_col_idx], HIGH);	
 	btn_col_idx = (btn_col_idx+1)%BTN_NUM_COL;
 }
 
@@ -138,9 +134,7 @@ static void write_shift_reg(uint32_t val){
 
 static void upd_shift_reg(led_matrix* lm){
 	uint32_t tmp = ((1<<(grd_cnt+4))) << GRD_OFFSET;
-//	Serial.println(tmp);
 	led_t l = lm->get_led(grd_cnt);	
-//	Serial.println(l.bitmap[LED_COLOR_GREEN_INDEX]);
 	tmp |= (l.bitmap[LED_COLOR_RED_INDEX] << RED_OFFSET)
 		 | (l.bitmap[LED_COLOR_GREEN_INDEX] << GREEN_OFFSET)
 		 | (l.bitmap[LED_COLOR_BLUE_INDEX] << BLUE_OFFSET);
@@ -217,7 +211,7 @@ void setup(){
 	init_matrix_btn();
 
 	ui_timer.begin(upd_gui, 1000);
-	btn_timer.begin(check_scan, 1000);
+	btn_timer.begin(check_btn, 1000);
 	
 	cnt = 0;
 	color_idx = 0;
@@ -226,9 +220,9 @@ void setup(){
 
 
 void loop(){
-//	test_led_matrix();
-	if(btn_flag){
-//		Serial.println("TEST");
-		scan();
-	}
+	test_led_matrix();
+//	if(btn_flag){
+////		Serial.println("TEST");
+//		scan();
+//	}
 }
