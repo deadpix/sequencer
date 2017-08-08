@@ -38,6 +38,13 @@
 #define LED_MATRIX_NR_COLORS		3
 #define NR_LEDS				(LED_MATRIX_NR_LEDS*LED_MATRIX_NR_GROUND)
 
+#define LED_R_IDX			0x1
+#define LED_G_IDX			0x2
+#define LED_B_IDX			0x4
+#define LED_RG_IDX			(LED_R_IDX|LED_G_IDX)
+#define LED_RB_IDX			(LED_R_IDX|LED_B_IDX)
+#define LED_GB_IDX			(LED_G_IDX|LED_B_IDX)
+#define LED_GBR_IDX			(LED_GB_IDX|LED_R_IDX)
 
 typedef struct {
 	mat_row_bmp_t bitmap[LED_MATRIX_NR_COLORS];

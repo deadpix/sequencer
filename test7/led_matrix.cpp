@@ -23,6 +23,7 @@
  */
 
 #include "led_matrix.h"
+#include "bit.h"
 
 led_matrix::led_matrix(){
 	for(int i=0;i<LED_MATRIX_NR_GROUND;i++){
@@ -60,27 +61,41 @@ int led_matrix::toogle_led_x_coor(uint8_t color, uint16_t x, uint16_t y){
 int led_matrix::set_led_x(uint8_t color, uint16_t nr){
 	uint16_t x = nr / LED_MATRIX_NR_LEDS;
 	uint16_t y = nr % LED_MATRIX_NR_LEDS;
-	
-	return set_led_x_coor(color,x,y);
+	uint16_t idx;
+
+	for_eachset_bit(idx,(uint16_t *) &color, LED_MATRIX_NR_COLORS){
+		set_led_x_coor(idx,x,y);
+	}
+
+//	return set_led_x_coor(color,x,y);
+	return 1;
 }
 
 int led_matrix::clr_led_x(uint8_t color, uint16_t nr){
 	uint16_t x = nr / LED_MATRIX_NR_LEDS;
 	uint16_t y = nr % LED_MATRIX_NR_LEDS;
+	uint16_t idx;
 
-	return clr_led_x_coor(color,x,y);
+	for_eachset_bit(idx,(uint16_t *) &color, LED_MATRIX_NR_COLORS){
+		clr_led_x_coor(idx,x,y);
+	}
+//	return clr_led_x_coor(color,x,y);
+	return 1;
 }
 
 int led_matrix::toogle_led_x(uint8_t color, uint16_t nr){
 	uint16_t x = nr / LED_MATRIX_NR_LEDS;
 	uint16_t y = nr % LED_MATRIX_NR_LEDS;
+	uint16_t idx;
 
-	return toogle_led_x_coor(color,x,y);
+	for_eachset_bit(idx,(uint16_t *) &color, LED_MATRIX_NR_COLORS){
+		toogle_led_x_coor(idx,x,y);
+	}
+	return 1;
+//	return toogle_led_x_coor(color,x,y);
 }
 
 led_t led_matrix::get_led(uint8_t x){
-//	led_t tmp = led_arr[x];
-//	return tmp;
 	return led_arr[x];
 }
 
