@@ -27,49 +27,32 @@
 #include "types.h"
 #include "led_matrix.h"
 #include "Bounce_array.h"
-#include "clk.h"
 
-//#define latchPin 		22
-//#define clockPin 		23
-//#define dataPin  		21
-//
-//#define GRD_OFFSET		24
-//#define BLUE_OFFSET		16
-//#define GREEN_OFFSET	 8
-//#define RED_OFFSET		 0
+#define latchPin 		22
+#define clockPin 		23
+#define dataPin  		21
 
-//#define BTN_NUM_COL		8
-//#define BTN_NUM_ROW		8
-//#define BOUNCE_TIME		5
+#define GRD_OFFSET		24
+#define BLUE_OFFSET		16
+#define GREEN_OFFSET	 8
+#define RED_OFFSET		 0
+
+#define BTN_NUM_COL		8
+#define BTN_NUM_ROW		8
+#define BOUNCE_TIME		5
 
 
-led_matrix 	current_lm;
-//uint8_t		grd_cnt;
+Adafruit_MCP23017 mcp;
+uint8_t		grd_cnt;
 
-clk mst_clk;
-volatile bool check_clk;
+static uint8_t btn_select_pins[BTN_NUM_COL] 	= { 7, 6, 5, 4, 3, 2, 1, 0};
+static uint8_t btn_read_pins[BTN_NUM_ROW] 	= {12, 13, 14, 15, 8, 9, 10, 11 };
 
-//Adafruit_MCP23017 mcp;
+static ArrBounce btn_row[BTN_NUM_COL];
 
-//static uint8_t btn_select_pins[BTN_NUM_COL] 	= { 7, 6, 5, 4, 3, 2, 1, 0};
-//static uint8_t btn_read_pins[BTN_NUM_ROW] 	= {12, 13, 14, 15, 8, 9, 10, 11 };
-//
-//static ArrBounce btn_row[BTN_NUM_COL];
-uint8_t btn_col_idx;
-volatile bool btn_flag;
-
-IntervalTimer ui_timer;
-IntervalTimer btn_timer;
-
-//static uint8_t btn_matrix_digitalRead(uint8_t pin){
-//	return mcp.digitalRead(pin);
-//}
-
-static void check_btn(){
-	if(!btn_flag)
-		btn_flag = true;
+static uint8_t btn_matrix_digitalRead(uint8_t pin){
+	return mcp.digitalRead(pin);
 }
-/*
 static void init_matrix_btn(){
 	int i;
 	btn_col_idx = 0;
@@ -113,8 +96,6 @@ static void scan(){
 	mcp.digitalWrite(btn_select_pins[btn_col_idx], HIGH);	
 	btn_col_idx = (btn_col_idx+1)%BTN_NUM_COL;
 }
-*/
-/*
 static void write_shift_reg(uint32_t val){
 	digitalWrite(latchPin, LOW);
 	shiftOut(dataPin, clockPin, LSBFIRST, val);
@@ -134,49 +115,11 @@ static void upd_shift_reg(led_matrix* lm){
 	write_shift_reg(tmp);
 	grd_cnt = (grd_cnt + 1) % LED_MATRIX_NR_GROUND;
 }
-*/
-static void upd_gui(){
-	upd_shift_reg(&current_lm);
-	if(!check_clk)
-		check_clk = true;
-}
+static void setup_gui(){
+	pinMode(latchPin, OUTPUT);
+	pinMode(clockPin, OUTPUT);
+	pinMode(dataPin, OUTPUT);
 
-//static void setup_gui(){
-//	write_shift_reg(0x0);
-//	grd_cnt = 0;
-//}
-
-static void next_step(clk* c){
-	uint32_t ms = c->clk_elapsed();
-	if(ms > 0){
-		uint16_t cnt = c->clk_get_step_cnt();
-		if(cnt == 0)
-			current_lm.clr_led_x(LED_RG_IDX,31);
-		else 
-			current_lm.toogle_led_x(LED_RG_IDX,(cnt-1));
-
-		current_lm.toogle_led_x(LED_RG_IDX,c->clk_get_step_cnt());
-	}
-}
-
-void setup(){
-	setup_gui();
-	init_matrix_btn();
-
-	ui_timer.begin(upd_gui, 1000);
-	btn_timer.begin(check_btn, 1000);
-	
-	mst_clk.clk_set_max_step(32);
-}
-
-
-void loop(){
-	uint32_t ms;
-	if(check_clk){
-		next_step(&mst_clk);
-		check_clk = false;
-	}
-	if(btn_flag){
-		scan();
-	}
+	write_shift_reg(0x0);
+	grd_cnt = 0;
 }
