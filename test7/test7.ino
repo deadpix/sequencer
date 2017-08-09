@@ -27,6 +27,7 @@
 #include "types.h"
 #include "led_matrix.h"
 #include "Bounce_array.h"
+#include "clk.h"
 
 #define latchPin 		22
 #define clockPin 		23
@@ -44,6 +45,9 @@
 
 led_matrix 	current_lm;
 uint8_t		grd_cnt;
+
+clk mst_clk;
+volatile bool check_clk;
 
 Adafruit_MCP23017 mcp;
 
@@ -145,6 +149,8 @@ static void upd_shift_reg(led_matrix* lm){
 
 static void upd_gui(){
 	upd_shift_reg(&current_lm);
+	if(!check_clk)
+		check_clk = true;
 }
 
 static void all_leds(uint8_t color){
@@ -182,7 +188,7 @@ static void test_toogle_led(int color, int led_idx){
 int cnt;
 int color_idx;
 int toogle_idx;
-int color_array[LED_MATRIX_NR_COLORS] = {LED_COLOR_BLUE_INDEX,LED_COLOR_GREEN_INDEX,LED_COLOR_RED_INDEX};
+int color_array[LED_MATRIX_NR_COLORS] = {LED_R_IDX,LED_G_IDX,LED_B_IDX};
 
 static void test_led_matrix(){
 	while(color_idx < LED_MATRIX_NR_COLORS){
@@ -202,6 +208,18 @@ static void test_led_matrix(){
 	delay(1000);
 }
 
+static void next_step(clk* c){
+	uint32_t ms = c->clk_elapsed();
+	if(ms > 0){
+		uint16_t cnt = c->clk_get_step_cnt();
+		if(cnt == 0)
+			current_lm.clr_led_x(LED_G_IDX,31);
+		else 
+			current_lm.toogle_led_x(LED_G_IDX,(cnt-1));
+
+		current_lm.toogle_led_x(LED_G_IDX,c->clk_get_step_cnt());
+	}
+}
 
 void setup(){
 	pinMode(latchPin, OUTPUT);
@@ -216,11 +234,19 @@ void setup(){
 	cnt = 0;
 	color_idx = 0;
 	toogle_idx = 0;
+
+	mst_clk.clk_set_max_step(32);
 }
 
 
 void loop(){
-	test_led_matrix();
+	uint32_t ms;
+	if(check_clk){
+		next_step(&mst_clk);
+		check_clk = false
+	}
+
+//	test_led_matrix();
 //	if(btn_flag){
 ////		Serial.println("TEST");
 //		scan();
