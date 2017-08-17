@@ -87,8 +87,9 @@ static void scan(){
 		if(btn_row[btn_col_idx].update(i)){
 
 			if(btn_row[btn_col_idx].read(i) == LOW){
-
+//				current_prog->on_release(current_prog, btn_col_idx*BTN_NUM_COL + i);
 			} else {
+//				current_prog->on_push(current_prog, btn_col_idx*BTN_NUM_COL + i);
 				current_lm.toogle_led_x(LED_RG_IDX,btn_col_idx*BTN_NUM_COL+i);
 			}		
 		}

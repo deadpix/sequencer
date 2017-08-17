@@ -25,12 +25,12 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
-#define MATRIX_NR_ROW		8
-#define MATRIX_NR_COL		4
+#define MATRIX_NR_ROW			8
+#define MATRIX_NR_COL			4
 #define LED_MATRIX_NR_COLORS	3
 #define NR_LEDS					(LED_MATRIX_NR_LEDS*LED_MATRIX_NR_GROUND)
 
-#define LED_COLOR_RED_INDEX	0
+#define LED_COLOR_RED_INDEX		0
 #define LED_COLOR_GREEN_INDEX	1
 #define LED_COLOR_BLUE_INDEX	2
 

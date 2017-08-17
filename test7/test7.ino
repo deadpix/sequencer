@@ -42,6 +42,8 @@
 //#define BTN_NUM_ROW		8
 //#define BOUNCE_TIME		5
 
+prog *prog_arr[MATRIX_NR_COL];
+prog *current_prog;
 
 led_matrix 	current_lm;
 //uint8_t		grd_cnt;
