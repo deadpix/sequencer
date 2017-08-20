@@ -1,0 +1,24 @@
+#ifndef __TEST_PROJ_TWO_H__
+#define __TEST_PROJ_TWO_H__
+
+#include "prog.h"
+#include "led_matrix.h"
+
+class test_proj_two : public prog {
+	private:
+		led_matrix _lm;
+
+	
+	public:
+		test_proj_two();
+		~test_proj_two();
+		
+		void on_push(void* ptr, uint8_t btn_id);
+		void on_release(void* ptr, uint8_t btn_id);
+		
+		static led_matrix* menu_clbk(void *, uint8_t, uint8_t, led_matrix*);
+		led_matrix* update_menu(uint8_t, uint8_t, led_matrix*);
+};
+
+
+#endif

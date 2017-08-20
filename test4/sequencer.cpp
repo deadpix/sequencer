@@ -52,10 +52,10 @@ led_matrix* sequencer::update_menu(uint8_t func_id, uint8_t opt_id, led_matrix* 
 		else {
 			menu_matrix->clr_pixel(func_id * NUM_LED_ROWS + i);
 		}
-	}
-	
+	}	
 	return next;
 }
+
 led_matrix* sequencer::menu_clbk(void * this_ptr, uint8_t func_id, uint8_t opt_id, led_matrix* menu_matrix){	
 	sequencer* myself = static_cast<sequencer *>(this_ptr);
 	led_matrix* lm = myself->update_menu(func_id, opt_id, menu_matrix);

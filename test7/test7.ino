@@ -28,125 +28,40 @@
 #include "led_matrix.h"
 #include "Bounce_array.h"
 #include "clk.h"
-
-//#define latchPin 		22
-//#define clockPin 		23
-//#define dataPin  		21
-//
-//#define GRD_OFFSET		24
-//#define BLUE_OFFSET		16
-//#define GREEN_OFFSET	 8
-//#define RED_OFFSET		 0
-
-//#define BTN_NUM_COL		8
-//#define BTN_NUM_ROW		8
-//#define BOUNCE_TIME		5
+#include "prog.h"
 
 prog *prog_arr[MATRIX_NR_COL];
 prog *current_prog;
 
+static test_proj_one p1;
+static test_proj_one p2;
+
+
+
+
 led_matrix 	current_lm;
-//uint8_t		grd_cnt;
+led_matrix* mtx_ptr;
+
 
 clk mst_clk;
 volatile bool check_clk;
 
-//Adafruit_MCP23017 mcp;
-
-//static uint8_t btn_select_pins[BTN_NUM_COL] 	= { 7, 6, 5, 4, 3, 2, 1, 0};
-//static uint8_t btn_read_pins[BTN_NUM_ROW] 	= {12, 13, 14, 15, 8, 9, 10, 11 };
-//
-//static ArrBounce btn_row[BTN_NUM_COL];
 uint8_t btn_col_idx;
 volatile bool btn_flag;
 
 IntervalTimer ui_timer;
 IntervalTimer btn_timer;
 
-//static uint8_t btn_matrix_digitalRead(uint8_t pin){
-//	return mcp.digitalRead(pin);
-//}
-
 static void check_btn(){
 	if(!btn_flag)
 		btn_flag = true;
 }
-/*
-static void init_matrix_btn(){
-	int i;
-	btn_col_idx = 0;
 
-	mcp.begin(6);
-	Wire.setClock(1000000);
-
-	for(i=0;i<BTN_NUM_COL;i++){
-		btn_row[i].init_ArrBounce(btn_read_pins, BOUNCE_TIME, BTN_NUM_ROW, &btn_matrix_digitalRead);
-	}
-
-	for (i=0;i<BTN_NUM_COL;i++){
-		mcp.pinMode(btn_select_pins[i], OUTPUT);
-		mcp.digitalWrite(btn_select_pins[i], HIGH);
-	}
-
-	// button row input lines
-	for (i=0;i<BTN_NUM_ROW;i++){
-		mcp.pinMode(btn_read_pins[i], INPUT);
-		mcp.pullUp(btn_read_pins[i], HIGH);
-	}
-}
-
-static void scan(){
-	uint8_t i, j;
-
-// 	Select current columns
-	mcp.digitalWrite(btn_select_pins[btn_col_idx], LOW);
-
-// 	Read the button inputs
-	for (i=0; i<BTN_NUM_ROW; i++){
-		if(btn_row[btn_col_idx].update(i)){
-
-			if(btn_row[btn_col_idx].read(i) == LOW){
-
-			} else {
-				current_lm.toogle_led_x(LED_RG_IDX,btn_col_idx*BTN_NUM_COL+i);
-			}		
-		}
-	}
-	mcp.digitalWrite(btn_select_pins[btn_col_idx], HIGH);	
-	btn_col_idx = (btn_col_idx+1)%BTN_NUM_COL;
-}
-*/
-/*
-static void write_shift_reg(uint32_t val){
-	digitalWrite(latchPin, LOW);
-	shiftOut(dataPin, clockPin, LSBFIRST, val);
-	shiftOut(dataPin, clockPin, LSBFIRST, val >> 8);
-	shiftOut(dataPin, clockPin, LSBFIRST, val >> 16);
-	shiftOut(dataPin, clockPin, LSBFIRST, val >> 24);
-	digitalWrite(latchPin, HIGH);
-}
-
-static void upd_shift_reg(led_matrix* lm){
-	uint32_t tmp = ((1<<(grd_cnt+4))) << GRD_OFFSET;
-	led_t l = lm->get_led(grd_cnt);	
-	tmp |= (l.bitmap[LED_COLOR_RED_INDEX] << RED_OFFSET)
-		 | (l.bitmap[LED_COLOR_GREEN_INDEX] << GREEN_OFFSET)
-		 | (l.bitmap[LED_COLOR_BLUE_INDEX] << BLUE_OFFSET);
-	
-	write_shift_reg(tmp);
-	grd_cnt = (grd_cnt + 1) % LED_MATRIX_NR_GROUND;
-}
-*/
 static void upd_gui(){
 	upd_shift_reg(&current_lm);
 	if(!check_clk)
 		check_clk = true;
 }
-
-//static void setup_gui(){
-//	write_shift_reg(0x0);
-//	grd_cnt = 0;
-//}
 
 static void next_step(clk* c){
 	uint32_t ms = c->clk_elapsed();
@@ -161,6 +76,22 @@ static void next_step(clk* c){
 	}
 }
 
+static void init_prog(){
+	led_matrix* menu_lmtx = menu_ctrl.get_menu_led_matrix();
+	
+	prog_arr[0] = &p1;
+	set_prog_menu_entry(0, p1.menu_clbk, &p1);
+	menu_lmtx->set_led_x(LED_R_IDX, 0 * MATRIX_NR_ROW + 0);
+
+	prog_arr[1] = &p2;
+	set_prog_menu_entry(1, p2.menu_clbk, &p2);
+	menu_lmtx->set_led_x(LED_B_IDX, 1 * MATRIX_NR_ROW + 0);
+
+	prog_arr[2] = &menu_ctrl;
+	
+}
+
+
 void setup(){
 	setup_gui();
 	init_matrix_btn();
@@ -169,16 +100,18 @@ void setup(){
 	btn_timer.begin(check_btn, 1000);
 	
 	mst_clk.clk_set_max_step(32);
+	init_menu_btn();
 }
 
 
 void loop(){
 	uint32_t ms;
 	if(check_clk){
-		next_step(&mst_clk);
+//		next_step(&mst_clk);
 		check_clk = false;
 	}
 	if(btn_flag){
 		scan();
+		scan_menu_btn();
 	}
 }

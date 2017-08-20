@@ -25,32 +25,89 @@
 #include <i2c_t3.h>
 #include <Adafruit_MCP23017.h>
 #include "Bounce_array.h"
+#include <Bounce2.h>
 
 #define NR_MENU_BTN				4
 #define MENU_BTN_BOUNCE_TIME	5
+#define PIN_MENU_BTN			17
 
-static uint8_t btn_menu_pins[NR_MENU_BTN] = { 0, 1, 2, 3};
+Bounce menu_btn = Bounce();
+menu menu_ctrl;
+
+static uint8_t btn_menu_pins[NR_MENU_BTN] = {7, 6, 5, 4};
 Adafruit_MCP23017 mcp_menu_btn;
 
-static ArrBounce menu_btn;
+static ArrBounce bn_menu_btn;
 
 static uint8_t btn_menu_digitalRead(uint8_t pin){
 	return mcp_menu_btn.digitalRead(pin);
 }
 
+static void init_menu_ctrl(){
+	
+}
+
+led_matrix* set_prog_menu_entry(uint8_t id, menu_clbk_type clbk, void* prog_ptr){
+	led_matrix* mtx = menu_ctrl.get_menu_led_matrix();
+	menu_ctrl.set_menu_clbk(id, clbk, prog_ptr);
+	return mtx;
+}
+
 static void init_menu_btn(){
-	menu_btn.init_ArrBounce(btn_menu_pins, MENU_BTN_BOUNCE_TIME, NR_MENU_BTN, &btn_menu_digitalRead);
+	menu_btn;
+	pinMode(PIN_MENU_BTN,INPUT);
+	menu_btn.attach(PIN_MENU_BTN);
+	menu_btn.interval(MENU_BTN_BOUNCE_TIME);
+
+	mcp_menu_btn.begin(0);
+	Wire.setClock(1000000);
+
+//
+//	mcp_menu_btn.pinMode(7, INPUT);
+//	mcp_menu_btn.pullUp(7, HIGH);
+//	
+	for(int i=0; i<NR_MENU_BTN; i++){
+		mcp_menu_btn.pinMode(btn_menu_pins[i], INPUT);
+		mcp_menu_btn.pullUp(btn_menu_pins[i], HIGH);
+	}
+//	bn_menu_btn.init_ArrBounce(btn_menu_pins, MENU_BTN_BOUNCE_TIME, NR_MENU_BTN, &btn_menu_digitalRead);
 }
 
 static void scan_menu_btn(){
-	int i = 0;
-	for (i=0; i<NR_MENU_BTN; i++){
-		if(menu_btn.update(i)){
-			if(menu_btn.read(i) == LOW){
-				Serial.println("pushed");
-			} else {
-				Serial.println("released");				
-			}		
+//	int i = 0;
+//	if(digitalRead(PIN_MENU_BTN) == LOW)
+//		Serial.println("LOW");
+//	else 
+//		Serial.println("HIGH");
+		
+	if(menu_btn.update()){
+		if(menu_btn.rose()){
+//			led_matrix* mtx = menu_manager.get_next_interface();
+		} 
+		else {
+			
 		}
-	}
+//		if(mtx)
+//			led_buf = mtx;
+//		if(menu_btn.read() == HIGH){
+//			Serial.println("pushed");
+//		} else {
+//			Serial.println("released");				
+//		}
+	} 
+	
+//	if(mcp_menu_btn.digitalRead(7) == HIGH)
+//		Serial.println("HIGH");
+//	else 
+//		Serial.println("LOW");
+
+//	for (i=0; i<NR_MENU_BTN; i++){
+//		if(menu_btn.update(i)){
+//			if(menu_btn.read(i) == LOW){
+//				Serial.println("pushed");
+//			} else {
+//				Serial.println("released");				
+//			}		
+//		}
+//	}
 }

@@ -43,6 +43,4 @@ class menu: public prog{
 		void on_release(void* ptr, uint8_t btn_id);		
 };
 
-
-
 #endif

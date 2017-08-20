@@ -12,7 +12,7 @@ menu::menu(){
 	default_clbk.clbk = default_clbk_func;
 	default_clbk.obj_ptr = NULL;
 	
-	for(int i=0;i<NUM_LED_ROWS;i++){
+	for(int i=0;i<MATRIX_NR_ROW;i++){
 		menu_clbk_arr[i] = default_clbk;
 	}
 }
@@ -29,7 +29,7 @@ void menu::set_menu_clbk(uint8_t prog_id, menu_clbk_type clbk, void* ptr){
 	tmp.clbk = clbk;
 	tmp.obj_ptr = ptr;
 	
-	if(prog_id < NUM_LED_ROWS)
+	if(prog_id < MATRIX_NR_ROW)
 		menu_clbk_arr[prog_id] = tmp;
 }
 
@@ -44,8 +44,8 @@ void menu::menu_on_push(uint8_t btn_id){
 	;
 }
 void menu::menu_on_release(uint8_t btn_id){
-	uint8_t prog_id = btn_id / NUM_LED_ROWS;
-	uint8_t opt_id = btn_id % NUM_LED_COLUMNS;
+	uint8_t prog_id = btn_id / MATRIX_NR_ROW;
+	uint8_t opt_id = btn_id % MATRIX_NR_COL;
 	struct menu_clbk tmp = menu_clbk_arr[prog_id];
 	
 	led_matrix* tmp_lm = (tmp.clbk)(tmp.obj_ptr, prog_id, opt_id, &menu_interface);
