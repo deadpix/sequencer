@@ -26,13 +26,14 @@
 #include <Adafruit_MCP23017.h>
 #include "Bounce_array.h"
 #include <Bounce2.h>
+#include "prog.h"
 
 #define NR_MENU_BTN				4
 #define MENU_BTN_BOUNCE_TIME	5
 #define PIN_MENU_BTN			17
 
 Bounce menu_btn = Bounce();
-menu menu_ctrl;
+//menu menu_ctrl;
 
 static uint8_t btn_menu_pins[NR_MENU_BTN] = {7, 6, 5, 4};
 Adafruit_MCP23017 mcp_menu_btn;

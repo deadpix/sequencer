@@ -29,18 +29,23 @@
 #include "Bounce_array.h"
 #include "clk.h"
 #include "prog.h"
+#include "menu.h"
 
+#include "test_proj_one.h"
+#include "test_proj_two.h"
+
+menu  menu_ctrl;
 prog *prog_arr[MATRIX_NR_COL];
 prog *current_prog;
 
 static test_proj_one p1;
-static test_proj_one p2;
+static test_proj_two p2;
 
 
 
 
 led_matrix 	current_lm;
-led_matrix* mtx_ptr;
+led_matrix* lm_ptr;
 
 
 clk mst_clk;
@@ -58,7 +63,7 @@ static void check_btn(){
 }
 
 static void upd_gui(){
-	upd_shift_reg(&current_lm);
+	upd_shift_reg(lm_ptr);
 	if(!check_clk)
 		check_clk = true;
 }
@@ -88,7 +93,9 @@ static void init_prog(){
 	menu_lmtx->set_led_x(LED_B_IDX, 1 * MATRIX_NR_ROW + 0);
 
 	prog_arr[2] = &menu_ctrl;
-	
+
+	lm_ptr = p1.get_led_matrix();
+	current_prog = prog_arr[0];
 }
 
 
@@ -100,6 +107,8 @@ void setup(){
 	btn_timer.begin(check_btn, 1000);
 	
 	mst_clk.clk_set_max_step(32);
+
+	init_prog();
 	init_menu_btn();
 }
 
@@ -111,7 +120,7 @@ void loop(){
 		check_clk = false;
 	}
 	if(btn_flag){
-		scan();
+		scan(current_prog);
 		scan_menu_btn();
 	}
 }

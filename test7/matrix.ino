@@ -28,6 +28,9 @@
 #include "led_matrix.h"
 #include "Bounce_array.h"
 
+
+
+
 #define latchPin 		22
 #define clockPin 		23
 #define dataPin  		21
@@ -76,7 +79,7 @@ static void init_matrix_btn(){
 	}
 }
 
-static void scan(){
+static void scan(prog* p){
 	uint8_t i, j;
 
 // 	Select current columns
@@ -87,9 +90,9 @@ static void scan(){
 		if(btn_row[btn_col_idx].update(i)){
 
 			if(btn_row[btn_col_idx].read(i) == LOW){
-//				current_prog->on_release(current_prog, btn_col_idx*BTN_NUM_COL + i);
+				p->on_release(current_prog, btn_col_idx*BTN_NUM_COL + i);
 			} else {
-//				current_prog->on_push(current_prog, btn_col_idx*BTN_NUM_COL + i);
+				p->on_push(current_prog, btn_col_idx*BTN_NUM_COL + i);
 				current_lm.toogle_led_x(LED_RG_IDX,btn_col_idx*BTN_NUM_COL+i);
 			}		
 		}

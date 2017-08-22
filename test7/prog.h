@@ -15,12 +15,12 @@ class prog {
 		uint8_t prog_id;
 	
 	public:
-		
 		void set_prog_id(uint8_t);
 		uint8_t get_prog_id();
 		
 		virtual void on_push(void* ptr, uint8_t btn_id) = 0;
 		virtual void on_release(void* ptr, uint8_t btn_id) = 0;
+		virtual led_matrix* get_led_matrix(void);
 };
 
 

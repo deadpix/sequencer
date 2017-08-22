@@ -61,3 +61,7 @@ void menu::on_release(void* this_ptr, uint8_t btn_id){
 	menu* myself = static_cast<menu *>(this_ptr);
 	myself->menu_on_release(btn_id);
 }
+
+led_matrix* menu::get_led_matrix(void){
+	return &menu_interface;
+}

@@ -11,6 +11,10 @@
 #include "prog.h"
 #include "led_matrix.h"
 
+
+
+
+
 typedef boolean (* menu_clbk_def)(uint8_t, uint8_t, led_matrix*);
 typedef led_matrix* (* menu_clbk_type)(void*, uint8_t, uint8_t, led_matrix*);
 
@@ -41,6 +45,7 @@ class menu: public prog{
 
 		void on_push(void* ptr, uint8_t btn_id);
 		void on_release(void* ptr, uint8_t btn_id);		
+		led_matrix* get_led_matrix(void);
 };
 
 #endif
