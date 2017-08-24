@@ -36,8 +36,16 @@ void menu::set_menu_clbk(uint8_t prog_id, menu_clbk_type clbk, void* ptr){
 led_matrix* menu::get_next_interface(){
 	return next_interface;
 }
+prog* menu::get_next_prog(){
+	return next_prog;
+}
+
 void menu::set_next_interface(led_matrix* lm){
 	next_interface = lm;
+}
+
+void menu::set_next_prog(prog* p){
+	next_prog = p;
 }
 
 void menu::menu_on_push(uint8_t btn_id){
@@ -50,8 +58,10 @@ void menu::menu_on_release(uint8_t btn_id){
 	
 	led_matrix* tmp_lm = (tmp.clbk)(tmp.obj_ptr, prog_id, opt_id, &menu_interface);
 	
-	if(tmp_lm)
+	if(tmp_lm){
 		next_interface = tmp_lm;
+		next_prog = static_cast<prog *>(tmp.obj_ptr);
+	}
 }
 void menu::on_push(void* this_ptr, uint8_t btn_id){
 	menu* myself = static_cast<menu *>(this_ptr);

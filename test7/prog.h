@@ -16,7 +16,8 @@ class prog {
 	
 	public:
 		void set_prog_id(uint8_t);
-		uint8_t get_prog_id();
+		uint8_t get_prog_id(void);
+		prog* get_prog(void);
 		
 		virtual void on_push(void* ptr, uint8_t btn_id) = 0;
 		virtual void on_release(void* ptr, uint8_t btn_id) = 0;

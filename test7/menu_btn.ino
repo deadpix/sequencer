@@ -80,13 +80,22 @@ static void scan_menu_btn(){
 //		Serial.println("LOW");
 //	else 
 //		Serial.println("HIGH");
-		
+
+			// need pointer to class led_matrix
+			// and pointer to class  prog
+			// ==> need to know the next programm to setup
 	if(menu_btn.update()){
 		if(menu_btn.rose()){
 //			led_matrix* mtx = menu_manager.get_next_interface();
+			led_matrix* tmp = menu_ctrl.get_next_interface();
+			if(tmp){
+				lm_ptr = tmp;
+			}
+			current_prog = menu_ctrl.get_next_prog();
 		} 
 		else {
-			
+			lm_ptr = menu_ctrl.get_menu_led_matrix();
+			current_prog = prog_arr[2];
 		}
 //		if(mtx)
 //			led_buf = mtx;

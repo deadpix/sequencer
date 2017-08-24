@@ -27,6 +27,7 @@ class menu: public prog{
 	private:
 		led_matrix  menu_interface;
 		led_matrix *next_interface;
+		prog*		next_prog; 
 		struct menu_clbk menu_clbk_arr[MATRIX_NR_COL];
 	
 	public:
@@ -38,7 +39,9 @@ class menu: public prog{
 		void set_menu_clbk(uint8_t prog_id, menu_clbk_type clbk, void *ptr);
 
 		led_matrix* get_next_interface();
+		prog* get_next_prog();
 		void set_next_interface(led_matrix*);
+		void set_next_prog(prog*);
 		
 		void menu_on_push(uint8_t btn_id);
 		void menu_on_release(uint8_t btn_id);
