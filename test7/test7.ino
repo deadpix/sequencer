@@ -34,6 +34,9 @@
 #include "test_proj_one.h"
 #include "test_proj_two.h"
 
+
+
+
 menu  menu_ctrl;
 prog *prog_arr[MATRIX_NR_COL];
 prog *current_prog;
@@ -53,9 +56,15 @@ volatile bool check_clk;
 
 uint8_t btn_col_idx;
 volatile bool btn_flag;
+volatile bool midi_flag;
 
 IntervalTimer ui_timer;
 IntervalTimer btn_timer;
+IntervalTimer midi_timer;
+
+static void upd_midi(){
+	midi_flag = true;
+}
 
 static void check_btn(){
 	if(!btn_flag)
@@ -85,11 +94,11 @@ static void init_prog(){
 	led_matrix* menu_lmtx = menu_ctrl.get_menu_led_matrix();
 	
 	prog_arr[0] = &p1;
-	set_prog_menu_entry(0, p1.menu_clbk, &p1);
+	set_prog_menu_entry(0, p1.clbk_menu_on_push, p1.clbk_menu_on_release, &p1);
 	menu_lmtx->set_led_x(LED_R_IDX, 0 * MATRIX_NR_ROW + 0);
 
 	prog_arr[1] = &p2;
-	set_prog_menu_entry(1, p2.menu_clbk, &p2);
+	set_prog_menu_entry(1, p2.clbk_menu_on_push, p2.clbk_menu_on_release, &p2);
 	menu_lmtx->set_led_x(LED_B_IDX, 1 * MATRIX_NR_ROW + 0);
 
 	prog_arr[2] = &menu_ctrl;
@@ -105,16 +114,18 @@ void setup(){
 
 	ui_timer.begin(upd_gui, 1000);
 	btn_timer.begin(check_btn, 1000);
+	midi_timer.begin(upd_midi, 8000);
 	
 	mst_clk.clk_set_max_step(32);
 
 	init_prog();
-	init_menu_btn();
+	init_menu_btn(current_prog);
+
+	init_midi();
 }
 
 
 void loop(){
-	uint32_t ms;
 	if(check_clk){
 //		next_step(&mst_clk);
 		check_clk = false;
@@ -123,4 +134,8 @@ void loop(){
 		scan(current_prog);
 		scan_menu_btn();
 	}
+	midi_loop(midi_flag);
+	if(midi_flag)
+		midi_flag = false;
+	
 }

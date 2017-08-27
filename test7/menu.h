@@ -19,7 +19,8 @@ typedef boolean (* menu_clbk_def)(uint8_t, uint8_t, led_matrix*);
 typedef led_matrix* (* menu_clbk_type)(void*, uint8_t, uint8_t, led_matrix*);
 
 struct menu_clbk {
-	menu_clbk_type clbk;
+	menu_clbk_type clbk_on_push;
+	menu_clbk_type clbk_on_release;
 	void* obj_ptr;
 };
 
@@ -36,7 +37,7 @@ class menu: public prog{
 		~menu();
 		
 		led_matrix* get_menu_led_matrix();
-		void set_menu_clbk(uint8_t prog_id, menu_clbk_type clbk, void *ptr);
+		void set_menu_clbk(uint8_t prog_id, menu_clbk_type on_push, menu_clbk_type on_release, void *ptr);
 
 		led_matrix* get_next_interface();
 		prog* get_next_prog();

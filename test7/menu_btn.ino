@@ -48,29 +48,30 @@ static void init_menu_ctrl(){
 	
 }
 
-led_matrix* set_prog_menu_entry(uint8_t id, menu_clbk_type clbk, void* prog_ptr){
+led_matrix* set_prog_menu_entry(uint8_t id, menu_clbk_type on_push, menu_clbk_type on_release, void* prog_ptr){
 	led_matrix* mtx = menu_ctrl.get_menu_led_matrix();
-	menu_ctrl.set_menu_clbk(id, clbk, prog_ptr);
+	menu_ctrl.set_menu_clbk(id, on_push, on_release, prog_ptr);
 	return mtx;
 }
 
-static void init_menu_btn(){
+static void init_menu_btn(prog* p){
 	menu_btn;
 	pinMode(PIN_MENU_BTN,INPUT);
 	menu_btn.attach(PIN_MENU_BTN);
 	menu_btn.interval(MENU_BTN_BOUNCE_TIME);
-
-	mcp_menu_btn.begin(0);
-	Wire.setClock(1000000);
+	menu_ctrl.set_next_interface(p->get_led_matrix());
+	menu_ctrl.set_next_prog(p);
+//	mcp_menu_btn.begin(0);
+//	Wire.setClock(1000000);
 
 //
 //	mcp_menu_btn.pinMode(7, INPUT);
 //	mcp_menu_btn.pullUp(7, HIGH);
 //	
-	for(int i=0; i<NR_MENU_BTN; i++){
-		mcp_menu_btn.pinMode(btn_menu_pins[i], INPUT);
-		mcp_menu_btn.pullUp(btn_menu_pins[i], HIGH);
-	}
+//	for(int i=0; i<NR_MENU_BTN; i++){
+//		mcp_menu_btn.pinMode(btn_menu_pins[i], INPUT);
+//		mcp_menu_btn.pullUp(btn_menu_pins[i], HIGH);
+//	}
 //	bn_menu_btn.init_ArrBounce(btn_menu_pins, MENU_BTN_BOUNCE_TIME, NR_MENU_BTN, &btn_menu_digitalRead);
 }
 
@@ -85,11 +86,14 @@ static void scan_menu_btn(){
 			// and pointer to class  prog
 			// ==> need to know the next programm to setup
 	if(menu_btn.update()){
-		if(menu_btn.rose()){
+//		if(digitalRead(PIN_MENU_BTN) == LOW){
+		if(menu_btn.fell()){
 //			led_matrix* mtx = menu_manager.get_next_interface();
 			led_matrix* tmp = menu_ctrl.get_next_interface();
 			if(tmp){
 				lm_ptr = tmp;
+			} else {
+				Serial.println("no lm pointer?");				
 			}
 			current_prog = menu_ctrl.get_next_prog();
 		} 
