@@ -70,10 +70,14 @@ uint32_t clk::clk_get_elapsed_ms(){
 int clk::clk_get_operator(){
 	return _operation;
 }
+uint16_t clk::clk_get_bpm(){
+	return _bpm;
+}
+
 void clk::clk_set_max_step(uint8_t max_step){
 	_max_step = max_step;
 }
-/*
+
 int clk::clk_set_ms(uint32_t new_ms){
 	int ret = 0;
 	if(new_ms < _ms)
@@ -83,7 +87,7 @@ int clk::clk_set_ms(uint32_t new_ms){
 	
 	return ret;
 }
-*/
+
 int clk::clk_set_bpm(uint16_t new_bpm){
 	int ret = 0;
 	if(new_bpm > _bpm)

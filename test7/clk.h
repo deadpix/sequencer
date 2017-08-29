@@ -53,8 +53,9 @@ class clk {
 		uint32_t clk_get_ms();
 		uint16_t clk_get_step_cnt();
 		uint32_t clk_get_elapsed_ms();
-
-//		int clk_set_ms(uint32_t);
+		uint16_t clk_get_bpm();
+		
+		int clk_set_ms(uint32_t);
 		int clk_set_bpm(uint16_t);	
 		int clk_get_operator();
 
