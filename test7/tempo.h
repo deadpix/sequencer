@@ -4,6 +4,7 @@
 #include "prog.h"
 #include "led_matrix.h"
 #include "clk.h"
+#include "led_toogle.h"
 
 #define NR_TAP	2
 
@@ -14,6 +15,7 @@ class tempo : public prog {
 		clk _mst;
 		uin32_t _tap_timestamp[NR_TAP-1];
 		uint8_t _tap_cnt;
+		led_toogle _tap_animation;
 		
 	protected:
 		void tap();
