@@ -12,6 +12,17 @@ led_matrix* test_proj_two::get_led_matrix(){
 	return &_lm;
 }
 
+
+
+void test_proj_two::menu_enter(){
+}
+void test_proj_two::menu_leave(){
+}
+void test_proj_two::menu_update(){
+}
+
+
+
 void test_proj_two::on_push(void* this_ptr, uint8_t btn_id){
 	test_proj_two* myself = static_cast<test_proj_two *>(this_ptr);
 }

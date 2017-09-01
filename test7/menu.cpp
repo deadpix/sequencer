@@ -49,6 +49,15 @@ void menu::set_next_prog(prog* p){
 	next_prog = p;
 }
 
+void menu::menu_enter(){
+}
+void menu::menu_leave(){
+}
+void menu::menu_update(){
+}
+
+
+
 void menu::menu_on_push(uint8_t btn_id){
 	uint8_t prog_id = btn_id / MATRIX_NR_ROW;
 	uint8_t opt_id = btn_id % MATRIX_NR_COL;

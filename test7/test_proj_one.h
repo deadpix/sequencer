@@ -16,7 +16,11 @@ class test_proj_one : public prog {
 		
 		void on_push(void* ptr, uint8_t btn_id);
 		void on_release(void* ptr, uint8_t btn_id);
-		
+
+		void menu_enter();
+		void menu_leave();
+		void menu_update();
+
 		static led_matrix* clbk_menu_on_push(void *, uint8_t, uint8_t, led_matrix*);
 		static led_matrix* clbk_menu_on_release(void *, uint8_t, uint8_t, led_matrix*);
 

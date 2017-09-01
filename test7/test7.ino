@@ -31,6 +31,7 @@
 #include "prog.h"
 #include "menu.h"
 
+#include "tempo.h"
 #include "test_proj_one.h"
 #include "test_proj_two.h"
 
@@ -40,7 +41,9 @@
 menu  menu_ctrl;
 prog *prog_arr[MATRIX_NR_COL];
 prog *current_prog;
+int nr_prog;
 
+static tempo tempo_setting;
 static test_proj_one p1;
 static test_proj_two p2;
 
@@ -91,20 +94,32 @@ static void next_step(clk* c){
 }
 
 static void init_prog(){
+	nr_prog = 0;
 	led_matrix* menu_lmtx = menu_ctrl.get_menu_led_matrix();
 	
-	prog_arr[0] = &p1;
-	set_prog_menu_entry(0, p1.clbk_menu_on_push, p1.clbk_menu_on_release, &p1);
-	menu_lmtx->set_led_x(LED_R_IDX, 0 * MATRIX_NR_ROW + 0);
+	prog_arr[nr_prog] = &tempo_setting;
+	set_prog_menu_entry(nr_prog, tempo_setting.clbk_menu_on_push, tempo_setting.clbk_menu_on_release, &tempo_setting);
+	nr_prog++;
+	
+	prog_arr[nr_prog] = &p1;
+	set_prog_menu_entry(nr_prog, p1.clbk_menu_on_push, p1.clbk_menu_on_release, &p1);
+	menu_lmtx->set_led_x(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0);
+	nr_prog++;
+	
+	prog_arr[nr_prog] = &p2;
+	set_prog_menu_entry(nr_prog, p2.clbk_menu_on_push, p2.clbk_menu_on_release, &p2);
+	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
+	nr_prog++;
 
-	prog_arr[1] = &p2;
-	set_prog_menu_entry(1, p2.clbk_menu_on_push, p2.clbk_menu_on_release, &p2);
-	menu_lmtx->set_led_x(LED_B_IDX, 1 * MATRIX_NR_ROW + 0);
+	// menu_ctrl MUST BE last
+	prog_arr[nr_prog] = &menu_ctrl;
 
-	prog_arr[2] = &menu_ctrl;
-
+	for(int i=0;i<(nr_prog-1);i++){
+		prog_arr[i]->set_menu_lm(menu_lmtx);
+	}
+	
 	lm_ptr = p1.get_led_matrix();
-	current_prog = prog_arr[0];
+	current_prog = prog_arr[1];
 }
 
 

@@ -23,9 +23,11 @@
  */ 
 
 #include "clk.h"
+#include "types.h"
 
 #define MAX_DIVIDER 	16
 #define DELAY_MS		50
+#define MAX_STEP		(MATRIX_NR_ROW*MATRIX_NR_COL)
 
 static uint32_t bpm_to_ms(uint16_t bpm){
 	return (60000/bpm);
@@ -37,7 +39,7 @@ static uint16_t ms_to_bpm(uint32_t ms){
 
 clk::clk(){
 	_step_cnt	= 0;
-	_max_step	= 16;
+	_max_step	= MAX_STEP;
 	_bpm 		= 90;
 	_elapsed_ms = 0;
 	_ms 		= bpm_to_ms(_bpm);

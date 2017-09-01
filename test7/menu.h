@@ -44,6 +44,11 @@ class menu: public prog{
 		void set_next_interface(led_matrix*);
 		void set_next_prog(prog*);
 		
+		void menu_enter();
+		void menu_leave();
+		void menu_update();
+
+		
 		void menu_on_push(uint8_t btn_id);
 		void menu_on_release(uint8_t btn_id);
 

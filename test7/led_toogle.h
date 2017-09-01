@@ -3,6 +3,7 @@
 
 //#include "led_animation.h"
 #include <elapsedMillis.h>
+#include "led_matrix.h"
 
 #define LED_ON			true
 #define LED_OFF			false
@@ -11,20 +12,27 @@
 
 class led_toogle {
 	private:
-		ellapsed_millis _time_cnt;
+		elapsedMillis _time_cnt;
 		led_matrix* _lm;
 		boolean _state;
 		uint16_t _led_id;
 		uint8_t _color;
 		uint32_t _animation_time;
-		boolean _animation_mode;
-
+//		boolean _animation_mode;
+		
+		
 	public:
-		led_toogle(led_matrix*, uint16_t, uint8_t);
+		led_toogle();
+		led_toogle(led_matrix* lm, uint16_t led_id, uint8_t color);
 		~led_toogle();
 		
-		int start_animation(uint32_t, boolean, boolean);
-		int update_animation(boolean hold);
+		void turn_on_led(void);
+		void turn_off_led(void);
+//		void menu_update(void);
+
+		void init_animation(led_matrix* lm, uint16_t led_id, uint8_t color);
+		int start_animation(uint32_t/*, boolean*//*, boolean*/);
+		int update_animation(/*boolean hold*/);
 		int stop_animation();
 };
 
