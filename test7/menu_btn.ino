@@ -99,7 +99,7 @@ static void scan_menu_btn(){
 		} 
 		else {
 			lm_ptr = menu_ctrl.get_menu_led_matrix();
-			current_prog = prog_arr[2];
+			current_prog = prog_arr[nr_prog];
 		}
 //		if(mtx)
 //			led_buf = mtx;

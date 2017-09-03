@@ -54,6 +54,11 @@ void menu::menu_enter(){
 void menu::menu_leave(){
 }
 void menu::menu_update(){
+	for(int i=0;i<(MATRIX_NR_COL-1);i++){
+		struct menu_clbk tmp = menu_clbk_arr[i];
+		prog* p = static_cast<prog *>(tmp.obj_ptr);
+		p->menu_update();
+	}
 }
 
 

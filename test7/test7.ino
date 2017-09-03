@@ -98,15 +98,18 @@ static void init_prog(){
 	led_matrix* menu_lmtx = menu_ctrl.get_menu_led_matrix();
 	
 	prog_arr[nr_prog] = &tempo_setting;
+	tempo_setting.set_prog_id(nr_prog);
 	set_prog_menu_entry(nr_prog, tempo_setting.clbk_menu_on_push, tempo_setting.clbk_menu_on_release, &tempo_setting);
 	nr_prog++;
 	
 	prog_arr[nr_prog] = &p1;
+	p1.set_prog_id(nr_prog);
 	set_prog_menu_entry(nr_prog, p1.clbk_menu_on_push, p1.clbk_menu_on_release, &p1);
 	menu_lmtx->set_led_x(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 	
 	prog_arr[nr_prog] = &p2;
+	p2.set_prog_id(nr_prog);
 	set_prog_menu_entry(nr_prog, p2.clbk_menu_on_push, p2.clbk_menu_on_release, &p2);
 	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
@@ -120,6 +123,8 @@ static void init_prog(){
 	
 	lm_ptr = p1.get_led_matrix();
 	current_prog = prog_arr[1];
+	
+	tempo_setting.init();
 }
 
 
@@ -149,8 +154,10 @@ void loop(){
 		scan(current_prog);
 		scan_menu_btn();
 	}
-	midi_loop(midi_flag);
-	if(midi_flag)
-		midi_flag = false;
+	menu_ctrl.menu_update();
+	
+//	midi_loop(midi_flag);
+//	if(midi_flag)
+//		midi_flag = false;
 	
 }

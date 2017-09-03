@@ -37,6 +37,10 @@ static uint16_t ms_to_bpm(uint32_t ms){
 	return (uint16_t)(ms/60000);
 }
 
+static uint16_t bpms_to_bpm(uint32_t bpms){
+	return (uint16_t) (60000/bpms);
+}
+
 clk::clk(){
 	_step_cnt	= 0;
 	_max_step	= MAX_STEP;
@@ -78,6 +82,11 @@ uint16_t clk::clk_get_bpm(){
 
 void clk::clk_set_max_step(uint8_t max_step){
 	_max_step = max_step;
+}
+
+int clk::clk_bpms_to_bpm(uint32_t bpms){
+	uint16_t bpm = bpms_to_bpm(bpms);
+	clk_set_bpm(bpm);
 }
 
 int clk::clk_set_ms(uint32_t new_ms){

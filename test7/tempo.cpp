@@ -1,7 +1,10 @@
 #include "tempo.h"
 
-#define DEBUG	1
-#define LED_ANIMATION_MS	20
+#define DEBUG				1
+#define LED_ANIMATION_MS	60
+
+#define TAP_BTN_ID			1
+#define BPM_BTN_ID			0
 
 tempo::tempo(){	
 	_tap_cnt = 0;
@@ -11,8 +14,8 @@ tempo::~tempo(){
 }
 
 void tempo::init(){
-	_tap_animation.init_animation(get_menu_lm(),(prog_id*MATRIX_NR_COL+1), LED_GBR_IDX);
-	_clk_animation.init_animation(get_menu_lm(),(prog_id*MATRIX_NR_COL+0), LED_R_IDX);
+	_tap_animation.init_animation(get_menu_lm(),(prog_id*MATRIX_NR_COL+TAP_BTN_ID), LED_GBR_IDX);
+	_clk_animation.init_animation(get_menu_lm(),(prog_id*MATRIX_NR_COL+BPM_BTN_ID), LED_R_IDX);
 }
 
 void tempo::clr_tap(){
@@ -26,6 +29,7 @@ led_matrix* tempo::get_led_matrix(){
 void tempo::tap(){
 	if(_tap_cnt > 0){
 		_tap_timestamp[(_tap_cnt-1)] = _ellapsed_tap;
+		Serial.println(_ellapsed_tap);
 	}
 	_ellapsed_tap = 0;
 
@@ -34,11 +38,12 @@ void tempo::tap(){
 		for(int i=0; i<NR_TAP; i++){
 			avg += _tap_timestamp[i];
 		}
-		avg /= NR_TAP;
-		_mst.clk_set_ms(avg);
+		avg /= (NR_TAP-1);
+		_mst.clk_bpms_to_bpm(avg);
 #if DEBUG
-		Serial.print("new bpm ");
+		Serial.print(" new bpm ");
 		Serial.println(_mst.clk_get_bpm());
+
 #endif
 	}
 	_tap_cnt = (_tap_cnt + 1) % NR_TAP;
@@ -68,22 +73,23 @@ void tempo::menu_leave(){
 }
 
 void tempo::menu_update(){
+	check_mst_clk();
 	_tap_animation.update_animation();
 	_clk_animation.update_animation();
 }
 
 
 led_matrix* tempo::menu_on_push(uint8_t func_id, uint8_t opt_id, led_matrix* menu_matrix){	
-	if(opt_id == 0){
-		tap();
+	if(opt_id == TAP_BTN_ID){
+		_tap_animation.start_animation(LED_ANIMATION_MS);
 		// need to start led animation
-		_tap_animation.turn_on_led();
 	}
 	return NULL;
 }
 led_matrix* tempo::menu_on_release(uint8_t func_id, uint8_t opt_id, led_matrix* menu_matrix){	
-	if(opt_id == 0){
-		_tap_animation.start_animation(LED_ANIMATION_MS);
+	if(opt_id == TAP_BTN_ID){
+		tap();
+		_tap_animation.turn_on_led();
 	}	
 //	for(int i=0; i<MATRIX_NR_COL; i++){
 //	}	

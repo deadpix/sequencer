@@ -57,6 +57,7 @@ class clk {
 		
 		int clk_set_ms(uint32_t);
 		int clk_set_bpm(uint16_t);	
+		int clk_bpms_to_bpm(uint32_t);
 		int clk_get_operator();
 
 		void clk_set_max_step(uint8_t);
