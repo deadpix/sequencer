@@ -58,6 +58,17 @@
 #define PWM_CV				1
 #define SLV_CV				2
 
+#define RANDOM_PARAM		RANDOM_CV
+#define CLOCK_PARAM			PWM_CV
+#define IO_PARAM			SLV_CV
+
+#define CLK_PARAM_SIZE		(3*2+2)
+#define IO_PARAM_SIZE		(4)
+#define RANDOM_PARAM_SIZE	(4*2)
+
+#define CLK_PARAM_OFF		0
+#define IO_PARAM_OFF		(CLK_PARAM_OFF + CLK_PARAM_SIZE)
+#define RANDOM_PARAM_OFF	(IO_PARAM_OFF + IO_PARAM_SIZE)
 
 const int ain1  = A0;	// Analog Input 1
 const int ain2  = A1;  	// Analog Input 2
@@ -96,17 +107,6 @@ struct gated_clock_t {
 struct gated_clock_t mst_clk;
 struct gated_clock_t slv_clk;
 
-//clk master;
-//clk slave;
-//gate m_gate;
-//gate s_gate;
-//byte percent_gate_len[2];
-//byte slv_trig_level;
-//byte ext_trig_level;
-//int master_rate;
-//byte slv_mult;
-
-
 /************************** RANDOM **************************/
 struct rnd_t {
 	clk rnd_clk;
@@ -115,9 +115,6 @@ struct rnd_t {
 };
 struct rnd_t rnds[NR_ANALOG_OUTPUT];
 /************************************************************/
-
-
-//bool sync_master;
 
 /***************** DIGITAL INPUT SYNC ***********************/
 // save state of digital input (HIGH or LOW)
@@ -145,14 +142,10 @@ ext_clock_t ext_clk;
 bool ext_clk_flag;
 // calculate time between two digital input 1 trig
 elapsedMillis ext_clk_period;
-
-/* ext clk: old code start */
-int ext_clk_state;
-unsigned int ext_clk_ms;
-/* ext clk: old code end */
 /************************************************************/
 
-
+// use to record previous switch position
+int prev_bank;
 
 ISR (PCINT0_vect){
 //	din_state = ( (digitalRead(din1) << 0) | (digitalRead(din2) << 1) );
@@ -165,6 +158,22 @@ ISR (PCINT1_vect){
 ISR (PCINT2_vect){
 	sw2_state = ( (digitalRead(sw2up) << 1) | (digitalRead(sw2dw) << 0) );
 }
+
+
+void eeprom_save_clk_param(){
+}
+void eeprom_save_rnd_param(){
+}
+void eeprom_save_io_param(){
+}
+
+void eeprom_load_clk_param(){
+}
+void eeprom_load_rnd_param(){
+}
+void eeprom_load_io_param(){
+}
+
 
 
 
@@ -284,6 +293,9 @@ void init_var(){
 	slv_clk.clk_gate_len = 50;
 	upd_gate_len(&mst_clk.g, &mst_clk.c, mst_clk.clk_gate_len);
 	upd_gate_len(&slv_clk.g, &slv_clk.c, slv_clk.clk_gate_len);
+
+
+	prev_bank = -1;
 }
 
 void init_io(){
@@ -383,6 +395,25 @@ int bank_time(int sw_state, unsigned int ms_period){
 	return ret;
 }
 
+void eeprom_save_data(int param){
+	switch(param){
+		case CLOCK_PARAM:
+
+			break;
+		case IO_PARAM:
+
+			break;
+
+		case RANDOM_PARAM:
+			break;
+
+		default:
+			Serial.print("Unknown param to save... ");
+			Serial.println(param);
+			break;
+	}
+}
+
 bool map_uint_to_bool(int mid, unsigned int val){
 //	return (val < (mid/2) ? 0 : 1);
 	return ((unsigned int) (val / (mid/2)));
@@ -457,6 +488,11 @@ int bank_all(unsigned int ms){
 			ret = bank_random(sw2_state);
 			break;
 	}
+	if(ret && prev_bank == 0){
+		// save data to eeprom
+		eeprom_save_data(ret);
+	}
+	prev_bank = ret;
 	return ret;
 }
 
@@ -480,7 +516,7 @@ void upd_output(unsigned int master_ms, unsigned int slave_ms){
 
 /********************** RANDOM FUNCTIONS *********************************/
 
-static void rnd_init(){
+static void init_rnd(){
 	randomSeed(analogRead(0));	
 	rnds[0].rnd_max = MAX_ANALOG_OUT + 1;
 	rnds[1].rnd_max = MAX_ANALOG_OUT + 1;
@@ -539,7 +575,7 @@ void setup() {
 	init_interrupt();
 	init_ext_clk();
 	init_var();
-	rnd_init();
+	init_rnd();
 }
 
 void loop(){
