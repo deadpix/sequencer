@@ -48,10 +48,13 @@ static void init_menu_ctrl(){
 	
 }
 
-led_matrix* set_prog_menu_entry(uint8_t id, menu_clbk_type on_push, menu_clbk_type on_release, void* prog_ptr){
-	led_matrix* mtx = menu_ctrl.get_menu_led_matrix();
-	menu_ctrl.set_menu_clbk(id, on_push, on_release, prog_ptr);
-	return mtx;
+//led_matrix* set_prog_menu_entry(uint8_t id, menu_clbk_type on_push, menu_clbk_type on_release, void* prog_ptr){
+//	led_matrix* mtx = menu_ctrl.get_menu_led_matrix();
+//	menu_ctrl.set_menu_clbk(id, on_push, on_release, prog_ptr);
+//	return mtx;
+//}
+void set_prog_menu_entry(uint8_t id, prog* prog){
+	menu_ctrl.set_menu_prog_entry(id, prog);
 }
 
 static void init_menu_btn(prog* p){

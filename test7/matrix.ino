@@ -90,9 +90,9 @@ static void scan(prog* p){
 		if(btn_row[btn_col_idx].update(i)){
 
 			if(btn_row[btn_col_idx].read(i) == LOW){
-				p->on_release(current_prog, btn_col_idx*BTN_NUM_COL + i);
+				p->on_release(/*current_prog,*/ btn_col_idx*BTN_NUM_COL + i);
 			} else {
-				p->on_push(current_prog, btn_col_idx*BTN_NUM_COL + i);
+				p->on_push(/*current_prog, */btn_col_idx*BTN_NUM_COL + i);
 //				current_lm.toogle_led_x(LED_RG_IDX,btn_col_idx*BTN_NUM_COL+i);
 			}		
 		}

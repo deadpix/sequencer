@@ -93,31 +93,43 @@ static void next_step(clk* c){
 	}
 }
 
-static void init_prog(){
+//static void init_one_prog(prog* p,   ){
+//	prog_arr[nr_prog] = p;
+//	p->set_prog_id(nr_prog);
+//	set_prog_menu_entry(nr_prog, tempo_setting.clbk_menu_on_push, tempo_setting.clbk_menu_on_release, &tempo_setting);
+//}
+
+static void init_all_prog(){
 	nr_prog = 0;
 	led_matrix* menu_lmtx = menu_ctrl.get_menu_led_matrix();
 	
 	prog_arr[nr_prog] = &tempo_setting;
 	tempo_setting.set_prog_id(nr_prog);
-	set_prog_menu_entry(nr_prog, tempo_setting.clbk_menu_on_push, tempo_setting.clbk_menu_on_release, &tempo_setting);
+	set_prog_menu_entry(nr_prog, (prog *) &tempo_setting);
+//	set_prog_menu_entry(nr_prog, tempo_setting.menu_on_push, tempo_setting.menu_on_release, &tempo_setting);
+//	set_prog_menu_entry(nr_prog, tempo_setting.clbk_menu_on_push, tempo_setting.clbk_menu_on_release, &tempo_setting);
 	nr_prog++;
 	
 	prog_arr[nr_prog] = &p1;
 	p1.set_prog_id(nr_prog);
-	set_prog_menu_entry(nr_prog, p1.clbk_menu_on_push, p1.clbk_menu_on_release, &p1);
+//	set_prog_menu_entry(nr_prog, p1.clbk_menu_on_push, p1.clbk_menu_on_release, &p1);
+//	set_prog_menu_entry(nr_prog, p1.menu_on_push, p1.menu_on_release, &p1);
+	set_prog_menu_entry(nr_prog, (prog *) &p1);
 	menu_lmtx->set_led_x(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 	
 	prog_arr[nr_prog] = &p2;
 	p2.set_prog_id(nr_prog);
-	set_prog_menu_entry(nr_prog, p2.clbk_menu_on_push, p2.clbk_menu_on_release, &p2);
+//	set_prog_menu_entry(nr_prog, p2.menu_on_push, p2.menu_on_release, &p2);
+//	set_prog_menu_entry(nr_prog, p2.clbk_menu_on_push, p2.clbk_menu_on_release, &p2);
+	set_prog_menu_entry(nr_prog, (prog *) &p2);
 	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 
 	// menu_ctrl MUST BE last
 	prog_arr[nr_prog] = &menu_ctrl;
 
-	for(int i=0;i<(nr_prog-1);i++){
+	for(int i=0;i<nr_prog;i++){
 		prog_arr[i]->set_menu_lm(menu_lmtx);
 	}
 	
@@ -138,7 +150,7 @@ void setup(){
 	
 	mst_clk.clk_set_max_step(32);
 
-	init_prog();
+	init_all_prog();
 	init_menu_btn(current_prog);
 
 	init_midi();
@@ -154,7 +166,9 @@ void loop(){
 		scan(current_prog);
 		scan_menu_btn();
 	}
+
 	menu_ctrl.menu_update();
+
 	
 //	midi_loop(midi_flag);
 //	if(midi_flag)

@@ -51,11 +51,11 @@ void tempo::tap(){
 
 
 
-void tempo::on_push(void* this_ptr, uint8_t btn_id){
-	tempo* myself = static_cast<tempo *>(this_ptr);
+void tempo::on_push(/*void* this_ptr, */uint8_t btn_id){
+//	tempo* myself = static_cast<tempo *>(this_ptr);
 }
-void tempo::on_release(void* this_ptr, uint8_t btn_id){
-	tempo* myself = static_cast<tempo *>(this_ptr);
+void tempo::on_release(/*void* this_ptr, */uint8_t btn_id){
+//	tempo* myself = static_cast<tempo *>(this_ptr);
 }
 
 uint32_t tempo::check_mst_clk(){
@@ -79,14 +79,14 @@ void tempo::menu_update(){
 }
 
 
-led_matrix* tempo::menu_on_push(uint8_t func_id, uint8_t opt_id, led_matrix* menu_matrix){	
+led_matrix* tempo::menu_on_push(uint8_t func_id, uint8_t opt_id/*, led_matrix* menu_matrix*/){	
 	if(opt_id == TAP_BTN_ID){
 		_tap_animation.start_animation(LED_ANIMATION_MS);
 		// need to start led animation
 	}
 	return NULL;
 }
-led_matrix* tempo::menu_on_release(uint8_t func_id, uint8_t opt_id, led_matrix* menu_matrix){	
+led_matrix* tempo::menu_on_release(uint8_t func_id, uint8_t opt_id/*, led_matrix* menu_matrix*/){	
 	if(opt_id == TAP_BTN_ID){
 		tap();
 		_tap_animation.turn_on_led();
@@ -97,9 +97,9 @@ led_matrix* tempo::menu_on_release(uint8_t func_id, uint8_t opt_id, led_matrix* 
 }
 led_matrix* tempo::clbk_menu_on_push(void * this_ptr, uint8_t func_id, uint8_t opt_id, led_matrix* menu_matrix){	
 	tempo* myself = static_cast<tempo *>(this_ptr);
-	return myself->menu_on_push(func_id, opt_id, menu_matrix);
+	return myself->menu_on_push(func_id, opt_id/*, menu_matrix*/);
 }
 led_matrix* tempo::clbk_menu_on_release(void * this_ptr, uint8_t func_id, uint8_t opt_id, led_matrix* menu_matrix){	
 	tempo* myself = static_cast<tempo *>(this_ptr);
-	return myself->menu_on_release(func_id, opt_id, menu_matrix);
+	return myself->menu_on_release(func_id, opt_id/*, menu_matrix*/);
 }
