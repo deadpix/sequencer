@@ -47,10 +47,6 @@ static tempo tempo_setting;
 static test_proj_one p1;
 static test_proj_two p2;
 
-
-
-
-led_matrix 	current_lm;
 led_matrix* lm_ptr;
 
 
@@ -80,25 +76,6 @@ static void upd_gui(){
 		check_clk = true;
 }
 
-static void next_step(clk* c){
-	uint32_t ms = c->clk_elapsed();
-	if(ms > 0){
-		uint16_t cnt = c->clk_get_step_cnt();
-		if(cnt == 0)
-			current_lm.clr_led_x(LED_RG_IDX,31);
-		else 
-			current_lm.toogle_led_x(LED_RG_IDX,(cnt-1));
-
-		current_lm.toogle_led_x(LED_RG_IDX,c->clk_get_step_cnt());
-	}
-}
-
-//static void init_one_prog(prog* p,   ){
-//	prog_arr[nr_prog] = p;
-//	p->set_prog_id(nr_prog);
-//	set_prog_menu_entry(nr_prog, tempo_setting.clbk_menu_on_push, tempo_setting.clbk_menu_on_release, &tempo_setting);
-//}
-
 static void init_all_prog(){
 	nr_prog = 0;
 	led_matrix* menu_lmtx = menu_ctrl.get_menu_led_matrix();
@@ -106,22 +83,16 @@ static void init_all_prog(){
 	prog_arr[nr_prog] = &tempo_setting;
 	tempo_setting.set_prog_id(nr_prog);
 	set_prog_menu_entry(nr_prog, (prog *) &tempo_setting);
-//	set_prog_menu_entry(nr_prog, tempo_setting.menu_on_push, tempo_setting.menu_on_release, &tempo_setting);
-//	set_prog_menu_entry(nr_prog, tempo_setting.clbk_menu_on_push, tempo_setting.clbk_menu_on_release, &tempo_setting);
 	nr_prog++;
 	
 	prog_arr[nr_prog] = &p1;
 	p1.set_prog_id(nr_prog);
-//	set_prog_menu_entry(nr_prog, p1.clbk_menu_on_push, p1.clbk_menu_on_release, &p1);
-//	set_prog_menu_entry(nr_prog, p1.menu_on_push, p1.menu_on_release, &p1);
 	set_prog_menu_entry(nr_prog, (prog *) &p1);
 	menu_lmtx->set_led_x(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 	
 	prog_arr[nr_prog] = &p2;
 	p2.set_prog_id(nr_prog);
-//	set_prog_menu_entry(nr_prog, p2.menu_on_push, p2.menu_on_release, &p2);
-//	set_prog_menu_entry(nr_prog, p2.clbk_menu_on_push, p2.clbk_menu_on_release, &p2);
 	set_prog_menu_entry(nr_prog, (prog *) &p2);
 	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;

@@ -28,8 +28,10 @@ class prog {
 		virtual void menu_enter() = 0;
 		virtual void menu_leave() = 0;
 		virtual void menu_update() = 0;
-		virtual led_matrix* menu_on_push(/*void*, */uint8_t, uint8_t) = 0;
-		virtual led_matrix* menu_on_release(/*void*, */uint8_t, uint8_t) = 0;
+//		virtual led_matrix* menu_on_push(/*void*, */uint8_t, uint8_t) = 0;
+//		virtual led_matrix* menu_on_release(/*void*, */uint8_t, uint8_t) = 0;
+		virtual int menu_on_push(/*void*, */uint8_t, uint8_t) = 0;
+		virtual int menu_on_release(/*void*, */uint8_t, uint8_t) = 0;
 
 		virtual void on_push(/*void* ptr, */uint8_t btn_id) = 0;
 		virtual void on_release(/*void* ptr, */uint8_t btn_id) = 0;

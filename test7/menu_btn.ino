@@ -44,15 +44,6 @@ static uint8_t btn_menu_digitalRead(uint8_t pin){
 	return mcp_menu_btn.digitalRead(pin);
 }
 
-static void init_menu_ctrl(){
-	
-}
-
-//led_matrix* set_prog_menu_entry(uint8_t id, menu_clbk_type on_push, menu_clbk_type on_release, void* prog_ptr){
-//	led_matrix* mtx = menu_ctrl.get_menu_led_matrix();
-//	menu_ctrl.set_menu_clbk(id, on_push, on_release, prog_ptr);
-//	return mtx;
-//}
 void set_prog_menu_entry(uint8_t id, prog* prog){
 	menu_ctrl.set_menu_prog_entry(id, prog);
 }
@@ -62,7 +53,7 @@ static void init_menu_btn(prog* p){
 	pinMode(PIN_MENU_BTN,INPUT);
 	menu_btn.attach(PIN_MENU_BTN);
 	menu_btn.interval(MENU_BTN_BOUNCE_TIME);
-	menu_ctrl.set_next_interface(p->get_led_matrix());
+//	menu_ctrl.set_next_interface(p->get_led_matrix());
 	menu_ctrl.set_next_prog(p);
 //	mcp_menu_btn.begin(0);
 //	Wire.setClock(1000000);
@@ -79,52 +70,22 @@ static void init_menu_btn(prog* p){
 }
 
 static void scan_menu_btn(){
-//	int i = 0;
-//	if(digitalRead(PIN_MENU_BTN) == LOW)
-//		Serial.println("LOW");
-//	else 
-//		Serial.println("HIGH");
-
-			// need pointer to class led_matrix
-			// and pointer to class  prog
-			// ==> need to know the next programm to setup
 	if(menu_btn.update()){
 //		if(digitalRead(PIN_MENU_BTN) == LOW){
 		if(menu_btn.fell()){
 //			led_matrix* mtx = menu_manager.get_next_interface();
-			led_matrix* tmp = menu_ctrl.get_next_interface();
-			if(tmp){
-				lm_ptr = tmp;
-			} else {
-				Serial.println("no lm pointer?");				
-			}
+//			led_matrix* tmp = menu_ctrl.get_next_interface();
+	//		if(tmp){
+//				lm_ptr = tmp;
+//			} else {
+//				Serial.println("no lm pointer?");				
+//			}
 			current_prog = menu_ctrl.get_next_prog();
+			lm_ptr = current_prog->get_menu_lm();
 		} 
 		else {
 			lm_ptr = menu_ctrl.get_menu_led_matrix();
 			current_prog = prog_arr[nr_prog];
 		}
-//		if(mtx)
-//			led_buf = mtx;
-//		if(menu_btn.read() == HIGH){
-//			Serial.println("pushed");
-//		} else {
-//			Serial.println("released");				
-//		}
 	} 
-	
-//	if(mcp_menu_btn.digitalRead(7) == HIGH)
-//		Serial.println("HIGH");
-//	else 
-//		Serial.println("LOW");
-
-//	for (i=0; i<NR_MENU_BTN; i++){
-//		if(menu_btn.update(i)){
-//			if(menu_btn.read(i) == LOW){
-//				Serial.println("pushed");
-//			} else {
-//				Serial.println("released");				
-//			}		
-//		}
-//	}
 }

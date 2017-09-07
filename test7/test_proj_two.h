@@ -22,10 +22,10 @@ class test_proj_two : public prog {
 		void menu_leave();
 		void menu_update();
 
-		static led_matrix* clbk_menu_on_push(void *, uint8_t, uint8_t, led_matrix*);
-		static led_matrix* clbk_menu_on_release(void *, uint8_t, uint8_t, led_matrix*);
-		led_matrix* menu_on_push(uint8_t, uint8_t/*, led_matrix**/);
-		led_matrix* menu_on_release(uint8_t, uint8_t/*, led_matrix**/);
+//		static led_matrix* clbk_menu_on_push(void *, uint8_t, uint8_t, led_matrix*);
+//		static led_matrix* clbk_menu_on_release(void *, uint8_t, uint8_t, led_matrix*);
+		int menu_on_push(uint8_t, uint8_t/*, led_matrix**/);
+		int menu_on_release(uint8_t, uint8_t/*, led_matrix**/);
 };
 
 
