@@ -34,16 +34,9 @@ void menu::set_menu_prog_entry(uint8_t prog_id, prog* p){
 	prog_arr[prog_id] = p;
 }
 
-//led_matrix* menu::get_next_interface(){
-//	return next_interface;
-//}
 prog* menu::get_next_prog(){
 	return next_prog;
 }
-
-//void menu::set_next_interface(led_matrix* lm){
-//	next_interface = lm;
-//}
 
 void menu::set_next_prog(prog* p){
 	next_prog = p;
@@ -72,9 +65,9 @@ void menu::menu_update(){
 }
 
 // DUMMY FUNCTIONS
-int menu::menu_on_push(/*void*, */uint8_t, uint8_t){
+int menu::menu_on_push(uint8_t, uint8_t){
 }
-int menu::menu_on_release(/*void*, */uint8_t, uint8_t){
+int menu::menu_on_release(uint8_t, uint8_t){
 }
 
 void menu::on_push(uint8_t btn_id){
@@ -96,7 +89,6 @@ void menu::on_release(uint8_t btn_id){
 		ret = p->menu_on_release(prog_id, opt_id);
 	
 	if(ret){
-//		next_interface = tmp_lm;
 		next_prog = p;
 	}
 }

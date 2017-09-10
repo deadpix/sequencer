@@ -29,8 +29,6 @@
 #include "Bounce_array.h"
 
 
-
-
 #define latchPin 		22
 #define clockPin 		23
 #define dataPin  		21
@@ -90,11 +88,10 @@ static void scan(prog* p){
 		if(btn_row[btn_col_idx].update(i)){
 
 			if(btn_row[btn_col_idx].read(i) == LOW){
-				p->on_release(/*current_prog,*/ btn_col_idx*BTN_NUM_COL + i);
+				p->on_release(btn_col_idx*BTN_NUM_COL + i);
 			} else {
-				p->on_push(/*current_prog, */btn_col_idx*BTN_NUM_COL + i);
-//				current_lm.toogle_led_x(LED_RG_IDX,btn_col_idx*BTN_NUM_COL+i);
-			}		
+				p->on_push(btn_col_idx*BTN_NUM_COL + i);
+			}
 		}
 	}
 	mcp.digitalWrite(btn_select_pins[btn_col_idx], HIGH);	

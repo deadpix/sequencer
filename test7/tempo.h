@@ -17,6 +17,8 @@ class tempo : public prog {
 		uint8_t _tap_cnt;
 		led_toogle _tap_animation;
 		led_toogle _clk_animation;
+		bool _in_menu_mode;
+		
 		
 	protected:
 		void tap();
@@ -25,8 +27,10 @@ class tempo : public prog {
 		tempo();
 		~tempo();
 
-		void init();
+		void init(void (*)(uint32_t));
+		
 		led_matrix* get_led_matrix(void);
+		clk* get_mst_clk();
 		void clr_tap(void);
 		
 		uint32_t check_mst_clk(void);
@@ -34,14 +38,11 @@ class tempo : public prog {
 		void menu_enter();
 		void menu_leave();
 		void menu_update();
-		int  menu_on_push(uint8_t, uint8_t/*, led_matrix**/);
-		int  menu_on_release(uint8_t, uint8_t/*, led_matrix**/);
+		int  menu_on_push(uint8_t, uint8_t);
+		int  menu_on_release(uint8_t, uint8_t);
 		
-		void on_push(/*void* ptr, */uint8_t btn_id);
-		void on_release(/*void* ptr, */uint8_t btn_id);
-		
-//		static led_matrix* clbk_menu_on_push(void *, uint8_t, uint8_t, led_matrix*);
-//		static led_matrix* clbk_menu_on_release(void *, uint8_t, uint8_t, led_matrix*);
+		void on_push(uint8_t btn_id);
+		void on_release(uint8_t btn_id);
 };
 
 #endif

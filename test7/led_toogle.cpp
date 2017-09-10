@@ -16,7 +16,6 @@ led_toogle::~led_toogle(){
 }
 
 void led_toogle::turn_on_led(){
-	Serial.println("turb on ");
 	_lm->set_led_x(_color, _led_id);
 }
 void led_toogle::turn_off_led(){

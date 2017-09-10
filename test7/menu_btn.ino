@@ -71,19 +71,13 @@ static void init_menu_btn(prog* p){
 
 static void scan_menu_btn(){
 	if(menu_btn.update()){
-//		if(digitalRead(PIN_MENU_BTN) == LOW){
 		if(menu_btn.fell()){
-//			led_matrix* mtx = menu_manager.get_next_interface();
-//			led_matrix* tmp = menu_ctrl.get_next_interface();
-	//		if(tmp){
-//				lm_ptr = tmp;
-//			} else {
-//				Serial.println("no lm pointer?");				
-//			}
 			current_prog = menu_ctrl.get_next_prog();
-			lm_ptr = current_prog->get_menu_lm();
+			lm_ptr = current_prog->get_led_matrix();
+			menu_ctrl.menu_leave();
 		} 
 		else {
+			menu_ctrl.menu_enter();
 			lm_ptr = menu_ctrl.get_menu_led_matrix();
 			current_prog = prog_arr[nr_prog];
 		}

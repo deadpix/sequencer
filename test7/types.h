@@ -43,5 +43,10 @@ typedef volatile uint16_t mat_row_bmp_t;
 typedef volatile uint32_t mat_row_bmp_t;
 #endif
 
+// Pulse Per Quarter Note (PPQN)
+#define MIDI_SYNC_PPQN	24
+// Pulse Per Note (PPN)
+#define MIDI_SYNC_PPN	(MIDI_SYNC_PPQN*1)
+
 
 #endif
