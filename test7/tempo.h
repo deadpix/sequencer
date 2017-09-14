@@ -43,6 +43,7 @@ class tempo : public prog {
 		
 		void on_push(uint8_t btn_id);
 		void on_release(uint8_t btn_id);
+		void update_ui();
 };
 
 #endif

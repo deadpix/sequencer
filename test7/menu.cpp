@@ -96,3 +96,5 @@ void menu::on_release(uint8_t btn_id){
 led_matrix* menu::get_led_matrix(void){
 	return &menu_interface;
 }
+void menu::update_ui(){
+}

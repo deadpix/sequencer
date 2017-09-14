@@ -32,6 +32,7 @@ class prog {
 
 		virtual void on_push(uint8_t btn_id) = 0;
 		virtual void on_release(uint8_t btn_id) = 0;
+		virtual void update_ui() = 0;
 };
 
 

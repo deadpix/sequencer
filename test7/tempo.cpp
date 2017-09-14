@@ -102,3 +102,6 @@ int tempo::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	}	
 	return ret;
 }
+
+void tempo::update_ui(){
+}

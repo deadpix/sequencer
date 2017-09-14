@@ -41,3 +41,5 @@ int test_proj_two::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	}	
 	return ret;
 }
+void test_proj_two::update_ui(){
+}

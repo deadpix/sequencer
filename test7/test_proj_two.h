@@ -17,6 +17,7 @@ class test_proj_two : public prog {
 		
 		void on_push(uint8_t btn_id);
 		void on_release(uint8_t btn_id);
+		void update_ui();
 
 		void menu_enter();
 		void menu_leave();
@@ -24,6 +25,5 @@ class test_proj_two : public prog {
 		int  menu_on_push(uint8_t, uint8_t);
 		int  menu_on_release(uint8_t, uint8_t);
 };
-
 
 #endif
