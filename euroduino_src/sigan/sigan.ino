@@ -395,16 +395,113 @@ int bank_time(int sw_state, unsigned int ms_period){
 	return ret;
 }
 
+static byte* int_to_byte(int intval){
+	byte[2] arr;
+
+	arr[1] = (unsigned char)((intval >> 0x08) & 0xff);
+	arr[0] = (unsigned char)(intval & 0xff);
+
+	return (byte *) arr;
+}
+
+static int byte_to_int(byte* arr){
+	int val = 0;
+
+	val |= arr[1] << 0x08;
+	val |= arr[0];
+
+	return val
+}
+
+void eeprom_dump_clk_data(){
+	
+}
+void eeprom_dump_io_data(){
+	
+}
+void eeprom_dump_rnd_data(){
+	
+}
+
+void eeprom_restore_clk_data(){
+	
+}
+void eeprom_restore_io_data(){
+	
+}
+void eeprom_restore_rnd_data(){
+//		rnds[0].rnd_clk.clk_set_operation(p1, mst_clk.c.clk_get_ms());
+//		rnds[0].rnd_max = p2;
+//		rnds[0].rnd_pot = pot1;
+//	val1: divider / multiplier, int
+//	val2: random max value, int,
+//	val3: pot position, int
+//	 EEPROM.update(addr, val);
+
+	int addr = RANDOM_PARAM_OFF;
+
+
+}
+
+void write_to_eeprom(byte* arr, int size, int* addr){
+	for(int i=0;i<size;i++){
+		EEPROM.update(addr, arr[i]);
+		(*addr)++;
+	}
+}
+
+void eeprom_save_clk_data(){
+	
+}
+void eeprom_save_io_data(){
+	
+}
+void eeprom_save_rnd_data(){
+//	val1: divider / multiplier, int
+//	val2: random max value, int,
+//	val3: pot position, int
+
+	int addr = RANDOM_PARAM_OFF;
+	int val = 0;
+	byte* arr;
+
+	val = rnds[0].rnd_clk.clk_get_operator();
+	arr = int_to_byte(val);
+	write_to_eeprom(arr, 2, &addr);
+
+	val = rnds[0].rnd_max;
+	arr = int_to_byte(val);
+	write_to_eeprom(arr, 2, &addr);
+
+	val = rnds[0].rnd_pot;
+	arr = int_to_byte(val);
+	write_to_eeprom(arr, 2, &addr);
+
+	val = rnds[1].rnd_clk.clk_get_operator();
+	arr = int_to_byte(val);
+	write_to_eeprom(arr, 2, &addr);
+
+	val = rnds[1].rnd_max;
+	arr = int_to_byte(val);
+	write_to_eeprom(arr, 2, &addr);
+
+	val = rnds[1].rnd_pot;
+	arr = int_to_byte(val);
+	write_to_eeprom(arr, 2, &addr);
+}
+
+
 void eeprom_save_data(int param){
 	switch(param){
 		case CLOCK_PARAM:
-
+			eeprom_save_clk_data();
 			break;
 		case IO_PARAM:
-
+			eeprom_save_io_data();
 			break;
 
 		case RANDOM_PARAM:
+			eeprom_save_rnd_data();
 			break;
 
 		default:
@@ -518,8 +615,9 @@ void upd_output(unsigned int master_ms, unsigned int slave_ms){
 
 static void init_rnd(){
 	randomSeed(analogRead(0));	
-	rnds[0].rnd_max = MAX_ANALOG_OUT + 1;
-	rnds[1].rnd_max = MAX_ANALOG_OUT + 1;
+//	rnds[0].rnd_max = MAX_ANALOG_OUT + 1;
+//	rnds[1].rnd_max = MAX_ANALOG_OUT + 1;
+	eeprom_restore_rnd_data();
 }
 
 static void rnd_upd_output(struct rnd_t *r, int pin){
