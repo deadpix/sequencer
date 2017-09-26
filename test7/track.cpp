@@ -1,13 +1,20 @@
 #include "track.h"
 
-//static void (*hw_dWrite)(uint8_t, boolean);
+#define CLK_LEN_PER 	(10)
+
+static void (*_hw_fct)(uint16_t, uint8_t, uint8_t);
+
+static void _dummy_fct(uint16_t arg1, uint8_t arg2, uint8_t arg3){
+	Serial.println("track dummy callback function");
+}
 
 track::track(){
 	curr_step_id = 0;
 	track_len = 16;
 	elapsed_ms = 0;
+	_hw_fct = _dummy_fct;
 	
-	for(int i=0; i<NR_STEP;i++){
+	for(int i=0;i<NR_STEP;i++){
 		arr_step[i].set_step_id(i);
 	}
 }
@@ -15,13 +22,26 @@ track::track(){
 track::~track(){
 }
 
-// void track::init_hw_clbk(void (*hw_fct)(uint8_t, boolean), uint8_t id){
-	// hw_dWrite = hw_fct;
-	// output_id = id;
-// }
+void track::init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t)){
+	_hw_fct = fct;
+}
 
 led_matrix* track::get_led_matrix(){
 	return &_lm;
+}
+
+uint8_t track::get_track_id(){
+	return _track_id;
+}
+void track::set_track_id(uint8_t id){
+	_track_id = id;
+}
+
+uint8_t track::get_out_id(){
+	return _out_id;
+}
+void track::set_out_id(uint8_t id){
+	_out_id = id;
 }
 
 boolean track::next_step(){
@@ -66,7 +86,27 @@ void track::toogle_mute(){
 	mute_flg = !mute_flg;
 }
 
-void track::check_event(boolean master_clk_flg, clk* master_clk){
+uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_clk_flg, clk* master_clk*/){
+	uint32_t res = _c.master_sync(ms, mst_step_cnt);
+	
+	if(res){
+		if(next_step()){
+			step s = arr_step[curr_step_id];
+			s.reset_gate();
+			_hw_fct(s._note.pitch, s._note.velocity, _out_id);
+		}
+		_step_animation.init_animation(&_lm, curr_step_id, LED_GBR_IDX);
+		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100));
+	} else {
+		arr_step[curr_step_id].upd_gate();
+		if(_step_animation.update_animation()){
+			if(arr_step[curr_step_id].is_step_active())
+				_lm.set_led_x(LED_R_IDX, curr_step_id);
+		}
+			
+	}
+	return res;
+	
 	// boolean evt_flg = clk.clock_update(master_clk_flg, master_clk);
 	// boolean step_state;
 	// if(evt_flg){

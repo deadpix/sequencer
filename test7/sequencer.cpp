@@ -18,6 +18,23 @@ void sequencer::set_current_track(uint8_t track_id){
 	current = &track_arr[track_id];
 }
 
+void sequencer::check_clks(uint32_t mst_ms, uint16_t mst_step){
+	track* t;
+	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
+		t = &track_arr[i];
+//		if(t != current)
+			t->check_event(mst_ms, mst_step);
+			
+	}
+}
+void sequencer::menu_enter(){
+}
+void sequencer::menu_leave(){
+}
+void sequencer::menu_update(){
+}
+
+
 int sequencer::menu_on_push(uint8_t func_id, uint8_t opt_id){	
 	int ret = 1;
 	return ret;
@@ -45,6 +62,10 @@ void sequencer::on_release(uint8_t btn_id){
 void sequencer::update_ui(){
 	current->update_ui();
 }
+led_matrix* sequencer::get_led_matrix(){
+	current->get_led_matrix();
+}
+
 
 /*
 void sequencer::on_push(void* this_ptr, uint8_t btn_id){

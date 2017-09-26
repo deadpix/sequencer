@@ -35,7 +35,9 @@ class sequencer : public prog {
 		void on_push(uint8_t btn_id);
 		void on_release(uint8_t btn_id);
 		void update_ui();
-
+	
+		void check_clks(uint32_t mst_ms, uint16_t mst_step);
+				
 		void menu_enter();
 		void menu_leave();
 		void menu_update();

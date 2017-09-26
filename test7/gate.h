@@ -33,8 +33,11 @@
 
 #include <elapsedMillis.h>
 
-#define GATE_HIGH		true
-#define GATE_LOW		false
+#define GATE_HIGH		127
+#define GATE_LOW		0
+
+#define DEFAULT_VEL		127
+#define GATE_OFF		0
 
 #define GATE_ERROR		0
 #define GATE_STARTED	1
@@ -42,7 +45,8 @@
 
 class gate {
 	private:
-		bool _gate_value;
+		uint8_t _gate_value;
+		uint8_t _gate_off;
 		uint32_t _gate_len;
 		elapsedMillis _elapsed_ms;
 		uint8_t _port;
@@ -50,15 +54,16 @@ class gate {
 
 	public:
 		gate();
-		gate(uint8_t, uint8_t (*hw_wr)(uint8_t, bool));
+//		gate(uint8_t, uint8_t (*hw_wr)(uint8_t, uint8_t));
+		gate(uint8_t, uint8_t (*hw_wr)(uint8_t, uint8_t));
 		~gate();
 	
 //		void set_gate_value(boolean);
 		void set_gate_len(uint32_t);
-		void set_hw_cbck(uint8_t, uint8_t (*hw_wr)(uint8_t, bool));	
-		void set_gate_trig_lvl(bool);
+		void set_hw_cbck(uint8_t, uint8_t (*hw_wr)(uint8_t, uint8_t));	
+		void set_gate_trig_lvl(bool trig_lvl, uint8_t);
 
-		int rst_gate(bool);
+		int rst_gate(uint8_t);
 		int rst_gate();
 		int upd_gate();		
 };

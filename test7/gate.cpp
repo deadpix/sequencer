@@ -33,16 +33,18 @@
 
 #include "gate.h"
 
-static uint8_t (*_hw_wr_cbck)(uint8_t, bool);
+static uint8_t (*_hw_wr_cbck)(uint8_t, uint8_t);
 
 gate::gate(){
-	_gate_value = GATE_HIGH;
+	_gate_value = DEFAULT_VEL;
+	_gate_off = GATE_OFF;
 	_gate_len = 0;
 	_gate_state = GATE_FINISHED;
 }
 
-gate::gate(uint8_t port, uint8_t (*hw_wr)(uint8_t, bool)){
-	_gate_value = GATE_HIGH;
+gate::gate(uint8_t port, uint8_t (*hw_wr)(uint8_t, uint8_t)){
+	_gate_value = DEFAULT_VEL;
+	_gate_off = GATE_OFF;	
 	_gate_len = 0;
 	_gate_state = GATE_FINISHED;
 	_port = port;
@@ -52,49 +54,56 @@ gate::gate(uint8_t port, uint8_t (*hw_wr)(uint8_t, bool)){
 gate::~gate(){
 }
 
-void gate::set_gate_trig_lvl(bool trig_level){
-	_gate_value = trig_level;
+void gate::set_gate_trig_lvl(bool trig_lvl, uint8_t vel){
+	if(trig_lvl){
+		_gate_value = vel;
+		_gate_off = GATE_OFF;
+	}
+	else {
+		_gate_value = GATE_OFF;
+		_gate_off = vel;
+	}
 }
 
 void gate::set_gate_len(uint32_t ms){
 	_gate_len = ms;
 }
 
-void gate::set_hw_cbck(uint8_t port, uint8_t (*hw_wr)(uint8_t, bool)){
+void gate::set_hw_cbck(uint8_t port, uint8_t (*hw_wr)(uint8_t, uint8_t)){
 	_port = port;
 	_hw_wr_cbck = hw_wr;
 }
 
-int gate::rst_gate(bool gate_val){
-	if(!_hw_wr_cbck)	
-		return GATE_ERROR;
+int gate::rst_gate(uint8_t gate_val){
+//	if(!_hw_wr_cbck)	
+//		return GATE_ERROR;
 
 	_gate_value = gate_val;
 	_elapsed_ms = 0;
-	_hw_wr_cbck(_port, _gate_value);
+	if(_hw_wr_cbck) _hw_wr_cbck(_port, _gate_value);
 	_gate_state = GATE_STARTED;
 	
 	return GATE_STARTED;
 }
 int gate::rst_gate(){
-	if(!_hw_wr_cbck)	
-		return GATE_ERROR;
+//	if(!_hw_wr_cbck)	
+//		return GATE_ERROR;
 
 	_elapsed_ms = 0;
-	_hw_wr_cbck(_port, _gate_value);
+	if(_hw_wr_cbck) _hw_wr_cbck(_port, _gate_value);
 	_gate_state = GATE_STARTED;
 	
 	return GATE_STARTED;
 }
 int gate::upd_gate(){
-	if(!_hw_wr_cbck)	
-		return GATE_ERROR;
+//	if(!_hw_wr_cbck)	
+//		return GATE_ERROR;
 
 	if(_gate_state != GATE_STARTED)
 		return GATE_FINISHED;
 
 	if(_elapsed_ms > _gate_len){
-		_hw_wr_cbck(_port, !_gate_value);
+		if(_hw_wr_cbck) _hw_wr_cbck(_port, !_gate_off);
 		_gate_state = GATE_FINISHED;
 	}
 	return (int)_gate_state;

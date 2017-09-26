@@ -8,17 +8,20 @@
 #endif
 
 #include "types.h"
-#include "step.h"
-#include "clk.h"
 #include "led_matrix.h"
 #include "menu.h"
 #include "prog.h"
 #include "led_toogle.h"
+#include "step.h"
+#include "clk.h"
 
 class track {
 	private:
-		uint8_t	curr_step_id;
+		uint16_t curr_step_id;
 //		uint8_t max_step;
+		uint8_t _track_id;
+		uint8_t _out_id;
+		
 		uint8_t track_len;
 		clk _c;
 		step arr_step[NR_STEP];
@@ -34,14 +37,21 @@ class track {
 		
 		led_matrix * get_led_matrix();
 		clk* get_clk();
+
+		void set_track_id(uint8_t id);
+		uint8_t get_track_id();
+
+		void set_out_id(uint8_t id);
+		uint8_t get_out_id();
+
 		boolean is_step_on(uint8_t id);
 		boolean next_step();
 		// boolean is_curr_step_active(uint32_t ms);
 		uint8_t get_current_step();
 		void toogle_step_x(uint8_t id);
 
-		void check_event(boolean, clk *c);
-//		void init_hw_clbk(void (*hw_fct)(uint8_t, boolean), uint8_t);
+		uint32_t check_event(uint32_t, uint16_t/*boolean, clk *c*/);
+		void init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t));
 
 		void init_menu();
 		void on_push(uint8_t btn_id);

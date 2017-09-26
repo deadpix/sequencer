@@ -32,6 +32,10 @@
 #include "prog.h"
 #include "menu.h"
 
+#include "track.h"
+#include "step.h"
+#include "sequencer.h"
+
 #include "tempo.h"
 #include "test_proj_one.h"
 #include "test_proj_two.h"
@@ -44,6 +48,7 @@ prog *current_prog;
 int nr_prog;
 
 static tempo tempo_setting;
+static sequencer midi_seq;
 static test_proj_one p1;
 static test_proj_two p2;
 
@@ -129,6 +134,10 @@ static void init_all_prog(){
 	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 
+	init_one_prog((prog *) &midi_seq, nr_prog);
+	menu_lmtx->set_led_x(LED_G_IDX, nr_prog * MATRIX_NR_ROW + 0);
+	nr_prog++;
+		
 	// menu_ctrl MUST BE last
 	prog_arr[nr_prog] = &menu_ctrl;
 
@@ -144,6 +153,7 @@ static void init_all_prog(){
 	mst_clk->clk_set_max_step(32);
 	tempo_change_handler(mst_clk->clk_get_ms());
 
+	init_midi_seq(&midi_seq);
 //	sync_slv_clks(mst_clk);
 }
 
