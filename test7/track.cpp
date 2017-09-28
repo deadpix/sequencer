@@ -1,6 +1,6 @@
 #include "track.h"
 
-#define CLK_LEN_PER 	(10)
+#define CLK_LEN_PER 	(20)
 
 static void (*_hw_fct)(uint16_t, uint8_t, uint8_t);
 
@@ -96,14 +96,16 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_c
 			_hw_fct(s._note.pitch, s._note.velocity, _out_id);
 		}
 		_step_animation.init_animation(&_lm, curr_step_id, LED_GBR_IDX);
-		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100));
+		_step_animation.turn_on_led();
+		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
+
 	} else {
 		arr_step[curr_step_id].upd_gate();
 		if(_step_animation.update_animation()){
-			if(arr_step[curr_step_id].is_step_active())
+			if(arr_step[curr_step_id].is_step_active()){
 				_lm.set_led_x(LED_R_IDX, curr_step_id);
+			}
 		}
-			
 	}
 	return res;
 	
@@ -120,6 +122,7 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_c
 }
 
 void track::on_push(uint8_t btn_id){
+	arr_step[btn_id].set_step_active();
 }
 void track::on_release(uint8_t btn_id){
 	_lm.toogle_led_x(LED_R_IDX, btn_id);

@@ -194,5 +194,6 @@ void loop(){
 	midi_loop(midi_flag);
 	if(midi_flag)
 		midi_flag = false;
-	
+		
+	midi_seq.check_clks(clk_res, mst_clk->clk_get_step_cnt());
 }
