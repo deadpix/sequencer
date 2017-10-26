@@ -33,21 +33,33 @@
 #define clockPin 		23
 #define dataPin  		21
 
-#define GRD_OFFSET		24
+#define GRD_OFFSET		0
 #define BLUE_OFFSET		16
-#define GREEN_OFFSET	 8
-#define RED_OFFSET		 0
+#define GREEN_OFFSET	24
+#define RED_OFFSET		8
+
+
+//#define GRD_OFFSET		24
+//#define BLUE_OFFSET		16
+//#define GREEN_OFFSET	 8
+//#define RED_OFFSET		 0
 
 #define BTN_NUM_COL		8
 #define BTN_NUM_ROW		8
 #define BOUNCE_TIME		5
 
+#define DEBUG 1
 
 Adafruit_MCP23017 mcp;
 uint8_t		grd_cnt;
 
-static uint8_t btn_select_pins[BTN_NUM_COL] 	= { 7, 6, 5, 4, 3, 2, 1, 0};
-static uint8_t btn_read_pins[BTN_NUM_ROW] 	= {12, 13, 14, 15, 8, 9, 10, 11 };
+
+static uint8_t btn_select_pins[BTN_NUM_COL] = {3,2,1,0,12,13,14,15}; // ground switch
+static uint8_t btn_read_pins[BTN_NUM_ROW] = {7,8,6,9,5,10,4,11};
+
+
+//static uint8_t btn_select_pins[BTN_NUM_COL] 	= { 7, 6, 5, 4, 3, 2, 1, 0};
+//static uint8_t btn_read_pins[BTN_NUM_ROW] 	= {12, 13, 14, 15, 8, 9, 10, 11 };
 
 static ArrBounce btn_row[BTN_NUM_COL];
 
@@ -91,6 +103,10 @@ static void scan(prog* p){
 				p->on_release(btn_col_idx*BTN_NUM_COL + i);
 			} else {
 				p->on_push(btn_col_idx*BTN_NUM_COL + i);
+#if DEBUG
+				Serial.print("push btn ");
+				Serial.println(btn_col_idx*BTN_NUM_COL + i);
+#endif
 			}
 		}
 	}
@@ -107,7 +123,7 @@ static void write_shift_reg(uint32_t val){
 }
 
 static void upd_shift_reg(led_matrix* lm){
-	uint32_t tmp = ((1<<(grd_cnt+4))) << GRD_OFFSET;
+	uint32_t tmp = ((1<<(grd_cnt/*+4*/))) << GRD_OFFSET;
 	led_t l = lm->get_led(grd_cnt);	
 	tmp |= (l.bitmap[LED_COLOR_RED_INDEX] << RED_OFFSET)
 		 | (l.bitmap[LED_COLOR_GREEN_INDEX] << GREEN_OFFSET)

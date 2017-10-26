@@ -28,6 +28,11 @@ void init_midi_seq(sequencer* s){
 	}
 }
 
+// TEMPORARY
+void init_midi_controller(test_proj_one* p){
+	p->init_hw_clbk(midi_note_on);
+}
+
 void init_midi(){
 	MIDI.begin(MIDI_CHANNEL_OMNI);
 	MIDI.turnThruOff();

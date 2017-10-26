@@ -3,17 +3,20 @@
 
 #include "prog.h"
 #include "led_matrix.h"
+#include "led_toogle.h"
 
 class test_proj_one : public prog {
 	private:
 		led_matrix _lm;
-
+		led_toogle _btn_animation;
+		
 	public:
 		test_proj_one();
 		~test_proj_one();
 
 		led_matrix* get_led_matrix(void);
-		
+		void init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t));
+
 		void on_push(uint8_t btn_id);
 		void on_release(uint8_t btn_id);
 

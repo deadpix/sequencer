@@ -154,6 +154,7 @@ static void init_all_prog(){
 	tempo_change_handler(mst_clk->clk_get_ms());
 
 	init_midi_seq(&midi_seq);
+//	init_midi_controller(&p1);
 //	sync_slv_clks(mst_clk);
 }
 

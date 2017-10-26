@@ -22,7 +22,8 @@
  *  SOFTWARE.
  */
 
-#include <Wire.h>
+//#include <Wire.h>
+#include <i2c_t3.h>
 #include <Adafruit_MCP23017.h>
 
 #include "Bounce_array.h"
@@ -33,10 +34,16 @@
 #define clockPin 		23
 #define dataPin  		21
 
-#define GRD_OFFSET		24
+//#define GRD_OFFSET		24
+//#define BLUE_OFFSET		16
+//#define GREEN_OFFSET	 8
+//#define RED_OFFSET		 0
+
+#define GRD_OFFSET		0
 #define BLUE_OFFSET		16
-#define GREEN_OFFSET	 8
-#define RED_OFFSET		 0
+#define GREEN_OFFSET	24
+#define RED_OFFSET		8
+
 
 led_matrix 	current_lm;
 uint8_t		grd_cnt;
@@ -47,8 +54,16 @@ Adafruit_MCP23017 mcp;
 IntervalTimer btn_timer;
 
 uint8_t	drive_cnt;
-static uint8_t btn_drive_pins[BTN_MATRIX_NR_COL_GND] = {12,13,14,15};
-static uint8_t btn_read_pins[BTN_MATRIX_NR_ROW_SW] = {3, 2, 1, 0};
+//static uint8_t btn_drive_pins[BTN_MATRIX_NR_COL_GND] = {15, 14, 13, 12, 0, 1, 2, 3}; // ground switch
+//static uint8_t btn_read_pins[BTN_MATRIX_NR_ROW_SW] = {11, 10, 9, 8, 4, 5, 6, 7};
+//static uint8_t btn_drive_pins[BTN_MATRIX_NR_COL_GND] = {0,1,2,3,15,14,13,12}; // ground switch
+static uint8_t btn_drive_pins[BTN_MATRIX_NR_COL_GND] = {3,2,1,0,12,13,14,15}; // ground switch
+//static uint8_t btn_read_pins[BTN_MATRIX_NR_ROW_SW] = {9,6,8,7,11,4,10,5};
+static uint8_t btn_read_pins[BTN_MATRIX_NR_ROW_SW] = {7,8,6,9,5,10,4,11};
+//static uint8_t btn_read_pins[BTN_MATRIX_NR_ROW_SW] = {8,7,9,6,10,5,11,4};
+
+
+
 static ArrBounce btn[BTN_MATRIX_NR_COL_GND];
 volatile bool flg_btn_matrix;
 
@@ -82,18 +97,20 @@ static uint8_t btn_digitalRead(uint8_t pin){
 }
 static void scan_btn_matrix(){
 	if(flg_btn_matrix){
+	//	Serial.println("scan");
 		mcp.digitalWrite(btn_drive_pins[drive_cnt], LOW);
 		for(int i=0;i<BTN_MATRIX_NR_ROW_SW;i++){
 			if(btn[drive_cnt].update(i)){
 				if(btn[drive_cnt].read(i) == LOW){
-					Serial.print("btn ");
-					Serial.print((drive_cnt*i));
-					Serial.print(" released");
+//					Serial.print("btn ");
+					Serial.println((drive_cnt*8+i));
+//					Serial.println(" released");
+					current_lm.toogle_led_x(LED_COLOR_RED_INDEX,((drive_cnt*8+i)));
 				}
 				else {
-					Serial.print("btn ");
-					Serial.print((drive_cnt*i));
-					Serial.print(" pushed");	
+//					Serial.print("btn ");
+//					Serial.print((drive_cnt*i));
+//					Serial.println(" pushed");	
 				}
 			}
 		}
@@ -107,7 +124,7 @@ static void init_btn_matrix(){
 	int i;
 
 	/* init IO expander */
-	mcp.begin(0);
+	mcp.begin(6);
 	Wire.setClock(1000000);
 
 	for (i = 0; i < BTN_MATRIX_NR_COL_GND; i++){ 
@@ -185,7 +202,7 @@ static void test_toogle_led(int color, int led_idx){
 int cnt;
 int color_idx;
 int toogle_idx;
-int color_array[LED_MATRIX_NR_COLORS] = {LED_COLOR_BLUE_INDEX,LED_COLOR_BLUE_INDEX,LED_COLOR_BLUE_INDEX};
+int color_array[LED_MATRIX_NR_COLORS] = {LED_COLOR_BLUE_INDEX,LED_COLOR_GREEN_INDEX,LED_COLOR_RED_INDEX};
 
 void setup(){
 	pinMode(latchPin, OUTPUT);
@@ -229,5 +246,8 @@ void loop(){
 //	Serial.println("START");
 //	current_lm.dump_led_matrix();
 	scan_btn_matrix();
-
+//	uint32_t val = 0xff0000ff;
+	
+//	write_shift_reg(val);
+//	test_led_matrix();
 }

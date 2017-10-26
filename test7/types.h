@@ -26,7 +26,7 @@
 #define __TYPES_H__
 
 #define MATRIX_NR_ROW			8
-#define MATRIX_NR_COL			4
+#define MATRIX_NR_COL			8
 #define LED_MATRIX_NR_COLORS	3
 #define NR_LEDS					(LED_MATRIX_NR_LEDS*LED_MATRIX_NR_GROUND)
 #define NR_STEP					NR_LEDS
