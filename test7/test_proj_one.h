@@ -1,6 +1,8 @@
 #ifndef __TEST_PROJ_ONE_H__
 #define __TEST_PROJ_ONE_H__
 
+#include <LinkedList.h>
+
 #include "prog.h"
 #include "led_matrix.h"
 #include "led_toogle.h"
@@ -9,6 +11,7 @@ class test_proj_one : public prog {
 	private:
 		led_matrix _lm;
 		led_toogle _btn_animation;
+		LinkedList<led_toogle *> _btn_animation_list;
 		
 	public:
 		test_proj_one();

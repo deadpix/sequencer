@@ -3,10 +3,13 @@
 #include "clk.h"
 #include "sequencer.h"
 #include "track.h"
+#include "test_proj_one.h"
 
 SoftwareSerial SoftSerial(0, 1);
 MIDI_CREATE_INSTANCE(SoftwareSerial, SoftSerial, MIDI);
 clk midi_sync;
+
+static const uint8_t MIDI_DRUM_GM[8] = {37, 36, 42, 82, 40, 38, 46, 44};
 
 //sequencer midi_seq;
 
@@ -23,8 +26,10 @@ void init_midi_seq(sequencer* s){
 	s->set_current_track(0);
 	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
 		t = s->get_track(i);
-		t->set_out_id(i);
+		t->set_out_id(i+1);
+		t->set_all_step_note(MIDI_DRUM_GM[i]);
 		t->init_hw_clbk(midi_note_on);
+		
 	}
 }
 

@@ -43,6 +43,20 @@ uint8_t track::get_out_id(){
 void track::set_out_id(uint8_t id){
 	_out_id = id;
 }
+void track::set_all_step_note(uint16_t note){
+	for(int i=0;i<NR_STEP;i++){
+		arr_step[i].step_set_note(127, note);				
+	}
+}
+void track::set_step_note(uint16_t note, uint8_t step_id){
+	if(step_id <= NR_STEP){
+		arr_step[step_id].step_set_note(127, note);		
+	} 
+	else {
+		Serial.println("unable to set note: unknown step_id");
+	}
+
+}
 
 boolean track::next_step(){
 	curr_step_id = (curr_step_id + 1) % NR_STEP;
@@ -88,11 +102,18 @@ void track::toogle_mute(){
 
 uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_clk_flg, clk* master_clk*/){
 	uint32_t res = _c.master_sync(ms, mst_step_cnt);
+	step s = arr_step[curr_step_id];
 	
 	if(res){
 		if(next_step()){
-			step s = arr_step[curr_step_id];
 			s.reset_gate();
+			
+			Serial.print(s._note.pitch);
+			Serial.print(" ");
+			Serial.print(s._note.velocity);
+			Serial.print(" ");			
+			Serial.println(_out_id);
+			
 			_hw_fct(s._note.pitch, s._note.velocity, _out_id);
 		}
 		_step_animation.init_animation(&_lm, curr_step_id, LED_GBR_IDX);
@@ -100,7 +121,8 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_c
 		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
 
 	} else {
-		arr_step[curr_step_id].upd_gate();
+		if(arr_step[curr_step_id].upd_gate())
+			_hw_fct(s._note.pitch, 0, _out_id);
 		if(_step_animation.update_animation()){
 			if(arr_step[curr_step_id].is_step_active()){
 				_lm.set_led_x(LED_R_IDX, curr_step_id);
@@ -122,10 +144,13 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_c
 }
 
 void track::on_push(uint8_t btn_id){
-	arr_step[btn_id].set_step_active();
+	if(arr_step[btn_id].is_step_active())
+		arr_step[btn_id].clr_step_active();
+	else 
+		arr_step[btn_id].set_step_active();
+	_lm.toogle_led_x(LED_R_IDX, btn_id);
 }
 void track::on_release(uint8_t btn_id){
-	_lm.toogle_led_x(LED_R_IDX, btn_id);
 }
 
 //led_matrix* track::update_menu(uint8_t func_id, uint8_t opt_id, led_matrix* menu_matrix){	

@@ -44,6 +44,9 @@ class track {
 		void set_out_id(uint8_t id);
 		uint8_t get_out_id();
 
+		void set_all_step_note(uint16_t);
+		void set_step_note(uint16_t, uint8_t );
+		
 		boolean is_step_on(uint8_t id);
 		boolean next_step();
 		// boolean is_curr_step_active(uint32_t ms);

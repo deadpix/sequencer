@@ -99,7 +99,7 @@ static void scan(prog* p){
 	for (i=0; i<BTN_NUM_ROW; i++){
 		if(btn_row[btn_col_idx].update(i)){
 
-			if(btn_row[btn_col_idx].read(i) == LOW){
+			if(btn_row[btn_col_idx].read(i) == HIGH){
 				p->on_release(btn_col_idx*BTN_NUM_COL + i);
 			} else {
 				p->on_push(btn_col_idx*BTN_NUM_COL + i);

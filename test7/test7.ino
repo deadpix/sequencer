@@ -154,7 +154,7 @@ static void init_all_prog(){
 	tempo_change_handler(mst_clk->clk_get_ms());
 
 	init_midi_seq(&midi_seq);
-//	init_midi_controller(&p1);
+	init_midi_controller(&p1);
 //	sync_slv_clks(mst_clk);
 }
 
@@ -190,7 +190,8 @@ void loop(){
 	// if menu prog is running, call menu update function
 	if(current_prog == prog_arr[nr_prog])
 		menu_ctrl.menu_update();
-
+	else
+		current_prog->update_ui();
 	
 	midi_loop(midi_flag);
 	if(midi_flag)

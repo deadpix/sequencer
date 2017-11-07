@@ -37,12 +37,21 @@ void test_proj_one::menu_update(){
 
 void test_proj_one::on_push(uint8_t btn_id){
 	_lm.set_led_x(LED_GBR_IDX, btn_id);
+
+	//Serial.print(MIDI_DRUM_GM[btn_id]);
+			
+
 	_hw_fct(MIDI_DRUM_GM[btn_id], 127, 1);
 }
 void test_proj_one::on_release(uint8_t btn_id){
-	_lm.toogle_led_x(LED_R_IDX, btn_id);
-	_btn_animation.init_animation(&_lm, btn_id, LED_GBR_IDX);
-	_btn_animation.start_animation(BTN_LED_DELAY_MS);
+	_lm.toogle_led_x(LED_GBR_IDX, btn_id);	
+	led_toogle* lt = new led_toogle();
+	lt->init_animation(&_lm, btn_id, LED_GBR_IDX);
+	lt->start_animation(BTN_LED_DELAY_MS);
+	_btn_animation_list.add(lt);
+
+//	_btn_animation.init_animation(&_lm, btn_id, LED_GBR_IDX);
+//	_btn_animation.start_animation(BTN_LED_DELAY_MS);
 	_hw_fct(MIDI_DRUM_GM[btn_id], 0, 1);
 }
 
@@ -63,5 +72,18 @@ int test_proj_one::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	return ret;
 }
 void test_proj_one::update_ui(){
-	_btn_animation.update_animation();
+	int len = _btn_animation_list.size();
+	for(int i=0;i<len;i++){
+		led_toogle* lt = _btn_animation_list.shift();
+		if(lt->update_animation()){
+			lt->turn_off_led();
+			delete lt;
+		} else {
+			_btn_animation_list.add(lt);
+		}
+	}
+
+//	if(_btn_animation.update_animation())
+//		_btn_animation.turn_off_led();
+		
 }
