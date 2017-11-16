@@ -20,7 +20,7 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
- */
+ */ 
 #include <i2c_t3.h>
 #include <Adafruit_MCP23017.h>
 #include <LinkedList.h>
@@ -35,6 +35,7 @@
 #include "track.h"
 #include "step.h"
 #include "sequencer.h"
+#include "gui.h"
 
 #include "tempo.h"
 #include "test_proj_one.h"
@@ -160,6 +161,7 @@ static void init_all_prog(){
 
 
 void setup(){
+	setup_oled();
 	setup_gui();
 	init_matrix_btn();
 

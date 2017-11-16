@@ -50,4 +50,9 @@ typedef volatile uint32_t mat_row_bmp_t;
 #define MIDI_SYNC_PPN	(MIDI_SYNC_PPQN*1)
 
 
+
+#define MICRO_OLED_GUI 	1
+
+
+
 #endif
