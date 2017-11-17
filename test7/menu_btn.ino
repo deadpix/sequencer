@@ -35,21 +35,21 @@
 Bounce menu_btn = Bounce();
 //menu menu_ctrl;
 
-static uint8_t btn_menu_pins[NR_MENU_BTN] = {7, 6, 5, 4};
+//static uint8_t btn_menu_pins[NR_MENU_BTN] = {7, 6, 5, 4};
 Adafruit_MCP23017 mcp_menu_btn;
 
 static ArrBounce bn_menu_btn;
 
-static uint8_t btn_menu_digitalRead(uint8_t pin){
-	return mcp_menu_btn.digitalRead(pin);
-}
+//static uint8_t btn_menu_digitalRead(uint8_t pin){
+//	return mcp_menu_btn.digitalRead(pin);
+//}
 
 void set_prog_menu_entry(uint8_t id, prog* prog){
 	menu_ctrl.set_menu_prog_entry(id, prog);
 }
 
 static void init_menu_btn(prog* p){
-	menu_btn;
+//	menu_btn;
 	pinMode(PIN_MENU_BTN,INPUT);
 	menu_btn.attach(PIN_MENU_BTN);
 	menu_btn.interval(MENU_BTN_BOUNCE_TIME);

@@ -18,6 +18,7 @@
 //////////////////////////////////
 MicroOLED oled(PIN_RESET, PIN_DC, PIN_CS); // SPI declaration
 //MicroOLED oled(PIN_RESET, DC_JUMPER);    // I2C declaration
+gui oled_gui;
 
 static void print_oled(char* line, uint8_t off){
 	oled.setCursor(0, off);
@@ -48,8 +49,9 @@ static void refresh_oled(char** line_arr){
 */
 }
 
-void setup_oled(){
-	gui::init_gui(refresh_oled);
+void setup_oled(gui* ptr){
+	oled_gui.init_gui(refresh_oled);
+	ptr = &oled_gui;
 	oled.begin();    // Initialize the OLED
 	oled.clear(ALL); // Clear the display's internal memory
 	oled.display();  // Display what's in the buffer (splashscreen)

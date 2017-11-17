@@ -90,7 +90,7 @@ static void init_matrix_btn(){
 }
 
 static void scan(prog* p){
-	uint8_t i, j;
+	uint8_t i;
 
 // 	Select current columns
 	mcp.digitalWrite(btn_select_pins[btn_col_idx], LOW);

@@ -42,7 +42,7 @@
 #include "test_proj_two.h"
 
 
-
+gui	 *gui_ctrl;
 menu  menu_ctrl;
 prog *prog_arr[MATRIX_NR_COL];
 prog *current_prog;
@@ -105,9 +105,10 @@ static void sync_slv_clks(clk* mst){
 }
 */
 
-static void init_one_prog(prog* p, int prog_id){
+static void init_one_prog(prog* p, int prog_id, char *str){
 	prog_arr[prog_id] = p;
 	p->set_prog_id(prog_id);
+	p->set_title(str);
 	set_prog_menu_entry(prog_id, p);	
 }
 
@@ -115,27 +116,18 @@ static void init_all_prog(){
 	nr_prog = 0;
 	led_matrix* menu_lmtx = menu_ctrl.get_menu_led_matrix();
 	
-//	prog_arr[nr_prog] = &tempo_setting;
-//	tempo_setting.set_prog_id(nr_prog);
-//	set_prog_menu_entry(nr_prog, (prog *) &tempo_setting);
-	init_one_prog((prog *) &tempo_setting, nr_prog);
+	init_one_prog((prog *) &tempo_setting, nr_prog, "Setting");
 	nr_prog++;
 	
-//	prog_arr[nr_prog] = &p1;
-//	p1.set_prog_id(nr_prog);
-//	set_prog_menu_entry(nr_prog, (prog *) &p1);
-	init_one_prog((prog *) &p1, nr_prog);
+	init_one_prog((prog *) &p1, nr_prog, "MIDI ctl");
 	menu_lmtx->set_led_x(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 
-//	prog_arr[nr_prog] = &p2;
-//	p2.set_prog_id(nr_prog);
-//	set_prog_menu_entry(nr_prog, (prog *) &p2);
-	init_one_prog((prog *) &p2, nr_prog);
+	init_one_prog((prog *) &p2, nr_prog, "Prog 2");
 	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 
-	init_one_prog((prog *) &midi_seq, nr_prog);
+	init_one_prog((prog *) &midi_seq, nr_prog, "Midi seq");
 	menu_lmtx->set_led_x(LED_G_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 		
@@ -144,6 +136,7 @@ static void init_all_prog(){
 
 	for(int i=0;i<nr_prog;i++){
 		prog_arr[i]->set_menu_lm(menu_lmtx);
+		prog_arr[i]->set_gui(gui_ctrl);
 	}
 	
 	lm_ptr = p1.get_led_matrix();
@@ -161,7 +154,7 @@ static void init_all_prog(){
 
 
 void setup(){
-	setup_oled();
+	setup_oled(gui_ctrl);
 	setup_gui();
 	init_matrix_btn();
 
@@ -180,7 +173,7 @@ void setup(){
 
 
 void loop(){
-	uint32_t clk_res;
+	uint32_t clk_res = 0;
 	if(check_clk){
 		clk_res = tempo_setting.check_mst_clk();
 		check_clk = false;

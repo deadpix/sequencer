@@ -16,10 +16,11 @@ class gui {
 		static char* buffer[GUI_NR_CHAR_PER_LINE];
 	
 	public:
-		static void init_gui(void (*fct)(char**));
-		static uint8_t upd_buf(char* line, int idx);
-		static void (*refresh)(char**);
-
+		gui();
+		~gui();
+		void init_gui(void (*fct)(char**));
+		uint8_t upd_buf(char* line, int idx);
+		void refresh();
 };
 
 #endif

@@ -16,3 +16,13 @@ led_matrix* prog::get_menu_lm(){
 void prog::set_menu_lm(led_matrix* lm){
 	_menu_lm = lm;
 }
+void prog::set_gui(gui* gui_ptr){
+	_gui = gui_ptr;
+}
+void prog::set_title(char* str){
+	_title = str;
+}
+void prog::display_title(){
+	_gui->upd_buf(_title, 0);
+	_gui->refresh();
+}

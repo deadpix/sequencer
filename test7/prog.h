@@ -9,12 +9,17 @@
 
 #include "types.h"
 #include "led_matrix.h"
+#include "gui.h"
 
 class prog {
 	protected:
 		uint8_t prog_id;
 		led_matrix* _menu_lm;
-	
+		gui* _gui;
+		char* _title;
+
+		void display_title();
+
 	public:
 		void set_prog_id(uint8_t);
 		uint8_t get_prog_id(void);
@@ -23,7 +28,9 @@ class prog {
 		
 		led_matrix* get_menu_lm();
 		void set_menu_lm(led_matrix*);
-		
+		void set_gui(gui*);
+		void set_title(char*);
+
 		virtual void menu_enter() = 0;
 		virtual void menu_leave() = 0;
 		virtual void menu_update() = 0;
