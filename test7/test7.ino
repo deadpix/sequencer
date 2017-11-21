@@ -119,7 +119,7 @@ static void init_all_prog(){
 	init_one_prog((prog *) &tempo_setting, nr_prog, "Setting");
 	nr_prog++;
 	
-	init_one_prog((prog *) &p1, nr_prog, "MIDI ctl");
+	init_one_prog((prog *) &p1, nr_prog, "MIDIctl");
 	menu_lmtx->set_led_x(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 
@@ -127,7 +127,7 @@ static void init_all_prog(){
 	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 
-	init_one_prog((prog *) &midi_seq, nr_prog, "Midi seq");
+	init_one_prog((prog *) &midi_seq, nr_prog, "MIDIseq");
 	menu_lmtx->set_led_x(LED_G_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 		
@@ -141,6 +141,8 @@ static void init_all_prog(){
 	
 	lm_ptr = p1.get_led_matrix();
 	current_prog = prog_arr[1];
+	current_prog->display_title();
+
 	
 	tempo_setting.init(tempo_change_handler);
 	mst_clk = tempo_setting.get_mst_clk();
@@ -154,7 +156,7 @@ static void init_all_prog(){
 
 
 void setup(){
-	setup_oled(gui_ctrl);
+	gui_ctrl = setup_oled();
 	setup_gui();
 	init_matrix_btn();
 
@@ -164,7 +166,6 @@ void setup(){
 
 	init_all_prog();
 	init_midi();
-
 	
 	// MUST BE LAST...
 	init_menu_btn(current_prog);
@@ -181,6 +182,7 @@ void loop(){
 	if(btn_flag){
 		scan(current_prog);
 		scan_menu_btn();
+		scan_param_btn();
 	}
 	// if menu prog is running, call menu update function
 	if(current_prog == prog_arr[nr_prog])

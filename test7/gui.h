@@ -9,11 +9,11 @@
 
 
 #define GUI_NR_LINES			3
-#define GUI_NR_CHAR_PER_LINE 	8		
+#define GUI_NR_CHAR_PER_LINE 	7
 
 class gui {
 	private:
-		static char* buffer[GUI_NR_CHAR_PER_LINE];
+		/*static */char* buffer[GUI_NR_CHAR_PER_LINE];
 	
 	public:
 		gui();

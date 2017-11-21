@@ -49,13 +49,16 @@ static void refresh_oled(char** line_arr){
 */
 }
 
-void setup_oled(gui* ptr){
+gui* setup_oled(){
 	oled_gui.init_gui(refresh_oled);
-	ptr = &oled_gui;
 	oled.begin();    // Initialize the OLED
 	oled.clear(ALL); // Clear the display's internal memory
 	oled.display();  // Display what's in the buffer (splashscreen)
 	delay(1000);     // Delay 1000 ms
 	oled.clear(PAGE); // Clear the buffer.
 	oled.setFontType(1);
+	oled.setCursor(0, 0);
+	oled.print("OLED init done");
+	oled.display();
+	return &oled_gui;
 }

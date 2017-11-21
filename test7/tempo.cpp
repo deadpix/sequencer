@@ -89,6 +89,7 @@ void tempo::menu_update(){
 
 int tempo::menu_on_push(uint8_t func_id, uint8_t opt_id){
 	int ret = 0;
+	prog::display_title();
 	if(opt_id == TAP_BTN_ID){
 		_tap_animation.start_animation(LED_ANIMATION_MS);
 	}

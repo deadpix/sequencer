@@ -18,9 +18,9 @@ class prog {
 		gui* _gui;
 		char* _title;
 
-		void display_title();
 
 	public:
+		void display_title();
 		void set_prog_id(uint8_t);
 		uint8_t get_prog_id(void);
 		prog* get_prog(void);
@@ -41,6 +41,5 @@ class prog {
 		virtual void on_release(uint8_t btn_id) = 0;
 		virtual void update_ui() = 0;
 };
-
 
 #endif

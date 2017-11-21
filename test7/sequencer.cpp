@@ -37,6 +37,7 @@ void sequencer::menu_update(){
 
 int sequencer::menu_on_push(uint8_t func_id, uint8_t opt_id){	
 	int ret = 1;
+	prog::display_title();
 	return ret;
 }
 int sequencer::menu_on_release(uint8_t func_id, uint8_t opt_id){
