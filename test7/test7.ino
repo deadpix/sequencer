@@ -40,7 +40,8 @@
 #include "tempo.h"
 #include "test_proj_one.h"
 #include "test_proj_two.h"
-
+#include "fct_step.h"
+#include "seq_param.h"
 
 gui	 *gui_ctrl;
 menu  menu_ctrl;
@@ -50,6 +51,8 @@ int nr_prog;
 
 static tempo tempo_setting;
 static sequencer midi_seq;
+static seq_param seq_param_ui;
+static fct_step seq_option1;
 static test_proj_one p1;
 static test_proj_two p2;
 
@@ -105,6 +108,15 @@ static void sync_slv_clks(clk* mst){
 }
 */
 
+static void init_sequencer(){
+	seq_option1.init(&midi_seq);
+	seq_param_ui.init(&midi_seq);
+
+	midi_seq.add_fct(&seq_option1, 0);
+	midi_seq.set_current_param(0);
+	midi_seq.prog::set_param(&seq_param_ui);
+}
+
 static void init_one_prog(prog* p, int prog_id, char *str){
 	prog_arr[prog_id] = p;
 	p->set_prog_id(prog_id);
@@ -151,6 +163,7 @@ static void init_all_prog(){
 
 	init_midi_seq(&midi_seq);
 	init_midi_controller(&p1);
+	init_sequencer();
 //	sync_slv_clks(mst_clk);
 }
 

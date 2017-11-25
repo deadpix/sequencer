@@ -46,6 +46,10 @@ gui	 *gui_ctrl;
 menu  menu_ctrl;
 prog *prog_arr[MATRIX_NR_COL];
 prog *current_prog;
+
+matrixUI *mui_arr[MATRIX_NR_COL];
+matrixUI *current_mui;
+
 int nr_prog;
 
 static tempo tempo_setting;
@@ -105,8 +109,9 @@ static void sync_slv_clks(clk* mst){
 }
 */
 
-static void init_one_prog(prog* p, int prog_id, char *str){
+static void init_one_prog(prog* p, int prog_id, char *str, matrixUI *mui){
 	prog_arr[prog_id] = p;
+	mui_arr[prog_id] = mui;
 	p->set_prog_id(prog_id);
 	p->set_title(str);
 	set_prog_menu_entry(prog_id, p);	
@@ -168,7 +173,7 @@ void setup(){
 	init_midi();
 	
 	// MUST BE LAST...
-	init_menu_btn(current_prog);
+	init_menu_btn(current_prog, current_mui);
 
 }
 

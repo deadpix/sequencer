@@ -1,6 +1,10 @@
 #include "sequencer.h"
 
 sequencer::sequencer(){
+	current_param_id = 0;
+	for(int i=0;i<(MATRIX_NR_COL*MATRIX_NR_ROW);i++){
+		fct_arr[i] = NULL;
+	}
 }
 
 sequencer::~sequencer(){
@@ -16,6 +20,17 @@ track* sequencer::get_current_track(){
 
 void sequencer::set_current_track(uint8_t track_id){
 	current = &track_arr[track_id];
+}
+
+void sequencer::set_current_param(uint8_t id){
+	current_param_id = id;
+}
+
+void sequencer::add_fct(fct_clbk* fct, uint8_t idx){
+	fct_arr[idx] = fct;
+}
+fct_clbk* sequencer::get_fct(uint8_t idx){
+	return fct_arr[idx];
 }
 
 void sequencer::check_clks(uint32_t mst_ms, uint16_t mst_step){
@@ -55,13 +70,20 @@ int sequencer::menu_on_release(uint8_t func_id, uint8_t opt_id){
 }
 
 void sequencer::on_push(uint8_t btn_id){
-	current->on_push(btn_id);
+//	current->on_push(btn_id);
+	fct_clbk* fc = fct_arr[current_param_id];
+	if(fc)
+		fct_arr[current_param_id]->on_release(btn_id);
 }
 void sequencer::on_release(uint8_t btn_id){
-	current->on_release(btn_id);
+//	current->on_release(btn_id);
+	if(fct_arr[current_param_id])
+		fct_arr[current_param_id]->on_release(btn_id);
 }
 void sequencer::update_ui(){
-	current->update_ui();
+//	current->update_ui();
+	if(fct_arr[current_param_id])
+		fct_arr[current_param_id]->update_ui();
 }
 led_matrix* sequencer::get_led_matrix(){
 	current->get_led_matrix();

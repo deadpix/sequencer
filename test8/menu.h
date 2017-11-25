@@ -33,6 +33,8 @@ class menu: public prog {
 		prog*		next_prog; 
 		struct menu_clbk menu_clbk_arr[MATRIX_NR_COL];
 		prog*		prog_arr[MATRIX_NR_COL];
+		matrixUI*	_mui_arr[MATRIX_NR_COL];
+		matrixUI*	_next_mui;
 	
 	public:
 		
@@ -44,6 +46,9 @@ class menu: public prog {
 
 		prog* get_next_prog();
 		void set_next_prog(prog*);
+		
+		matrixUI* get_next_mui();
+		void set_next_mui(matrixUI*);
 		
 		void menu_enter();
 		void menu_leave();

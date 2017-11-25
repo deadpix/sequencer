@@ -46,11 +46,12 @@ Bounce param_btn = Bounce();
 //	return mcp_menu_btn.digitalRead(pin);
 //}
 
-void set_prog_menu_entry(uint8_t id, prog* prog){
+void set_prog_menu_entry(uint8_t id, prog* prog, matrixUI* mui){
 	menu_ctrl.set_menu_prog_entry(id, prog);
+	menu_ctrl.set_menu_mui_entry(id, mui);
 }
 
-static void init_menu_btn(prog* p){
+static void init_menu_btn(prog* p, matrixUI* mui){
 //	menu_btn;
 	pinMode(PIN_MENU_BTN,INPUT);
 	pinMode(PIN_PARAM_BTN,INPUT);
@@ -62,6 +63,7 @@ static void init_menu_btn(prog* p){
 	
 	//	menu_ctrl.set_next_interface(p->get_led_matrix());
 	menu_ctrl.set_next_prog(p);
+	menu_ctrl.set_next_mui(mui);
 //	mcp_menu_btn.begin(0);
 //	Wire.setClock(1000000);
 

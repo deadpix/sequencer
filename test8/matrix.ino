@@ -27,7 +27,7 @@
 #include "types.h"
 #include "led_matrix.h"
 #include "Bounce_array.h"
-
+#include "matrixUI.h"
 
 #define latchPin 		22
 #define clockPin 		23
@@ -89,7 +89,7 @@ static void init_matrix_btn(){
 	}
 }
 
-static void scan(prog* p){
+static void scan(const matrixUI* const mui){
 	uint8_t i;
 
 // 	Select current columns
@@ -100,9 +100,9 @@ static void scan(prog* p){
 		if(btn_row[btn_col_idx].update(i)){
 
 			if(btn_row[btn_col_idx].read(i) == HIGH){
-				p->on_release(btn_col_idx*BTN_NUM_COL + i);
+				mui->on_release(btn_col_idx*BTN_NUM_COL + i);
 			} else {
-				p->on_push(btn_col_idx*BTN_NUM_COL + i);
+				mui->on_push(btn_col_idx*BTN_NUM_COL + i);
 #if DEBUG
 				Serial.print("push btn ");
 				Serial.println(btn_col_idx*BTN_NUM_COL + i);
@@ -122,7 +122,7 @@ static void write_shift_reg(uint32_t val){
 	digitalWrite(latchPin, HIGH);
 }
 
-static void upd_shift_reg(led_matrix* lm){
+static void upd_shift_reg(const led_matrix* const lm){
 	uint32_t tmp = ((1<<(grd_cnt/*+4*/))) << GRD_OFFSET;
 	led_t l = lm->get_led(grd_cnt);	
 	tmp |= (l.bitmap[LED_COLOR_RED_INDEX] << RED_OFFSET)

@@ -24,7 +24,6 @@ class track {
 		
 		uint8_t track_len;
 		clk _c;
-		step arr_step[NR_STEP];
 		elapsedMillis elapsed_ms;
 		led_matrix _lm;
 		uint8_t output_id;
@@ -32,6 +31,7 @@ class track {
 		led_toogle _step_animation;
 		
 	public:
+		step arr_step[NR_STEP];
 		track();
 		~track();
 		

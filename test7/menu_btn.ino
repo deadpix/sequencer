@@ -23,10 +23,11 @@
  */
 
 #include <i2c_t3.h>
+#include <Bounce2.h>
 //#include <Adafruit_MCP23017.h>
 #include "Bounce_array.h"
-#include <Bounce2.h>
 #include "prog.h"
+#include "param.h"
 
 #define NR_MENU_BTN				4
 #define MENU_BTN_BOUNCE_TIME	5
@@ -35,6 +36,7 @@
 
 Bounce menu_btn = Bounce();
 Bounce param_btn = Bounce();
+param* param_ptr;
 //menu menu_ctrl;
 
 //static uint8_t btn_menu_pins[NR_MENU_BTN] = {7, 6, 5, 4};
@@ -59,6 +61,7 @@ static void init_menu_btn(prog* p){
 	param_btn.attach(PIN_PARAM_BTN);
 	param_btn.interval(MENU_BTN_BOUNCE_TIME);
 	
+	param_ptr = NULL;
 	
 	//	menu_ctrl.set_next_interface(p->get_led_matrix());
 	menu_ctrl.set_next_prog(p);
@@ -91,13 +94,24 @@ static void scan_menu_btn(){
 		}
 	} 
 }
+
 static void scan_param_btn(){
 	if(param_btn.update()){
 		if(param_btn.fell()){
 			Serial.println("param button released");
+			if(param_ptr){
+				current_prog = param_ptr->get_prog();
+				lm_ptr = current_prog->get_led_matrix();
+			}
 		} 
 		else {
 			Serial.println("param button pushed");
+			param_ptr = current_prog->get_param();
+			if(param_ptr){
+				lm_ptr = param_ptr->get_led_matrix();
+				current_prog = param_ptr;
+				//TODO print selected options
+			}
 		}
-	} 
+	}
 }

@@ -10,6 +10,13 @@ prog* prog::get_prog(){
 	return this;
 }
 
+void prog::set_param(param* p){
+	_param = p;
+}
+param* prog::get_param(){
+	return _param;
+}
+
 led_matrix* prog::get_menu_lm(){
 	return _menu_lm;
 }

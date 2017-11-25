@@ -10,10 +10,11 @@
 #include "types.h"
 #include "led_matrix.h"
 #include "gui.h"
+#include "matrixUI.h"
 
-class prog {
+class prog : matrixUI {
 	protected:
-		uint8_t prog_id;
+//		uint8_t prog_id;
 		led_matrix* _menu_lm;
 		gui* _gui;
 		char* _title;
@@ -26,6 +27,7 @@ class prog {
 		prog* get_prog(void);
 		virtual led_matrix* get_led_matrix(void);
 		
+		
 		led_matrix* get_menu_lm();
 		void set_menu_lm(led_matrix*);
 		void set_gui(gui*);
@@ -37,9 +39,9 @@ class prog {
 		virtual int  menu_on_push(uint8_t, uint8_t) = 0;
 		virtual int  menu_on_release(uint8_t, uint8_t) = 0;
 
-		virtual void on_push(uint8_t btn_id) = 0;
-		virtual void on_release(uint8_t btn_id) = 0;
-		virtual void update_ui() = 0;
+//		virtual void on_push(uint8_t btn_id) = 0;
+//		virtual void on_release(uint8_t btn_id) = 0;
+//		virtual void update_ui() = 0;
 };
 
 #endif

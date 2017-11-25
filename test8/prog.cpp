@@ -1,10 +1,10 @@
 #include "prog.h"
 
 void prog::set_prog_id(uint8_t id){
-	prog_id = id;
+	matrixUI::set_mui_id(id);
 }
 uint8_t prog::get_prog_id(){
-	return prog_id;
+	return matrixUI::get_mui_id();
 }
 prog* prog::get_prog(){
 	return this;
