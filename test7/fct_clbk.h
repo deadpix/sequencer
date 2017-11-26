@@ -8,12 +8,16 @@
 #endif
 
 class fct_clbk {
-	public:
+	private:
 		char* _fct_name;
 	
-	virtual void on_push(uint8_t btn_id) = 0;
-	virtual void on_release(uint8_t btn_id) = 0;
-	virtual void update_ui() = 0;
+	public:
+		char* get_fct_name();
+		void  set_fct_name(char* str);
+		
+		virtual void on_push(uint8_t btn_id) = 0;
+		virtual void on_release(uint8_t btn_id) = 0;
+		virtual void update_ui() = 0;
 };
 
 #endif

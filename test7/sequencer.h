@@ -21,10 +21,10 @@ class sequencer : public prog {
 		track  track_arr[SEQUENCER_NR_TRACK];
 		track* current;
 		fct_clbk* fct_arr[MATRIX_NR_COL*MATRIX_NR_ROW];
-		uint8_t current_param_id;
 		
 	public:
 		static const uint8_t nr_track = 1;
+		uint8_t current_param_id;
 
 		sequencer();
 		~sequencer();

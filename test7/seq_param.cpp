@@ -7,7 +7,12 @@ seq_param::~seq_param(){
 
 void seq_param::init(sequencer* const s){
 	_s = s;
-	param::_lm.set_led_x(LED_R_IDX, 0);	
+	for(int i=0;i<(MATRIX_NR_COL*MATRIX_NR_ROW);i++){
+		if(_s->get_fct(i))
+			param::_lm.set_led_x(LED_R_IDX, i);
+	}
+	if(_s->get_fct(_s->current_param_id))
+		param::_lm.set_led_x(LED_GBR_IDX, _s->current_param_id);
 }
 
 void seq_param::on_push(uint8_t btn_id){
@@ -15,7 +20,7 @@ void seq_param::on_push(uint8_t btn_id){
 	// TODO set param title
 	fct_clbk* fc = _s->get_fct(btn_id);
 	if(fc)
-		Serial.println(fc->fct_clbk::_fct_name);
+		Serial.println(fc->fct_clbk::get_fct_name());
 	else 
 		Serial.println("unknown option");
 }

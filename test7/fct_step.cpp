@@ -1,8 +1,8 @@
 #include "fct_step.h"
 
-void fct_step::init(sequencer* seq){
+void fct_step::init(sequencer* seq, char* name){
 	_seq = seq;
-	fct_clbk::_fct_name = "step ed";
+	fct_clbk::set_fct_name(name);
 }
 
 void fct_step::on_push(uint8_t btn_id){

@@ -109,13 +109,18 @@ static void sync_slv_clks(clk* mst){
 */
 
 static void init_sequencer(){
-	seq_option1.init(&midi_seq);
-	seq_param_ui.init(&midi_seq);
-	seq_param_ui.param::set_prog(&midi_seq);
+	seq_option1.init(&midi_seq, "step");
 	
 	midi_seq.add_fct(&seq_option1, 0);
 	midi_seq.set_current_param(0);
 	midi_seq.prog::set_param(&seq_param_ui);
+
+	/* MUST BE called after sequencer initialization 	*/
+	/* as parameters depends on sequencer options/fct 	*/
+	/* initialization 									*/
+	seq_param_ui.init(&midi_seq);
+	seq_param_ui.param::set_prog(&midi_seq);
+
 }
 
 static void init_one_prog(prog* p, int prog_id, char *str){
