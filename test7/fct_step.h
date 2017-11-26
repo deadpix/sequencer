@@ -19,9 +19,7 @@ class fct_step: public fct_clbk {
 		fct_step(){};
 		~fct_step(){};
 		
-		void init(sequencer*);
-		char* get_fct_name();
-		
+		void init(sequencer*);		
 		void on_push(uint8_t btn_id);
 		void on_release(uint8_t btn_id);
 		void update_ui();

@@ -2,6 +2,7 @@
 
 void fct_step::init(sequencer* seq){
 	_seq = seq;
+	fct_clbk::_fct_name = "step ed";
 }
 
 void fct_step::on_push(uint8_t btn_id){

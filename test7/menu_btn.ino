@@ -98,14 +98,12 @@ static void scan_menu_btn(){
 static void scan_param_btn(){
 	if(param_btn.update()){
 		if(param_btn.fell()){
-			Serial.println("param button released");
 			if(param_ptr){
 				current_prog = param_ptr->get_prog();
 				lm_ptr = current_prog->get_led_matrix();
 			}
 		} 
 		else {
-			Serial.println("param button pushed");
 			param_ptr = current_prog->get_param();
 			if(param_ptr){
 				lm_ptr = param_ptr->get_led_matrix();

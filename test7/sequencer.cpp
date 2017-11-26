@@ -71,14 +71,18 @@ int sequencer::menu_on_release(uint8_t func_id, uint8_t opt_id){
 
 void sequencer::on_push(uint8_t btn_id){
 //	current->on_push(btn_id);
-	fct_clbk* fc = fct_arr[current_param_id];
-	if(fc)
-		fct_arr[current_param_id]->on_release(btn_id);
+	if(fct_arr[current_param_id]){
+		fct_arr[current_param_id]->on_push(btn_id);
+	}
+	
+//	if(fc)
+		
 }
 void sequencer::on_release(uint8_t btn_id){
 //	current->on_release(btn_id);
-	if(fct_arr[current_param_id])
+	if(fct_arr[current_param_id]){
 		fct_arr[current_param_id]->on_release(btn_id);
+	}
 }
 void sequencer::update_ui(){
 //	current->update_ui();
