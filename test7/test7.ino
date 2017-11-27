@@ -113,6 +113,7 @@ static void init_sequencer(){
 	
 	midi_seq.add_fct(&seq_option1, 0);
 	midi_seq.set_current_param(0);
+	midi_seq.prog::display_str("step", 1);
 	midi_seq.prog::set_param(&seq_param_ui);
 
 	/* MUST BE called after sequencer initialization 	*/

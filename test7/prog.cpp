@@ -10,11 +10,11 @@ prog* prog::get_prog(){
 	return this;
 }
 
-void prog::set_param(param* p){
-	_param = p;
-}
 param* prog::get_param(){
 	return _param;
+}
+void prog::set_param(param* p){
+	_param = p;
 }
 
 led_matrix* prog::get_menu_lm(){
@@ -33,3 +33,8 @@ void prog::display_title(){
 	_gui->upd_buf(_title, 0);
 	_gui->refresh();
 }
+void prog::display_str(char* str, uint8_t idx){
+	_gui->upd_buf(str, idx);
+	_gui->refresh();
+}
+

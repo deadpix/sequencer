@@ -24,6 +24,8 @@ class prog {
 
 	public:
 		void display_title();
+		void display_str(char*, uint8_t);
+
 		void set_prog_id(uint8_t);
 		uint8_t get_prog_id(void);
 		prog* get_prog(void);
