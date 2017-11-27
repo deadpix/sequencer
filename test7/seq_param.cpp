@@ -16,11 +16,12 @@ void seq_param::init(sequencer* const s){
 }
 
 void seq_param::on_push(uint8_t btn_id){
-	param::_lm.toogle_led_x(LED_R_IDX, btn_id);;
-	// TODO set param title
 	fct_clbk* fc = _s->get_fct(btn_id);
-	if(fc)
+	param::_lm.toogle_led_x(LED_R_IDX, btn_id);;
+	if(fc){
 		Serial.println(fc->fct_clbk::get_fct_name());
+		_s->prog::display_str(fc->get_fct_name(), 1);
+	}
 	else 
 		Serial.println("unknown option");
 }
