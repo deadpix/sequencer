@@ -10,7 +10,6 @@ prog* prog::get_prog(){
 	return this;
 }
 
-void prog::set_param(param* p){
 param* prog::get_param(){
 	return _param;
 }
