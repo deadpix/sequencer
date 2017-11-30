@@ -13,6 +13,7 @@ track::track(){
 	track_len = 16;
 	elapsed_ms = 0;
 	_hw_fct = _dummy_fct;
+	_max_step = NR_STEP;
 	
 	for(int i=0;i<NR_STEP;i++){
 		arr_step[i].set_step_id(i);
@@ -55,7 +56,13 @@ void track::set_step_note(uint16_t note, uint8_t step_id){
 	else {
 		Serial.println("unable to set note: unknown step_id");
 	}
+}
 
+uint8_t track::get_max_step(){
+	return _max_step;
+}
+void 	track::set_max_step(uint8_t max){
+	_max_step = max;
 }
 
 boolean track::next_step(){
@@ -108,11 +115,11 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_c
 		if(next_step()){
 			s.reset_gate();
 			
-			Serial.print(s._note.pitch);
-			Serial.print(" ");
-			Serial.print(s._note.velocity);
-			Serial.print(" ");			
-			Serial.println(_out_id);
+//			Serial.print(s._note.pitch);
+//			Serial.print(" ");
+//			Serial.print(s._note.velocity);
+//			Serial.print(" ");			
+//			Serial.println(_out_id);
 			
 			_hw_fct(s._note.pitch, s._note.velocity, _out_id);
 		}

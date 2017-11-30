@@ -25,6 +25,9 @@ void sequencer::set_current_track(uint8_t track_id){
 void sequencer::set_current_param(uint8_t id){
 	current_param_id = id;
 }
+uint8_t sequencer::get_current_param(){
+	return current_param_id;
+}
 
 void sequencer::add_fct(fct_clbk* fct, uint8_t idx){
 	fct_arr[idx] = fct;

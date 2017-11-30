@@ -17,3 +17,5 @@ void fct_step::on_release(uint8_t btn_id){
 }
 void fct_step::update_ui(){
 }
+void fct_step::on_start(){
+}

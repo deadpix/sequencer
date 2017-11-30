@@ -31,5 +31,12 @@ void seq_param::on_release(uint8_t btn_id){
 
 void seq_param::update_ui(){
 }
+void seq_param::param_on_enter(){
+}
+void seq_param::param_on_leave(){
+	fct_clbk* fc = _s->get_fct(_s->get_current_param());
+	if(fc)
+		fc->on_start();
+}
 
 

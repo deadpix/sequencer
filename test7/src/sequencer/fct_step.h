@@ -1,5 +1,5 @@
-#ifndef __FCT_STEP_H__
-#define __FCT_STEP_H__
+#ifndef __SRC_SEQUENCER_FCT_STEP_H__
+#define __SRC_SEQUENCER_FCT_STEP_H__
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include <Arduino.h>
@@ -7,8 +7,8 @@
 	#include <WProgram.h>
 #endif
 
-#include "fct_clbk.h"
-#include "sequencer.h"
+#include "../../fct_clbk.h"
+#include "../../sequencer.h"
 
 class fct_step: public fct_clbk {
 	private:
@@ -23,6 +23,9 @@ class fct_step: public fct_clbk {
 		void on_push(uint8_t btn_id);
 		void on_release(uint8_t btn_id);
 		void update_ui();
+		
+		void on_start();
+
 };
 
 #endif

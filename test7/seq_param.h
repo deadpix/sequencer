@@ -19,6 +19,10 @@ class seq_param: public param {
 		void on_push(uint8_t btn_id);
 		void on_release(uint8_t btn_id);
 		void update_ui();
+		
+		void param_on_enter();
+		void param_on_leave();
+
 };
 
 #endif

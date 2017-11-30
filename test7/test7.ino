@@ -40,7 +40,7 @@
 #include "tempo.h"
 #include "test_proj_one.h"
 #include "test_proj_two.h"
-#include "fct_step.h"
+#include "src/sequencer/fct_step.h"
 #include "seq_param.h"
 
 gui	 *gui_ctrl;

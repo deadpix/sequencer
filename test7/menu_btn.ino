@@ -101,6 +101,7 @@ static void scan_param_btn(){
 			if(param_ptr){
 				current_prog = param_ptr->get_prog();
 				lm_ptr = current_prog->get_led_matrix();
+				param_ptr->param_on_leave();
 			}
 		} 
 		else {
@@ -108,6 +109,7 @@ static void scan_param_btn(){
 			if(param_ptr){
 				lm_ptr = param_ptr->get_led_matrix();
 				current_prog = param_ptr;
+				param_ptr->param_on_enter();
 				//TODO print selected options
 			}
 		}

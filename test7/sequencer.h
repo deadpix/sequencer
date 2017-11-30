@@ -33,6 +33,7 @@ class sequencer : public prog {
 		track* get_current_track();
 		void set_current_track(uint8_t track_id);
 		void set_current_param(uint8_t);
+		uint8_t get_current_param();
 		
 		void add_fct(fct_clbk*, uint8_t);
 		fct_clbk* get_fct(uint8_t);

@@ -18,7 +18,7 @@
 class track {
 	private:
 		uint16_t curr_step_id;
-//		uint8_t max_step;
+		uint8_t _max_step;
 		uint8_t _track_id;
 		uint8_t _out_id;
 		
@@ -38,6 +38,9 @@ class track {
 		led_matrix * get_led_matrix();
 		clk* get_clk();
 
+		void set_max_step(uint8_t max);
+		uint8_t get_max_step();
+		
 		void set_track_id(uint8_t id);
 		uint8_t get_track_id();
 
