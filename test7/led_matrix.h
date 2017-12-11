@@ -53,6 +53,7 @@ typedef struct {
 class led_matrix {
 	private:
 		led_t led_arr[LED_MATRIX_NR_GROUND];
+		uint8_t bmp[NR_LEDS];
 
 	public:
 		led_matrix();
@@ -61,6 +62,9 @@ class led_matrix {
 		led_t* get_led_arr(void);
 		led_t get_led(uint8_t);
 
+		uint8_t get_led_x_state(uint8_t, uint16_t, uint16_t);
+		void set_led_x_state(uint8_t, uint16_t, uint16_t, uint8_t);
+
 		int set_led_x(uint8_t, uint16_t);
 		int clr_led_x(uint8_t, uint16_t);
 		int toogle_led_x(uint8_t, uint16_t);
@@ -68,6 +72,9 @@ class led_matrix {
 		int set_led_x_coor(uint8_t, uint16_t, uint16_t);
 		int clr_led_x_coor(uint8_t, uint16_t, uint16_t);
 		int toogle_led_x_coor(uint8_t, uint16_t, uint16_t);
+
+		void save_n_set(uint8_t, uint16_t);
+		void clr_n_restore(uint16_t);
 
 		void dump_led_matrix(void);
 };
