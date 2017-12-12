@@ -17,7 +17,7 @@ void seq_param::init(sequencer* const s){
 
 void seq_param::on_push(uint8_t btn_id){
 	fct_clbk* fc = _s->get_fct(btn_id);
-	param::_lm.toogle_led_x(LED_R_IDX, btn_id);;
+	param::_lm.toogle_led_x(LED_R_IDX, btn_id);
 	if(fc){
 		Serial.println(fc->fct_clbk::get_fct_name());
 		_s->prog::display_str(fc->get_fct_name(), 1);
@@ -30,7 +30,7 @@ void seq_param::on_release(uint8_t btn_id){
 	_s->set_current_param(btn_id);
 }
 
-void seq_param::update_ui(){
+void seq_param::update_ui(uint32_t mst_ms, uint16_t mst_step){
 }
 void seq_param::param_on_enter(){
 }
@@ -39,5 +39,3 @@ void seq_param::param_on_leave(){
 	if(fc)
 		fc->on_start();
 }
-
-

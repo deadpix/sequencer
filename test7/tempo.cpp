@@ -104,5 +104,5 @@ int tempo::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	return ret;
 }
 
-void tempo::update_ui(){
+void tempo::update_ui(uint32_t mst_ms, uint16_t mst_step){
 }

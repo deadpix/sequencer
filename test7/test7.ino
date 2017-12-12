@@ -41,6 +41,7 @@
 #include "test_proj_one.h"
 #include "test_proj_two.h"
 #include "src/sequencer/fct_step.h"
+#include "src/sequencer/fct_loop_setting.h"
 #include "seq_param.h"
 
 gui	 *gui_ctrl;
@@ -53,6 +54,8 @@ static tempo tempo_setting;
 static sequencer midi_seq;
 static seq_param seq_param_ui;
 static fct_step seq_option1;
+static fct_loop_setting seq_option2;
+
 static test_proj_one p1;
 static test_proj_two p2;
 
@@ -110,8 +113,11 @@ static void sync_slv_clks(clk* mst){
 
 static void init_sequencer(){
 	seq_option1.init(&midi_seq, "step");
+	seq_option2.init(&midi_seq, "looplen");
 	
 	midi_seq.add_fct(&seq_option1, 0);
+	midi_seq.add_fct(&seq_option2, 1);
+
 	midi_seq.set_current_param(0);
 	midi_seq.prog::display_str("step", 1);
 	midi_seq.prog::set_param(&seq_param_ui);
@@ -165,7 +171,7 @@ static void init_all_prog(){
 	
 	tempo_setting.init(tempo_change_handler);
 	mst_clk = tempo_setting.get_mst_clk();
-	mst_clk->clk_set_max_step(32);
+	mst_clk->clk_set_max_step(NR_STEP);
 	tempo_change_handler(mst_clk->clk_get_ms());
 
 	init_midi_seq(&midi_seq);
@@ -208,7 +214,7 @@ void loop(){
 	if(current_prog == prog_arr[nr_prog])
 		menu_ctrl.menu_update();
 	else
-		current_prog->update_ui();
+		current_prog->update_ui(clk_res, mst_clk->clk_get_step_cnt());
 	
 	midi_loop(midi_flag);
 	if(midi_flag)

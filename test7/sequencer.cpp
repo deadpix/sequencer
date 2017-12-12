@@ -84,10 +84,10 @@ void sequencer::on_release(uint8_t btn_id){
 		fct_arr[current_param_id]->on_release(btn_id);
 	}
 }
-void sequencer::update_ui(){
+void sequencer::update_ui(uint32_t mst_ms, uint16_t mst_step){
 //	current->update_ui();
 	if(fct_arr[current_param_id])
-		fct_arr[current_param_id]->update_ui();
+		fct_arr[current_param_id]->update_ui(mst_ms,mst_step);
 }
 led_matrix* sequencer::get_led_matrix(){
 	current->get_led_matrix();

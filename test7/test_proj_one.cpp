@@ -73,7 +73,7 @@ int test_proj_one::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	}	
 	return ret;
 }
-void test_proj_one::update_ui(){
+void test_proj_one::update_ui(uint32_t mst_ms, uint16_t mst_step){
 	int len = _btn_animation_list.size();
 	for(int i=0;i<len;i++){
 		led_toogle* lt = _btn_animation_list.shift();
