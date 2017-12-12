@@ -46,8 +46,8 @@ led_t* led_matrix::get_led_arr(){
 uint8_t led_matrix::get_led_x_state(uint8_t color, uint16_t x, uint16_t y){
 	return (led_arr[x].bitmap[color] << y) & 0x1;
 }
-uint8_t led_matrix::set_led_x_state(uint8_t color, uint16_t x, uint16_t y, uint8_t state){
-	led_arr[x].bitmap[color] |= (pix<<y);
+void led_matrix::set_led_x_state(uint8_t color, uint16_t x, uint16_t y, uint8_t state){
+	led_arr[x].bitmap[color] |= (state<<y);
 }
 
 
