@@ -18,6 +18,7 @@ class seq_param: public param {
 		clk _clk_mul[MAX_MULTIPLIER-1]; 
 
 		void clk_divider_ui(uint32_t, uint16_t);
+		void clk_multiplier_ui(uint32_t, uint16_t);
 
 	public:
 		seq_param(){};

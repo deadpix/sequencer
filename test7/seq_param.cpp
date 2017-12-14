@@ -1,7 +1,8 @@
 #include "seq_param.h"
 
-#define CLK_DIVIDER_LED_OFFSET	8
-#define LED_ANIMATION_PER		10
+#define CLK_DIVIDER_LED_OFFSET		8
+#define CLK_MULTIPLIER_LED_OFFSET	16
+#define LED_ANIMATION_PER			10
 
 //seq_param::seq_param(){
 //}
@@ -27,6 +28,33 @@ void seq_param::clk_divider_ui(uint32_t mst_ms, uint16_t mst_step){
 	}
 }
 
+void seq_param::clk_multiplier_ui(uint32_t mst_ms, uint16_t mst_step){
+//_s->get_current_track()->get_clk()->clk_get_ms()
+	if(mst_ms > 0){
+//		reset and update clock ms reference
+		_clk_mul_ui[0].turn_on_led();
+		_clk_mul_ui[0].start_animation(LED_ANIMATION_PER * mst_ms / 100);
+
+		for(int i=0;i<(MAX_MULTIPLIER-1);i++){
+			_clk_mul[i].clk_sync(mst_ms, mst_step);
+			_clk_mul_ui[i+1].turn_on_led();
+			_clk_mul_ui[i+1].start_animation(LED_ANIMATION_PER * _clk_mul[i].clk_get_ms() / 100);
+		}
+	}
+	else {
+		for(int i=0;i<(MAX_MULTIPLIER-1);i++){
+			uint32_t ms = _clk_mul[i].clk_elapsed();
+			if(ms > 0){
+				_clk_mul_ui[i+1].turn_on_led();
+				_clk_mul_ui[i+1].start_animation(LED_ANIMATION_PER * ms / 100);
+			}
+		}
+	}
+	for(int i=0;i<MAX_MULTIPLIER;i++){
+		_clk_mul_ui[i].update_animation();
+	}
+}
+
 void seq_param::init(sequencer* const s){
 	_s = s;
 	for(int i=0;i<(MATRIX_NR_COL*MATRIX_NR_ROW);i++){
@@ -38,6 +66,12 @@ void seq_param::init(sequencer* const s){
 
 	for(int i=0;i<MAX_DIVIDER;i++){
 		_clk_div_ui[i].init_animation(param::get_led_matrix(),(CLK_DIVIDER_LED_OFFSET+i), LED_R_IDX);
+	}
+	
+	_clk_mul_ui[0].init_animation(param::get_led_matrix(),(CLK_MULTIPLIER_LED_OFFSET), LED_R_IDX);
+	for(int i=1;i<MAX_MULTIPLIER;i++){
+		_clk_mul_ui[i].init_animation(param::get_led_matrix(),(CLK_MULTIPLIER_LED_OFFSET+i), LED_R_IDX);
+		_clk_mul[(i-1)].clk_set_operation(i, _s->get_current_track()->get_clk()->clk_get_ms());
 	}
 
 }
@@ -59,7 +93,7 @@ void seq_param::on_release(uint8_t btn_id){
 
 void seq_param::update_ui(uint32_t mst_ms, uint16_t mst_step){
 	clk_divider_ui(mst_ms, mst_step);
-
+	clk_multiplier_ui(mst_ms, mst_step);
 }
 void seq_param::param_on_enter(){
 }
