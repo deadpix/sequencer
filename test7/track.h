@@ -67,7 +67,7 @@ class track {
 		void unmute();
 		void toogle_mute();
 		
-		void update_ui();
+		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 };
 
 

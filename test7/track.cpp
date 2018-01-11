@@ -194,7 +194,7 @@ void track::on_release(uint8_t btn_id){
 //	return lm;
 //}
 
-void track::update_ui(){
+void track::update_ui(uint32_t mst_ms, uint16_t mst_step){
 //	clk.clock_upd_gui(curr_step_id, get_led_matrix(), is_step_on(curr_step_id));
 }
 
