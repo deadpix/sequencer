@@ -1,4 +1,5 @@
 #include "track.h"
+#include "src/errata.h"
 
 #define CLK_LEN_PER 	(20)
 
@@ -8,6 +9,8 @@ static void _dummy_fct(uint16_t arg1, uint8_t arg2, uint8_t arg3){
 	Serial.println("track dummy callback function");
 }
 
+
+						  
 track::track(){
 	curr_step_id = 0;
 	track_len = 16;
@@ -123,7 +126,7 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_c
 			
 			_hw_fct(s._note.pitch, s._note.velocity, _out_id);
 		}
-		_step_animation.init_animation(&_lm, curr_step_id, LED_GBR_IDX);
+		_step_animation.init_animation(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
 		_step_animation.turn_on_led();
 		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
 
@@ -132,7 +135,7 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_c
 			_hw_fct(s._note.pitch, 0, _out_id);
 		if(_step_animation.update_animation()){
 			if(arr_step[curr_step_id].is_step_active()){
-				_lm.set_led_x(LED_R_IDX, curr_step_id);
+				_lm.set_led_x(LED_R_IDX, errata_step[curr_step_id]);
 			}
 		}
 	}
@@ -151,10 +154,23 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_c
 }
 
 void track::on_push(uint8_t btn_id){
+
+	Serial.print("btn ");
+	Serial.print(btn_id);
+	Serial.print(" step ");
+	Serial.print(errata_btn[btn_id]);
+	
+	if(arr_step[errata_btn[btn_id]].is_step_active())
+		arr_step[errata_btn[btn_id]].clr_step_active();
+	else 
+		arr_step[errata_btn[btn_id]].set_step_active();
+
+/*
 	if(arr_step[btn_id].is_step_active())
 		arr_step[btn_id].clr_step_active();
 	else 
 		arr_step[btn_id].set_step_active();
+*/
 	_lm.toogle_led_x(LED_R_IDX, btn_id);
 }
 void track::on_release(uint8_t btn_id){
