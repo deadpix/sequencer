@@ -7,7 +7,7 @@
 #include "led_toogle.h"
 #include "clk.h"
 
-#define MAX_DIVIDER			8
+#define MAX_DIVIDER		8
 #define MAX_MULTIPLIER		8
 
 class seq_param: public param {

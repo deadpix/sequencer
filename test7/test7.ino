@@ -153,7 +153,7 @@ static void init_all_prog(){
 	nr_prog++;
 
 	init_one_prog((prog *) &midi_seq, nr_prog, "MIDIseq");
-	menu_lmtx->set_led_x(LED_G_IDX, nr_prog * MATRIX_NR_ROW + 0);
+	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	nr_prog++;
 		
 	// menu_ctrl MUST BE last

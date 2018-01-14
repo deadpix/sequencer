@@ -69,7 +69,7 @@ void 	track::set_max_step(uint8_t max){
 }
 
 boolean track::next_step(){
-	curr_step_id = (curr_step_id + 1) % NR_STEP;
+	curr_step_id = (curr_step_id + 1) % _max_step; 
 	// elapsed_ms = 0;
 	return arr_step[curr_step_id].is_step_active();
 }
@@ -110,7 +110,7 @@ void track::toogle_mute(){
 	mute_flg = !mute_flg;
 }
 
-uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_clk_flg, clk* master_clk*/){
+uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	uint32_t res = _c.master_sync(ms, mst_step_cnt);
 	step s = arr_step[curr_step_id];
 	
@@ -126,39 +126,31 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt/*boolean master_c
 			
 			_hw_fct(s._note.pitch, s._note.velocity, _out_id);
 		}
-		_step_animation.init_animation(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
-		_step_animation.turn_on_led();
+//		_step_animation.init_animation(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
+//		_step_animation.turn_on_led();
+//		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
+		_step_animation.init_animation_n_save(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
 		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
 
 	} else {
 		if(arr_step[curr_step_id].upd_gate())
 			_hw_fct(s._note.pitch, 0, _out_id);
-		if(_step_animation.update_animation()){
-			if(arr_step[curr_step_id].is_step_active()){
-				_lm.set_led_x(LED_R_IDX, errata_step[curr_step_id]);
-			}
-		}
+//		if(_step_animation.update_animation()){
+//			if(arr_step[curr_step_id].is_step_active()){
+//				_lm.set_led_x(LED_R_IDX, errata_step[curr_step_id]);
+//			}
+//		}
+		_step_animation.end_animation_n_restore();
 	}
 	return res;
-	
-	// boolean evt_flg = clk.clock_update(master_clk_flg, master_clk);
-	// boolean step_state;
-	// if(evt_flg){
-		// step_state = next_step();
-		// _lm.set_pixel(curr_step_id);
-	// } else {
-		// step_state = is_curr_step_active(clk.getInterval());
-	// }
-
-	// if(!mute_flg) hw_dWrite(output_id, step_state);
 }
 
 void track::on_push(uint8_t btn_id){
 
-	Serial.print("btn ");
-	Serial.print(btn_id);
-	Serial.print(" step ");
-	Serial.print(errata_btn[btn_id]);
+//	Serial.print("btn ");
+//	Serial.print(btn_id);
+//	Serial.print(" step ");
+//	Serial.print(errata_btn[btn_id]);
 	
 	if(arr_step[errata_btn[btn_id]].is_step_active())
 		arr_step[errata_btn[btn_id]].clr_step_active();

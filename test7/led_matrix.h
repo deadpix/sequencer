@@ -76,6 +76,8 @@ class led_matrix {
 		void save_n_set(uint8_t, uint16_t);
 		void clr_n_restore(uint16_t);
 
+		void led_off(uint16_t);
+
 		void dump_led_matrix(void);
 };
 

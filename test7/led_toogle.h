@@ -28,12 +28,16 @@ class led_toogle {
 		
 		void turn_on_led(void);
 		void turn_off_led(void);
+		void turn_on_n_save_led(void);
+		void turn_off_n_restore_led(void);
 //		void menu_update(void);
 
 		void init_animation(led_matrix* lm, uint16_t led_id, uint8_t color);
 		int start_animation(uint32_t/*, boolean*//*, boolean*/);
 		int update_animation(/*boolean hold*/);
 		int stop_animation();
+		void init_animation_n_save(led_matrix* lm, uint16_t led_id, uint8_t color);
+		int end_animation_n_restore();
 };
 
 #endif
