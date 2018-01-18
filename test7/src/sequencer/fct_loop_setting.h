@@ -24,6 +24,7 @@ class fct_loop_setting: public fct_clbk {
 		void on_release(uint8_t btn_id);
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 		void on_start();
+		void on_leave();
 };
 
 #endif

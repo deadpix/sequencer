@@ -25,7 +25,7 @@ class fct_step: public fct_clbk {
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 		
 		void on_start();
-
+		void on_leave(){};
 };
 
 #endif

@@ -16,7 +16,7 @@ class seq_param: public param {
 		led_toogle _clk_div_ui[MAX_DIVIDER];
 		led_toogle _clk_mul_ui[MAX_MULTIPLIER];
 		clk _clk_mul[MAX_MULTIPLIER-1]; 
-
+		clk* _clk_ref;
 		void clk_divider_ui(uint32_t, uint16_t);
 		void clk_multiplier_ui(uint32_t, uint16_t);
 
@@ -24,7 +24,7 @@ class seq_param: public param {
 		seq_param(){};
 		~seq_param(){};
 		
-		void init(sequencer* const s);
+		void init(sequencer* const s, clk* const c);
 		
 		void on_push(uint8_t btn_id);
 		void on_release(uint8_t btn_id);

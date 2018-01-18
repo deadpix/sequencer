@@ -69,6 +69,7 @@ static uint8_t btn_matrix_digitalRead(uint8_t pin){
 static void init_matrix_btn(){
 	int i;
 	btn_col_idx = 0;
+	flag_btn_active = false;
 
 	mcp.begin(6);
 	Wire.setClock(1000000);
@@ -101,12 +102,14 @@ static void scan(prog* p){
 
 			if(btn_row[btn_col_idx].read(i) == HIGH){
 				p->on_release(btn_col_idx*BTN_NUM_COL + i);
+				flag_btn_active = false;
 			} else {
 				p->on_push(btn_col_idx*BTN_NUM_COL + i);
 #if DEBUG
 				Serial.print("push btn ");
 				Serial.println(btn_col_idx*BTN_NUM_COL + i);
 #endif
+				flag_btn_active = true;
 			}
 		}
 	}

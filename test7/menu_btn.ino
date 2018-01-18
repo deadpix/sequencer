@@ -29,10 +29,17 @@
 #include "prog.h"
 #include "param.h"
 
-#define NR_MENU_BTN				4
+#define NR_MENU_BTN		4
 #define MENU_BTN_BOUNCE_TIME	5
-#define PIN_MENU_BTN			17
-#define PIN_PARAM_BTN			16
+#define PIN_MENU_BTN		17
+#define PIN_PARAM_BTN		16
+
+#define FCT_BTN_IDLE		0
+#define FCT_BTN_RELEASED	1
+#define FCT_BTN_PUSHED		2
+uint8_t param_btn_status;
+uint8_t menu_btn_status;
+
 
 Bounce menu_btn = Bounce();
 Bounce param_btn = Bounce();
@@ -54,6 +61,9 @@ void set_prog_menu_entry(uint8_t id, prog* prog){
 
 static void init_menu_btn(prog* p){
 //	menu_btn;
+	param_btn_status = FCT_BTN_IDLE;
+	menu_btn_status = FCT_BTN_IDLE;
+
 	pinMode(PIN_MENU_BTN,INPUT);
 	pinMode(PIN_PARAM_BTN,INPUT);
 	menu_btn.attach(PIN_MENU_BTN);
@@ -78,40 +88,75 @@ static void init_menu_btn(prog* p){
 //	}
 //	bn_menu_btn.init_ArrBounce(btn_menu_pins, MENU_BTN_BOUNCE_TIME, NR_MENU_BTN, &btn_menu_digitalRead);
 }
-
 static void scan_menu_btn(){
 	if(menu_btn.update()){
 		if(menu_btn.fell()){
+			menu_btn_status = FCT_BTN_RELEASED;
+//			current_prog = menu_ctrl.get_next_prog();
+//			current_prog->display_title();
+//			lm_ptr = current_prog->get_led_matrix();
+//			menu_ctrl.menu_leave();
+		} 
+		else {
+			menu_btn_status = FCT_BTN_PUSHED;
+//			menu_ctrl.menu_enter();
+//			lm_ptr = menu_ctrl.get_menu_led_matrix();
+//			current_prog = prog_arr[nr_prog];
+		}
+	}
+	if(menu_btn_status == FCT_BTN_RELEASED){
+		if(!flag_btn_active){
 			current_prog = menu_ctrl.get_next_prog();
 			current_prog->display_title();
 			lm_ptr = current_prog->get_led_matrix();
 			menu_ctrl.menu_leave();
-		} 
-		else {
+			menu_btn_status = FCT_BTN_IDLE;
+		}
+	} else if(menu_btn_status == FCT_BTN_PUSHED){
+		if(!flag_btn_active){
 			menu_ctrl.menu_enter();
 			lm_ptr = menu_ctrl.get_menu_led_matrix();
 			current_prog = prog_arr[nr_prog];
+			menu_btn_status = FCT_BTN_IDLE;
 		}
 	} 
 }
-
 static void scan_param_btn(){
 	if(param_btn.update()){
-		if(param_btn.fell()){
-			if(param_ptr){
-				current_prog = param_ptr->get_prog();
-				lm_ptr = current_prog->get_led_matrix();
-				param_ptr->param_on_leave();
-			}
+		if(param_btn.fell() && param_ptr){
+			param_btn_status = FCT_BTN_RELEASED; 
+//			if(param_ptr){
+//				current_prog = param_ptr->get_prog();
+//				lm_ptr = current_prog->get_led_matrix();
+//				param_ptr->param_on_leave();
+//			}
 		} 
 		else {
 			param_ptr = current_prog->get_param();
 			if(param_ptr){
-				lm_ptr = param_ptr->get_led_matrix();
-				current_prog = param_ptr;
-				param_ptr->param_on_enter();
-				//TODO print selected options
+				param_btn_status = FCT_BTN_PUSHED;
+//				lm_ptr = param_ptr->get_led_matrix();
+//				current_prog = param_ptr;
+//				param_ptr->param_on_enter();
+//				//TODO print selected options
 			}
+		}
+	}
+
+	if(param_btn_status == FCT_BTN_RELEASED){
+		if(!flag_btn_active){
+			current_prog = param_ptr->get_prog();
+			lm_ptr = current_prog->get_led_matrix();
+			param_ptr->param_on_leave();
+			param_btn_status = FCT_BTN_IDLE;
+		}	
+	}
+	else if(param_btn_status == FCT_BTN_PUSHED){
+		if(!flag_btn_active){
+			lm_ptr = param_ptr->get_led_matrix();
+			current_prog = param_ptr;
+			param_ptr->param_on_enter();
+			param_btn_status = FCT_BTN_IDLE;
 		}
 	}
 }

@@ -151,6 +151,7 @@ uint32_t clk::clk_sync_multiplier(uint32_t ms){
 	_ms = ms / _operation;
 	_bpm = ms_to_bpm(_ms);
 	_elapsed_ms = 0;
+	_step_cnt = 0;
 	return _ms;
 }
 
@@ -192,6 +193,10 @@ uint32_t clk::master_sync(uint32_t mst_ms, uint16_t mst_cnt){
 	/* when _step_cnt = _operation, slave clk has to be synced with master */
 	else if( (_operation > 0) && (_step_cnt < (_operation - 1)) ){
 		ret = clk_elapsed(); 
+//		Serial.print("clk sync? ");
+//		Serial.print(_operation);
+//		Serial.print(" ");
+//		Serial.println(ret);
 	}
 	return ret;
 }

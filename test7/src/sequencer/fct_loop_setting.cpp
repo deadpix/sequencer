@@ -20,18 +20,19 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 	
 	upd_display(_seq, id);
 
-	t->get_led_matrix()->clr_led_x(LED_G_IDX,errata_step[nr_step-1]);	
-	t->get_led_matrix()->led_off(btn_id);	
+	if((id+1) != nr_step){
+		t->get_led_matrix()->clr_led_x(LED_G_IDX,errata_step[nr_step-1]);	
+		t->get_led_matrix()->led_off(btn_id);	
 	
-	if(t->arr_step[errata_step[nr_step-1]].is_step_active()){
-		t->get_led_matrix()->set_led_x(LED_R_IDX,errata_step[nr_step-1]);
-	}
-	t->get_led_matrix()->set_led_x(LED_G_IDX,btn_id);
+		if(t->arr_step[errata_step[nr_step-1]].is_step_active()){
+			t->get_led_matrix()->set_led_x(LED_R_IDX,errata_step[nr_step-1]);
+		}
+		t->get_led_matrix()->set_led_x(LED_G_IDX,btn_id);
 
-//	t->get_led_matrix()->clr_n_restore(errata_step[nr_step-1]);
-//	t->get_led_matrix()->save_n_set(LED_G_IDX, btn_id);
-	t->set_max_step(id+1);
-	
+//		t->get_led_matrix()->clr_n_restore(errata_step[nr_step-1]);
+//		t->get_led_matrix()->save_n_set(LED_G_IDX, btn_id);
+		t->set_max_step(id+1);
+	}
 
 /*
 	if(nr_step == btn_id){
@@ -53,4 +54,15 @@ void fct_loop_setting::on_start(){
 
 	upd_display(_seq, nr_step);
 	t->get_led_matrix()->save_n_set(LED_G_IDX, errata_step[nr_step-1]);
+	/*FIXME: force red clearing of led nr_step (already saved */
+	/* 	 with save_n_set(...) call			  */
+	/* 	 !! temporary fix that wont work in the future !! */
+	/* 	 ==> need to be handeld by led_matrix function	  */
+//	t->get_led_matrix()->clr_led_x(LED_R_IDX, errata_step[nr_step-1]);
 }
+void fct_loop_setting::on_leave(){	
+	track* t = _seq->get_current_track();
+	uint8_t nr_step = t->get_max_step();
+	t->get_led_matrix()->clr_n_restore(errata_step[nr_step-1]);	
+}
+

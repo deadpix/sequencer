@@ -20,6 +20,7 @@ class fct_clbk {
 		virtual void update_ui(uint32_t mst_ms, uint16_t mst_step) = 0;
 		
 		virtual void on_start() = 0;
+		virtual void on_leave() = 0;
 };
 
 #endif

@@ -55,8 +55,9 @@ void seq_param::clk_multiplier_ui(uint32_t mst_ms, uint16_t mst_step){
 	}
 }
 
-void seq_param::init(sequencer* const s){
+void seq_param::init(sequencer* const s, clk* const c){
 	_s = s;
+	_clk_ref = c;
 	for(int i=0;i<(MATRIX_NR_COL*MATRIX_NR_ROW);i++){
 		if(_s->get_fct(i))
 			param::_lm.set_led_x(LED_R_IDX, i);
@@ -71,7 +72,7 @@ void seq_param::init(sequencer* const s){
 	_clk_mul_ui[0].init_animation(param::get_led_matrix(),(CLK_MULTIPLIER_LED_OFFSET), LED_R_IDX);
 	for(int i=1;i<MAX_MULTIPLIER;i++){
 		_clk_mul_ui[i].init_animation(param::get_led_matrix(),(CLK_MULTIPLIER_LED_OFFSET+i), LED_R_IDX);
-		_clk_mul[(i-1)].clk_set_operation((i+1), _s->get_current_track()->get_clk()->clk_get_ms());
+		_clk_mul[(i-1)].clk_set_operation((i+1), _clk_ref->clk_get_ms());
 	}
 
 }
@@ -83,7 +84,24 @@ void seq_param::on_push(uint8_t btn_id){
 		param::_lm.clr_led_x(LED_GB_IDX, _s->get_current_param());
 		param::_lm.set_led_x(LED_GBR_IDX, btn_id);
 	}
-	else { 
+	else if(btn_id > CLK_DIVIDER_LED_OFFSET && btn_id < CLK_MULTIPLIER_LED_OFFSET){ 
+		clk* c = _s->get_current_track()->get_clk();
+		c->clk_set_operation((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1), _clk_ref->clk_get_ms());
+		Serial.print("set divider ");
+		Serial.println((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1));		
+		_s->prog::display_str("div", 1);
+//		_s->prog::display_str((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1), 2);
+	}
+	else if(btn_id > CLK_MULTIPLIER_LED_OFFSET && btn_id < (CLK_MULTIPLIER_LED_OFFSET + 8)){
+		clk* c = _s->get_current_track()->get_clk();	
+		c->clk_set_operation((btn_id-CLK_MULTIPLIER_LED_OFFSET+1), _clk_ref->clk_get_ms());
+		Serial.print("set multiplier ");
+		Serial.println((btn_id-CLK_MULTIPLIER_LED_OFFSET+1));
+		_s->prog::display_str("mult", 1);
+//		_s->prog::display_str((btn_id-CLK_MULTIPLIER_LED_OFFSET+1), 2);
+
+	}
+	else {
 		_s->prog::display_str("undef", 1);
 	}
 }
@@ -100,8 +118,11 @@ void seq_param::update_ui(uint32_t mst_ms, uint16_t mst_step){
 	clk_multiplier_ui(mst_ms, mst_step);
 }
 void seq_param::param_on_enter(){
-	Serial.print("param on enter ");
-	Serial.println(_s->get_current_param());
+//	Serial.print("param on enter ");
+//	Serial.println(_s->get_current_param());
+	fct_clbk* fc = _s->get_fct(_s->get_current_param());
+	if(fc)
+		fc->on_leave();
 }
 void seq_param::param_on_leave(){
 	fct_clbk* fc = _s->get_fct(_s->get_current_param());

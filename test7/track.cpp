@@ -114,21 +114,19 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	uint32_t res = _c.master_sync(ms, mst_step_cnt);
 	step s = arr_step[curr_step_id];
 	
+	// need to determine if there is a new clock
+	//  --> res and clk_sync 
+	//  --> clk_ellasped() 
+	
 	if(res){
 		if(next_step()){
 			s.reset_gate();
-			
-//			Serial.print(s._note.pitch);
-//			Serial.print(" ");
-//			Serial.print(s._note.velocity);
-//			Serial.print(" ");			
-//			Serial.println(_out_id);
-			
 			_hw_fct(s._note.pitch, s._note.velocity, _out_id);
 		}
 //		_step_animation.init_animation(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
 //		_step_animation.turn_on_led();
 //		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
+		// step animation only for the current track
 		_step_animation.init_animation_n_save(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
 		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
 

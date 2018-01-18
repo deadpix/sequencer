@@ -74,6 +74,8 @@ IntervalTimer ui_timer;
 IntervalTimer btn_timer;
 IntervalTimer midi_timer;
 
+bool flag_btn_active;
+
 static void upd_midi(){
 	midi_flag = true;
 }
@@ -125,7 +127,7 @@ static void init_sequencer(){
 	/* MUST BE called after sequencer initialization 	*/
 	/* as parameters depends on sequencer options/fct 	*/
 	/* initialization 									*/
-	seq_param_ui.init(&midi_seq);
+	seq_param_ui.init(&midi_seq, mst_clk);
 	seq_param_ui.param::set_prog(&midi_seq);
 
 }
