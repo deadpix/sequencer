@@ -32,6 +32,8 @@
 #endif
 
 #include "types.h" 
+#include <LinkedList.h>
+#include "led_state.h"
 
 #define LED_MATRIX_NR_LEDS			MATRIX_NR_ROW
 #define LED_MATRIX_NR_GROUND		MATRIX_NR_COL
@@ -46,6 +48,10 @@
 #define LED_GB_IDX			(LED_G_IDX|LED_B_IDX)
 #define LED_GBR_IDX			(LED_GB_IDX|LED_R_IDX)
 
+#define BACKGROUND			0
+#define FOREGROUND1			1
+#define FOREGROUND2			2
+
 typedef struct {
 	mat_row_bmp_t bitmap[LED_MATRIX_NR_COLORS];
 } led_t;
@@ -53,7 +59,8 @@ typedef struct {
 class led_matrix {
 	private:
 		led_t led_arr[LED_MATRIX_NR_GROUND];
-		uint8_t bmp[NR_LEDS];
+		uint8_t bmp[NR_LEDS][2];
+		LinkedList<led_state*> led_list[NR_LEDS];
 
 	public:
 		led_matrix();
@@ -73,10 +80,14 @@ class led_matrix {
 		int clr_led_x_coor(uint8_t, uint16_t, uint16_t);
 		int toogle_led_x_coor(uint8_t, uint16_t, uint16_t);
 
-		void save_n_set(uint8_t, uint16_t);
-		void clr_n_restore(uint16_t);
+//		void save_n_set(uint8_t, uint16_t);
+//		void clr_n_restore(uint16_t);
+
+		void save_n_set(uint8_t, uint16_t, uint8_t);
+		void clr_n_restore(uint16_t, uint8_t);
 
 		void led_off(uint16_t);
+		void led_ovw(uint8_t, uint16_t);
 
 		void dump_led_matrix(void);
 };

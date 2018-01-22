@@ -22,10 +22,10 @@ void led_toogle::turn_off_led(){
 	_lm->clr_led_x(_color, _led_id);
 }
 void led_toogle::turn_on_n_save_led(){
-	_lm->save_n_set(_color, _led_id);
+	_lm->save_n_set(_color, _led_id, FOREGROUND2);
 }
 void led_toogle::turn_off_n_restore_led(){
-	_lm->clr_n_restore(_led_id);
+	_lm->clr_n_restore(_led_id, FOREGROUND2);
 }
 
 

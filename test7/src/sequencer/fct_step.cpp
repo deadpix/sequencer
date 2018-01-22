@@ -13,11 +13,13 @@ void fct_step::on_push(uint8_t btn_id){
 	uint8_t id = errata_btn[btn_id];
 	_seq->prog::display_str(itoa(btn_id,str,BASE10), 2);
 	track* t = _seq->get_current_track();
-	if(t->arr_step[id].is_step_active())
+	if(t->arr_step[id].is_step_active()){
 		t->arr_step[id].clr_step_active();
-	else 
+		t->get_led_matrix()->clr_n_restore(btn_id, BACKGROUND);
+	} else { 
 		t->arr_step[id].set_step_active();
-	t->get_led_matrix()->toogle_led_x(LED_R_IDX, btn_id);
+		t->get_led_matrix()->save_n_set(LED_R_IDX, btn_id, BACKGROUND);
+	}
 }
 void fct_step::on_release(uint8_t btn_id){
 }
