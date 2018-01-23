@@ -46,3 +46,11 @@ int BIT::check_bit(uint16_t *word, int bit){
 		return -1;
 	}
 }
+
+uint8_t BIT::get_highest_bit_set(unsigned int v){
+	uint8_t ret = 0;
+	while (v >>= 1){
+    		ret++;
+	}
+	return ret;
+}

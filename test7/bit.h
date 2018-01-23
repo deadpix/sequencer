@@ -14,6 +14,7 @@ namespace BIT {
 	void clear_bits(uint16_t *word, uint16_t from, uint16_t len);
 	void set_bits(uint16_t *word, uint16_t from, uint16_t len);
 	int  check_bit(uint16_t *word, int bit);
+	uint8_t get_highest_bit_set(unsigned int);
 }
 
 

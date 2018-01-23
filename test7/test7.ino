@@ -94,7 +94,7 @@ static void upd_gui(){
 static void tempo_change_handler(uint32_t ms){
 	noInterrupts();
 	uint32_t tmp = ((ms*1000)/MIDI_SYNC_PPN);
-	Serial.println(tmp);
+//	Serial.println(tmp);
 	midi_timer.begin(upd_midi, tmp);
 	interrupts();
 }
