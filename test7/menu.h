@@ -53,6 +53,7 @@ class menu: public prog {
 		int menu_on_release(uint8_t, uint8_t);	
 	
 		void on_push(uint8_t btn_id);
+		void on_long_push(uint8_t btn_id){};
 		void on_release(uint8_t btn_id);		
 		led_matrix* get_led_matrix(void);
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);

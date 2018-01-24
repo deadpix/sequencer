@@ -41,6 +41,7 @@ class sequencer : public prog {
 		led_matrix* get_led_matrix(void);
 
 		void on_push(uint8_t btn_id);
+		void on_long_push(uint8_t btn_id);
 		void on_release(uint8_t btn_id);
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 	

@@ -49,10 +49,17 @@
 #define BOUNCE_TIME		5
 
 #define DEBUG 1
+#define LONG_PRESS_TIME_MS	1000
 
 Adafruit_MCP23017 mcp;
 uint8_t		grd_cnt;
 
+static elapsedMillis btn_ms_cnt[NR_LEDS];
+struct _btn_status {
+	byte pushed_bmp[BTN_NUM_COL];
+	byte long_pushed_bmp[BTN_NUM_COL];
+};
+static struct _btn_status btn_status;
 
 static uint8_t btn_select_pins[BTN_NUM_COL] = {3,2,1,0,12,13,14,15}; // ground switch
 static uint8_t btn_read_pins[BTN_NUM_ROW] = {7,8,6,9,5,10,4,11};
@@ -76,6 +83,8 @@ static void init_matrix_btn(){
 
 	for(i=0;i<BTN_NUM_COL;i++){
 		btn_row[i].init_ArrBounce(btn_read_pins, BOUNCE_TIME, BTN_NUM_ROW, &btn_matrix_digitalRead);
+		btn_status.pushed_bmp[i] = 0x0;
+		btn_status.long_pushed_bmp[i] = 0x0;
 	}
 
 	for (i=0;i<BTN_NUM_COL;i++){
@@ -103,13 +112,25 @@ static void scan(prog* p){
 			if(btn_row[btn_col_idx].read(i) == HIGH){
 				p->on_release(btn_col_idx*BTN_NUM_COL + i);
 				flag_btn_active = false;
+				btn_status.pushed_bmp[btn_col_idx] &= ~(1<<i);
+				btn_status.long_pushed_bmp[btn_col_idx] &= ~(1<<i);
+				
 			} else {
-				p->on_push(btn_col_idx*BTN_NUM_COL + i);
 #if DEBUG
 				Serial.print("push btn ");
 				Serial.println(btn_col_idx*BTN_NUM_COL + i);
 #endif
+				p->on_push(btn_col_idx*BTN_NUM_COL + i);
 				flag_btn_active = true;
+				btn_ms_cnt[btn_col_idx*BTN_NUM_COL + i] = 0;
+				btn_status.pushed_bmp[btn_col_idx] |= (1<<i);
+			}
+		}
+		if( (btn_status.pushed_bmp[btn_col_idx] & (1<<i)) 
+		&& !(btn_status.long_pushed_bmp[btn_col_idx] & (1<<i))){
+			if(btn_ms_cnt[btn_col_idx*BTN_NUM_COL + i] > LONG_PRESS_TIME_MS){
+				btn_status.long_pushed_bmp[btn_col_idx] |= (1<<i);
+				p->on_long_push(btn_col_idx*BTN_NUM_COL + i);
 			}
 		}
 	}

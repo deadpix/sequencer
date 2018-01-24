@@ -21,6 +21,7 @@ class test_proj_one : public prog {
 		void init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t));
 
 		void on_push(uint8_t btn_id);
+		void on_long_push(uint8_t btn_id){};
 		void on_release(uint8_t btn_id);
 
 		void menu_enter();

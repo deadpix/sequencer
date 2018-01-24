@@ -78,6 +78,9 @@ void sequencer::on_push(uint8_t btn_id){
 		fct_arr[current_param_id]->on_push(btn_id);
 	}
 }
+void sequencer::on_long_push(uint8_t btn_id){
+	Serial.println("long press");
+}
 void sequencer::on_release(uint8_t btn_id){
 //	current->on_release(btn_id);
 	if(fct_arr[current_param_id]){
