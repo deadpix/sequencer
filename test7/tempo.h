@@ -5,6 +5,7 @@
 #include "led_matrix.h"
 #include "clk.h"
 #include "led_toogle.h"
+#include "sequencer.h"
 
 #define NR_TAP	2
 
@@ -18,7 +19,8 @@ class tempo : public prog {
 		led_toogle _tap_animation;
 		led_toogle _clk_animation;
 		bool _in_menu_mode;
-		
+		sequencer* _seq;		
+		bool _play;
 		
 	protected:
 		void tap();
@@ -27,7 +29,7 @@ class tempo : public prog {
 		tempo();
 		~tempo();
 
-		void init(void (*)(uint32_t));
+		void init(void (*)(uint32_t), sequencer*);
 		
 		led_matrix* get_led_matrix(void);
 		clk* get_mst_clk();

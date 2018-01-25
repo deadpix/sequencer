@@ -17,6 +17,7 @@ track::track(){
 	elapsed_ms = 0;
 	_hw_fct = _dummy_fct;
 	_max_step = NR_STEP;
+	_play = false;
 	
 	for(int i=0;i<NR_STEP;i++){
 		arr_step[i].set_step_id(i);
@@ -67,24 +68,18 @@ uint8_t track::get_max_step(){
 void 	track::set_max_step(uint8_t max){
 	_max_step = max;
 }
-
 boolean track::next_step(){
 	curr_step_id = (curr_step_id + 1) % _max_step; 
 	// elapsed_ms = 0;
 	return arr_step[curr_step_id].is_step_active();
 }
-
-// boolean track::is_curr_step_active(uint32_t ms){
-	// uint32_t limit = (arr_step[curr_step_id].get_step_gate_len() * ms) / 100; 
-	// if( (elapsed_ms > limit) || !(is_step_on(curr_step_id)) )
-		// return false;
-	// else
-		// return true;
-// }
-
 uint8_t track::get_current_step(){
 	return curr_step_id;
 }
+void track::step_reset(){
+	curr_step_id = 0;
+}
+
 
 clk* track::get_clk(){
 	return &_c;
@@ -99,15 +94,21 @@ boolean track::is_step_on(uint8_t id){
 	return arr_step[id].step_status();
 }
 
+
 void track::mute(){
 	mute_flg = true;
 }
 void track::unmute(){
 	mute_flg = false;
 }
-
 void track::toogle_mute(){
 	mute_flg = !mute_flg;
+}
+void track::toogle_play(){
+	_play = !_play;
+}
+void track::set_play(bool play){
+	_play = play;
 }
 
 uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
@@ -119,26 +120,21 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	//  --> clk_ellasped() 
 	
 	if(res){
-		if(next_step()){
-			s.reset_gate();
-			_hw_fct(s._note.pitch, s._note.velocity, _out_id);
+	
+		if(_play){	
+			if(next_step()){
+				s.reset_gate();
+				_hw_fct(s._note.pitch, s._note.velocity, _out_id);
+			}
 		}
-//		_step_animation.init_animation(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
-//		_step_animation.turn_on_led();
-//		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
 		// step animation only for the current track
 		_step_animation.init_animation_n_save(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
 		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
 
 	} else {
-		if(arr_step[curr_step_id].upd_gate())
+		if(arr_step[curr_step_id].upd_gate()){
 			_hw_fct(s._note.pitch, 0, _out_id);
-//		if(_step_animation.update_animation()){
-//			if(arr_step[curr_step_id].is_step_active()){
-//				_lm.set_led_x(LED_R_IDX, errata_step[curr_step_id]);
-//			}
-//		}
-		_step_animation.end_animation_n_restore();
+		}
 	}
 	return res;
 }

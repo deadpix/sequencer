@@ -5,6 +5,7 @@ sequencer::sequencer(){
 	for(int i=0;i<(MATRIX_NR_COL*MATRIX_NR_ROW);i++){
 		fct_arr[i] = NULL;
 	}
+//	_transport.play = 0x0;
 }
 
 sequencer::~sequencer(){
@@ -40,11 +41,20 @@ void sequencer::check_clks(uint32_t mst_ms, uint16_t mst_step){
 	track* t;
 	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
 		t = &track_arr[i];
-//		if(t != current)
-			t->check_event(mst_ms, mst_step);
-			
+		t->check_event(mst_ms, mst_step);
 	}
 }
+void sequencer::set_track_start(bool play){
+	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
+		track_arr[i].set_play(play);
+	}
+}
+void sequencer::reset_all(){
+	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
+		track_arr[i].step_reset();
+	}
+}
+
 void sequencer::menu_enter(){
 }
 void sequencer::menu_leave(){

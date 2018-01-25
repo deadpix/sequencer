@@ -16,11 +16,16 @@
 
 #define SEQUENCER_NR_TRACK MATRIX_NR_COL
 
+//typedef struct _transport {
+//	byte play;
+//} transport_t;
+
 class sequencer : public prog {
 	private:
 		track  track_arr[SEQUENCER_NR_TRACK];
 		track* current;
 		fct_clbk* fct_arr[MATRIX_NR_COL*MATRIX_NR_ROW];
+//		transport_t _transport;
 		
 	public:
 		static const uint8_t nr_track = 1;
@@ -34,6 +39,9 @@ class sequencer : public prog {
 		void set_current_track(uint8_t track_id);
 		void set_current_param(uint8_t);
 		uint8_t get_current_param();
+		
+		void set_track_start(bool);
+		void reset_all();	
 		
 		void add_fct(fct_clbk*, uint8_t);
 		fct_clbk* get_fct(uint8_t);

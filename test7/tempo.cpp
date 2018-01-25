@@ -3,24 +3,32 @@
 #define DEBUG				1
 #define LED_ANIMATION_MS	60
 
-#define TAP_BTN_ID			1
 #define BPM_BTN_ID			0
+#define TAP_BTN_ID			1
+#define START_BTN_ID			2
+#define RESET_BTN_ID			3
 
 static void (*on_tempo_change)(uint32_t ms);
 
 tempo::tempo(){	
 	_tap_cnt = 0;
 	_in_menu_mode = false;
+	_play = false;
 }
 
 tempo::~tempo(){
 }
 
-void tempo::init(void (*fct)(uint32_t)){
-	_tap_animation.init_animation(get_menu_lm(),(prog_id*MATRIX_NR_COL+TAP_BTN_ID), LED_GBR_IDX);
-	_clk_animation.init_animation(get_menu_lm(),(prog_id*MATRIX_NR_COL+BPM_BTN_ID), LED_R_IDX);
+void tempo::init(void (*fct)(uint32_t), sequencer* seq){
+	led_matrix* lm = get_menu_lm();
+	_tap_animation.init_animation(lm,(prog_id*MATRIX_NR_COL+TAP_BTN_ID), LED_GBR_IDX);
+	_clk_animation.init_animation(lm,(prog_id*MATRIX_NR_COL+BPM_BTN_ID), LED_R_IDX);
 
 	on_tempo_change = fct;
+	_seq = seq;
+	lm->set_led_x(LED_R_IDX, START_BTN_ID);
+	lm->set_led_x(LED_R_IDX, RESET_BTN_ID);
+	
 }
 
 void tempo::clr_tap(){
@@ -34,7 +42,6 @@ led_matrix* tempo::get_led_matrix(){
 void tempo::tap(){
 	if(_tap_cnt > 0){
 		_tap_timestamp[(_tap_cnt-1)] = _ellapsed_tap;
-		Serial.println(_ellapsed_tap);
 	}
 	_ellapsed_tap = 0;
 
@@ -45,10 +52,6 @@ void tempo::tap(){
 		}
 		avg /= (NR_TAP-1);
 		_mst.clk_bpms_to_bpm(avg);
-#if DEBUG
-		Serial.print(" new bpm ");
-		Serial.println(_mst.clk_get_bpm());
-#endif
 		on_tempo_change(avg);
 	}
 	_tap_cnt = (_tap_cnt + 1) % NR_TAP;
@@ -92,6 +95,21 @@ int tempo::menu_on_push(uint8_t func_id, uint8_t opt_id){
 	prog::display_title();
 	if(opt_id == TAP_BTN_ID){
 		_tap_animation.start_animation(LED_ANIMATION_MS);
+	} 
+	else if(opt_id == START_BTN_ID){
+		_play = !_play;
+		_seq->set_track_start(_play);
+		if(_play){
+			get_menu_lm()->led_ovw(LED_B_IDX, opt_id);
+		}
+		else {
+			get_menu_lm()->led_ovw(LED_R_IDX, opt_id);
+		}
+	}
+	else if(opt_id == RESET_BTN_ID){
+		_seq->reset_all();
+		get_menu_lm()->led_ovw(LED_G_IDX, opt_id);
+		
 	}
 	return ret;
 }
@@ -100,7 +118,11 @@ int tempo::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	if(opt_id == TAP_BTN_ID){
 		tap();
 		_tap_animation.turn_on_led();
-	}	
+	} 
+	else if(opt_id == RESET_BTN_ID){
+		get_menu_lm()->led_ovw(LED_R_IDX, opt_id);	
+	}
+
 	return ret;
 }
 

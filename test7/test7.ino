@@ -171,7 +171,7 @@ static void init_all_prog(){
 	current_prog->display_title();
 
 	
-	tempo_setting.init(tempo_change_handler);
+	tempo_setting.init(tempo_change_handler, &midi_seq);
 	mst_clk = tempo_setting.get_mst_clk();
 	mst_clk->clk_set_max_step(NR_STEP);
 	tempo_change_handler(mst_clk->clk_get_ms());

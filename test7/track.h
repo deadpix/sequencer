@@ -21,7 +21,8 @@ class track {
 		uint8_t _max_step;
 		uint8_t _track_id;
 		uint8_t _out_id;
-		
+		bool	_play;	
+	
 		uint8_t track_len;
 		clk _c;
 		elapsedMillis elapsed_ms;
@@ -52,9 +53,9 @@ class track {
 		
 		boolean is_step_on(uint8_t id);
 		boolean next_step();
-		// boolean is_curr_step_active(uint32_t ms);
 		uint8_t get_current_step();
 		void toogle_step_x(uint8_t id);
+		void step_reset();
 
 		uint32_t check_event(uint32_t, uint16_t/*boolean, clk *c*/);
 		void init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t));
@@ -67,7 +68,9 @@ class track {
 		void mute();
 		void unmute();
 		void toogle_mute();
-		
+		void toogle_play();	
+		void set_play(bool);
+	
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 };
 
