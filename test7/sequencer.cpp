@@ -89,7 +89,9 @@ void sequencer::on_push(uint8_t btn_id){
 	}
 }
 void sequencer::on_long_push(uint8_t btn_id){
-	Serial.println("long press");
+	if(fct_arr[current_param_id]){
+		fct_arr[current_param_id]->on_long_push(btn_id);
+	}
 }
 void sequencer::on_release(uint8_t btn_id){
 //	current->on_release(btn_id);
@@ -97,6 +99,12 @@ void sequencer::on_release(uint8_t btn_id){
 		fct_arr[current_param_id]->on_release(btn_id);
 	}
 }
+void sequencer::on_long_release(uint8_t btn_id){
+	if(fct_arr[current_param_id]){
+		fct_arr[current_param_id]->on_long_release(btn_id);
+	}
+}
+
 void sequencer::update_ui(uint32_t mst_ms, uint16_t mst_step){
 //	current->update_ui();
 	if(fct_arr[current_param_id])

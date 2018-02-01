@@ -18,10 +18,10 @@ namespace BIT {
 }
 
 
-#define for_eachset_bit(bit, word, limit) 							\
+#define for_eachset_bit(bit, word, limit) 					\
         for ((bit) = (BIT::find_next_bit((word), (limit), 0));			\
-             ((bit) < (limit)) && (bit != -1);						\
-             (bit) = (BIT::find_next_bit((word), (limit), (bit) + 1)))	
+             ((bit) < (limit)) && (bit != -1);					\
+             (bit) = (BIT::find_next_bit((word), (limit), (bit) + 1)))
 
 
 #endif

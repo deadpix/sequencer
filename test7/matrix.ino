@@ -110,8 +110,15 @@ static void scan(prog* p){
 		if(btn_row[btn_col_idx].update(i)){
 
 			if(btn_row[btn_col_idx].read(i) == HIGH){
-				p->on_release(btn_col_idx*BTN_NUM_COL + i);
+//				p->on_release(btn_col_idx*BTN_NUM_COL + i);
 				flag_btn_active = false;
+				if(btn_status.long_pushed_bmp[btn_col_idx] & (1<<i)){
+					// release
+					p->on_long_release(btn_col_idx*BTN_NUM_COL + i);
+				} 
+				else {
+					p->on_release(btn_col_idx*BTN_NUM_COL + i);
+				}
 				btn_status.pushed_bmp[btn_col_idx] &= ~(1<<i);
 				btn_status.long_pushed_bmp[btn_col_idx] &= ~(1<<i);
 				

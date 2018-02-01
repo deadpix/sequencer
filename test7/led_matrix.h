@@ -90,6 +90,7 @@ class led_matrix {
 //		void clr_n_restore(uint16_t);
 
 		int  save_n_set(uint8_t, uint16_t, uint8_t);
+		int  save_n_toogle(uint8_t, uint16_t, uint8_t);
 		void clr_n_restore(uint16_t, uint8_t);
 
 		void led_off(uint16_t);

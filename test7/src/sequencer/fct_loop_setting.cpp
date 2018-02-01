@@ -49,7 +49,11 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 }
 void fct_loop_setting::on_release(uint8_t btn_id){
 }
+void fct_loop_setting::on_long_release(uint8_t btn_id){
+}
+
 void fct_loop_setting::update_ui(uint32_t mst_ms, uint16_t mst_step){
+
 }
 void fct_loop_setting::on_start(){
 	track* t = _seq->get_current_track();

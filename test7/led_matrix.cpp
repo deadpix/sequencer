@@ -140,7 +140,24 @@ int led_matrix::save_n_set(uint8_t color, uint16_t nr, uint8_t ground){
 	return ret;
 	
 }
-
+int led_matrix::save_n_toogle(uint8_t color, uint16_t nr, uint8_t ground){
+	bool flg = false; 
+	bool first = false;
+	int ret = 0;
+		
+	if(ground > 0){
+		ret = -1;
+	} 
+//	else if(_led_status_arr[nr].bmp == 0){
+	else {
+//		Serial.println("toogle");
+		_led_status_arr[nr].bmp = (1 << ground);
+		_led_status_arr[nr].color[ground] = color;
+		toogle_led_x(color, nr);
+	}
+	return ret;
+	
+}
 void led_matrix::clr_n_restore(uint16_t nr, uint8_t ground){
 	clr_led_x(_led_status_arr[nr].color[ground], nr);
 	_led_status_arr[nr].color[ground] = 0;
@@ -148,6 +165,7 @@ void led_matrix::clr_n_restore(uint16_t nr, uint8_t ground){
 
 	if(_led_status_arr[nr].bmp){
 		uint8_t level_hi = BIT::get_highest_bit_set(_led_status_arr[nr].bmp);
+		Serial.print("restore high ");
 		Serial.println(level_hi);
 		set_led_x(_led_status_arr[nr].color[level_hi], nr);
 	}

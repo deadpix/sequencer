@@ -31,34 +31,28 @@
 #endif
 
 #include "types.h"
-//#include <LinkedList.h>
+#include "bit.h"
 
-#define BTN_MATRIX_ROW	MATRIX_NR_ROW
-#define BTN_MATRIX_COL	MATRIX_NR_COL
-
-typedef struct {
-	mat_row_bmp_t bitmap;
-} btn_t;
-
-typedef struct {
-	uint16_t btn_id;
-	unsigned long timestamp;
-} active_btn_t;
-
+#define BIT_PER_BYTE	8	
 class btn_state {
 	private:
-		btn_t btn_arr[BTN_MATRIX_COL];
-//		LinkedList<active_btn_t*> list_active_btns;
+		byte short_push[MATRIX_NR_COL];
+		byte long_push[MATRIX_NR_COL];
 	
 	public:
 		btn_state();
-		~btn_state();		
+		~btn_state(){};		
+		
+		void set_short_push(uint8_t);
+		void clr_short_push(uint8_t);
+		void set_long_push(uint8_t);
+		void clr_long_push(uint8_t);
 
-		int set_btn_active_coor(uint16_t x, uint16_t y);
-		int clr_btn_active_coor(uint16_t x, uint16_t y);
+		uint8_t get_nr_short_push();
+		uint8_t	get_nr_long_push();
 
-		int set_btn_active(uint16_t id);
-		int clr_btn_active(uint16_t id);
+		uint8_t get_short_push_id(uint8_t*);
+		uint8_t get_long_push_id(uint8_t*);
 };
 
 #endif

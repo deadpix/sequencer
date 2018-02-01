@@ -113,6 +113,10 @@ void seq_param::on_release(uint8_t btn_id){
 	}
 }
 
+void seq_param::on_long_release(uint8_t btn_id){
+	
+}
+
 void seq_param::update_ui(uint32_t mst_ms, uint16_t mst_step){
 	clk_divider_ui(mst_ms, mst_step);
 	clk_multiplier_ui(mst_ms, mst_step);

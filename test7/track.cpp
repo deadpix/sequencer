@@ -135,55 +135,22 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 		if(arr_step[curr_step_id].upd_gate()){
 			_hw_fct(s._note.pitch, 0, _out_id);
 		}
+               _step_animation.end_animation_n_restore();
 	}
 	return res;
 }
 
 void track::on_push(uint8_t btn_id){
 
-//	Serial.print("btn ");
-//	Serial.print(btn_id);
-//	Serial.print(" step ");
-//	Serial.print(errata_btn[btn_id]);
-	
-	if(arr_step[errata_btn[btn_id]].is_step_active())
-		arr_step[errata_btn[btn_id]].clr_step_active();
-	else 
-		arr_step[errata_btn[btn_id]].set_step_active();
-
-/*
-	if(arr_step[btn_id].is_step_active())
-		arr_step[btn_id].clr_step_active();
-	else 
-		arr_step[btn_id].set_step_active();
-*/
-	_lm.toogle_led_x(LED_R_IDX, btn_id);
+//	if(arr_step[errata_btn[btn_id]].is_step_active())
+//		arr_step[errata_btn[btn_id]].clr_step_active();
+//	else 
+//		arr_step[errata_btn[btn_id]].set_step_active();
+//
+//	_lm.toogle_led_x(LED_R_IDX, btn_id);
 }
 void track::on_release(uint8_t btn_id){
 }
 
-//led_matrix* track::update_menu(uint8_t func_id, uint8_t opt_id, led_matrix* menu_matrix){	
-//	for(int i=0; i<NUM_LED_COLUMNS; i++){
-//		if(i == opt_id){
-//			menu_matrix->set_pixel(func_id * NUM_LED_ROWS + i);		
-//		}
-//		else {
-//			menu_matrix->clr_pixel(func_id * NUM_LED_ROWS + i);
-//		}
-//	}
-//	return &_lm;
-//}
-//led_matrix* track::menu_clbk(void * this_ptr, uint8_t func_id, uint8_t opt_id, led_matrix* menu_matrix){	
-//	track* myself = static_cast<track *>(this_ptr);
-//	led_matrix* lm = myself->update_menu(func_id, opt_id, menu_matrix);
-//
-//	return lm;
-//}
-
 void track::update_ui(uint32_t mst_ms, uint16_t mst_step){
-//	clk.clock_upd_gui(curr_step_id, get_led_matrix(), is_step_on(curr_step_id));
 }
-
-//menu_clbk_def track::get_menu_clbk(){
-//	return menu_clbk;
-//}

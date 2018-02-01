@@ -51,6 +51,7 @@ class sequencer : public prog {
 		void on_push(uint8_t btn_id);
 		void on_long_push(uint8_t btn_id);
 		void on_release(uint8_t btn_id);
+		void on_long_release(uint8_t btn_id);
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 	
 		void check_clks(uint32_t mst_ms, uint16_t mst_step);

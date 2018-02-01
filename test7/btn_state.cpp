@@ -23,40 +23,69 @@
  */
 
 #include "btn_state.h"
+#include "bit.h"
 
 btn_state::btn_state(){
-	for(int i=0;i<BTN_MATRIX_COL;i++){
-		btn_arr[i].bitmap = 0x0;
+	for(uint8_t i=0;i<MATRIX_NR_COL;i++){
+		short_push[i] = 0x0;
+		long_push[i] = 0x0;
 	}
 }
-btn_state::~btn_state(){
+
+void btn_state::set_short_push(uint8_t id){
+	short_push[id / MATRIX_NR_COL] |= (1 << MATRIX_NR_COL);
+}
+void btn_state::clr_short_push(uint8_t id){
+	short_push[id / MATRIX_NR_COL] &= ~(1 << MATRIX_NR_COL);
+}
+void btn_state::set_long_push(uint8_t id){
+	long_push[id / MATRIX_NR_COL] |= (1 << MATRIX_NR_COL);
+}
+void btn_state::clr_long_push(uint8_t id){
+	long_push[id / MATRIX_NR_COL] &= ~(1 << MATRIX_NR_COL);
 }
 
-
-int btn_state::set_btn_active_coor(uint16_t x, uint16_t y){
-	int res = 0;
-	btn_arr[x].bitmap |= (1<<y);
-
-	return res;
+uint8_t btn_state::get_nr_short_push(){
+	uint8_t bit = 0, cnt = 0;
+	for(uint8_t i=0; i<MATRIX_NR_COL; i++){
+		for_eachset_bit(bit, (uint16_t *) &short_push[i], BIT_PER_BYTE){
+			cnt++;
+		}
+	}
+	return cnt;
 }
+uint8_t btn_state::get_nr_long_push(){
+	uint8_t bit = 0, cnt = 0;
+	for(uint8_t i=0;i<MATRIX_NR_COL;i++){
+		for_eachset_bit(bit, (uint16_t *) &long_push[i], BIT_PER_BYTE){
+			cnt++;
+		}
+	}
+	return cnt;
 
-int btn_state::clr_btn_active_coor(uint16_t x, uint16_t y){
-	int res = 0;
-	btn_arr[x].bitmap &= ~(1<<y);
-	
-	return res;
 }
+uint8_t btn_state::get_short_push_id(uint8_t* arr){
+	uint8_t bit = 0, cnt = 0, arr_size = sizeof(arr) / sizeof(arr[0]);
+	for(uint8_t i=0;i<MATRIX_NR_COL;i++){
+		for_eachset_bit(bit, (uint16_t *) &short_push[i], BIT_PER_BYTE){
+			arr[++cnt] = bit;
+			if(cnt == arr_size){
+				return cnt;
+			}
+		}
+	}
+	return cnt;
 
-int btn_state::set_btn_active(uint16_t id){
-	uint16_t x = id / BTN_MATRIX_ROW;	
-	uint16_t y = id % BTN_MATRIX_ROW;	
-	
-	return set_btn_active_coor(x, y);
 }
-
-int btn_state::clr_btn_active(uint16_t id){
-	uint16_t x = id / BTN_MATRIX_ROW;	
-	uint16_t y = id % BTN_MATRIX_ROW;	
-
-	return clr_btn_active_coor(x, y);
+uint8_t btn_state::get_long_push_id(uint8_t* arr){
+	uint8_t bit = 0, cnt = 0, arr_size = sizeof(arr) / sizeof(arr[0]);
+	for(uint8_t i=0;i<MATRIX_NR_COL;i++){
+		for_eachset_bit(bit, (uint16_t *) &long_push[i], BIT_PER_BYTE){
+			arr[++cnt] = bit;
+			if(cnt == arr_size){
+				return cnt;
+			}
+		}
+	}
+	return cnt;
 }
