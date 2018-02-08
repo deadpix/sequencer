@@ -18,6 +18,7 @@ class step {
 	private:
 		uint8_t step_id;
 		boolean flag_active;
+		bool _linked;
 		uint8_t gate_len_per; // percentage
 		uint32_t gate_len_ms; // percentage
 		bool flg_gate;
@@ -34,7 +35,8 @@ class step {
 		void reset_gate();
 		bool upd_gate();
 		void set_step_gate_len(uint32_t ms, uint8_t len);
-		
+		void upd_step_gate_len(uint32_t);
+
 		boolean is_step_active();
 		void set_step_active();
 		void clr_step_active();
@@ -47,6 +49,9 @@ class step {
 		
 		void set_step_id(uint8_t id);
 		boolean step_status();
+		void link_step();
+		void unlink_step();
+		bool is_step_linked();
 };
 
 #endif

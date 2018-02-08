@@ -2,6 +2,7 @@
 
 step::step(){
 	flag_active = false;
+	_linked = false;
 	gate_len_per = 20;
 	flg_gate = false;
 	_note.velocity = 127;
@@ -22,7 +23,8 @@ void step::reset_gate(){
 }
 bool step::upd_gate(){
 	bool res = false;
-	if(flg_gate && (gate_elapsed > gate_len_ms) ){
+
+	if( flg_gate && !_linked && (gate_elapsed > gate_len_ms) ){
 		res = true;
 		flg_gate = false;
 	}
@@ -53,6 +55,10 @@ void step::set_step_gate_len(uint32_t ms, uint8_t len){
 	gate_len_ms = ms;
 }
 
+void step::upd_step_gate_len(uint32_t ms_ref){
+	gate_len_ms = ms_ref * gate_len_per / 100;
+}
+
 uint8_t step::get_step_id(){
 	return step_id;
 }
@@ -67,4 +73,16 @@ void step::toogle_step(){
 
 boolean step::step_status(){
 	return flag_active;
+}
+
+void step::link_step(){
+	_linked = true;
+//	gate_len_per = 100;
+//	gate_len_ms = 0;
+}
+void step::unlink_step(){
+	_linked = false;
+}
+bool step::is_step_linked(){
+	return _linked;
 }

@@ -71,7 +71,12 @@ void 	track::set_max_step(uint8_t max){
 boolean track::next_step(){
 	curr_step_id = (curr_step_id + 1) % _max_step; 
 	// elapsed_ms = 0;
-	return arr_step[curr_step_id].is_step_active();
+
+	// FIXME: calculate of gate len only when clock is 
+	//	  changed or at init time
+	arr_step[curr_step_id].upd_step_gate_len(_c.clk_get_ms());
+
+	return (arr_step[curr_step_id].is_step_active() && !arr_step[curr_step_id].is_step_linked());
 }
 uint8_t track::get_current_step(){
 	return curr_step_id;
@@ -123,8 +128,8 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	
 		if(_play){	
 			if(next_step()){
-				s.reset_gate();
-				_hw_fct(s._note.pitch, s._note.velocity, _out_id);
+				arr_step[curr_step_id].reset_gate();
+				_hw_fct(arr_step[curr_step_id]._note.pitch, arr_step[curr_step_id]._note.velocity, _out_id);
 			}
 		}
 		// step animation only for the current track

@@ -18,7 +18,14 @@ static const uint8_t MIDI_DRUM_GM[8] = {37, 36, 42, 82, 40, 38, 46, 44};
 //}
 
 static void midi_note_on(uint16_t note, uint8_t vel, uint8_t chan){
-	MIDI.sendNoteOn(note, vel, chan);
+	if(vel > 0){
+		MIDI.sendNoteOn(note, vel, chan);
+		Serial.println("note on");
+	} 
+	else {
+		MIDI.sendNoteOff(note, vel, chan);
+		Serial.println("note off");
+	}
 }
 
 void init_midi_seq(sequencer* s){
