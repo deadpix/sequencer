@@ -54,7 +54,7 @@ class track {
 		boolean is_step_on(uint8_t id);
 		boolean next_step();
 		uint8_t get_current_step();
-		void toogle_step_x(uint8_t id);
+//		void toogle_step_x(uint8_t id);
 		void step_reset();
 
 		uint32_t check_event(uint32_t, uint16_t/*boolean, clk *c*/);

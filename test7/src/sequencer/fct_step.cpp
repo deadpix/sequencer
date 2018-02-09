@@ -81,12 +81,15 @@ void fct_step::on_release(uint8_t btn_id){
 //			t->arr_step[second_push].set_step_active();
 //			t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[second_push], BACKGROUND);
 
-			for(uint8_t i=first_push;i<second_push;i++){
-				t->arr_step[i].set_step_active();
-				t->arr_step[i].link_step();
+			t->arr_step[first_push].set_step_up();
+			t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[first_push], BACKGROUND);
+
+			for(uint8_t i=first_push+1;i<second_push;i++){
+				t->arr_step[i].set_step_off();
+////				t->arr_step[i].link_step();
 				t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[i], BACKGROUND);	
 			}
-			t->arr_step[second_push].set_step_active();
+			t->arr_step[second_push].set_step_dw();
 			t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[second_push], BACKGROUND);
 		}
 		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);

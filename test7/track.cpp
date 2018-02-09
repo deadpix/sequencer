@@ -76,7 +76,7 @@ boolean track::next_step(){
 	//	  changed or at init time
 	arr_step[curr_step_id].upd_step_gate_len(_c.clk_get_ms());
 
-	return (arr_step[curr_step_id].is_step_active() && !arr_step[curr_step_id].is_step_linked());
+	return (arr_step[curr_step_id].is_step_active() /*&& !arr_step[curr_step_id].is_step_linked()*/);
 }
 uint8_t track::get_current_step(){
 	return curr_step_id;
@@ -91,9 +91,9 @@ clk* track::get_clk(){
 }
 
 
-void track::toogle_step_x(uint8_t id){
-	arr_step[id].toogle_step();
-}
+//void track::toogle_step_x(uint8_t id){
+//	arr_step[id].toogle_step();
+//}
 
 boolean track::is_step_on(uint8_t id){
 	return arr_step[id].step_status();
@@ -128,8 +128,9 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	
 		if(_play){	
 			if(next_step()){
-				arr_step[curr_step_id].reset_gate();
-				_hw_fct(arr_step[curr_step_id]._note.pitch, arr_step[curr_step_id]._note.velocity, _out_id);
+				if(arr_step[curr_step_id].reset_gate()){
+					_hw_fct(arr_step[curr_step_id]._note.pitch, arr_step[curr_step_id]._note.velocity, _out_id);
+				}
 			}
 		}
 		// step animation only for the current track

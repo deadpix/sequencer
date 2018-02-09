@@ -9,6 +9,11 @@
 
 #include "types.h"
 
+#define GATE_UP			(1<<0)
+#define GATE_DW			(1<<1)
+#define GATE_ON			(GATE_UP_MASK | GATE_DW_MASK)
+#define GATE_OFF		0x0
+
 struct note {
 	uint8_t  velocity;
 	uint16_t pitch;
@@ -19,6 +24,7 @@ class step {
 		uint8_t step_id;
 		boolean flag_active;
 		bool _linked;
+		uint8_t _gate_bmp;
 		uint8_t gate_len_per; // percentage
 		uint32_t gate_len_ms; // percentage
 		bool flg_gate;
@@ -32,7 +38,7 @@ class step {
 		
 //		void step_init_gate(uint8_t (*hw_wr)(uint8_t, uint8_t));
 	//	void check_gate(uint32_t);
-		void reset_gate();
+		bool reset_gate();
 		bool upd_gate();
 		void set_step_gate_len(uint32_t ms, uint8_t len);
 		void upd_step_gate_len(uint32_t);
@@ -40,7 +46,10 @@ class step {
 		boolean is_step_active();
 		void set_step_active();
 		void clr_step_active();
-		void toogle_step();
+		void set_step_up();
+		void set_step_dw();
+		void set_step_off();
+//		void toogle_step();
 		
 		uint8_t get_step_gate_len();
 		uint8_t get_step_id();

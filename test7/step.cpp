@@ -7,6 +7,7 @@ step::step(){
 	flg_gate = false;
 	_note.velocity = 127;
 	_note.pitch = 37;
+	_gate_bmp = 0x0;
 }
 
 step::~step(){
@@ -17,16 +18,17 @@ void step::step_set_note(uint8_t vel, uint16_t pitch){
 	_note.pitch = pitch;
 }
 
-void step::reset_gate(){
+bool step::reset_gate(){
 	gate_elapsed = 0;
-	flg_gate = true;
+//	flg_gate = true;
+	return (_gate_bmp & GATE_UP);
 }
 bool step::upd_gate(){
 	bool res = false;
 
-	if( flg_gate && !_linked && (gate_elapsed > gate_len_ms) ){
+	if( (_gate_bmp & GATE_DW) && (gate_elapsed > gate_len_ms) ){
 		res = true;
-		flg_gate = false;
+//		flg_gate = false;
 	}
 	return res;
 }
@@ -40,11 +42,28 @@ boolean step::is_step_active(){
 
 void step::set_step_active(){
 	flag_active = true;
+	_gate_bmp = GATE_ON;
 }
 
 void step::clr_step_active(){
 	flag_active = false;
+	_gate_bmp = GATE_OFF;
 }
+
+void step::set_step_up(){
+	flag_active = true;
+	_gate_bmp = GATE_UP;
+}
+void step::set_step_dw(){
+	flag_active = true;
+	_gate_bmp = GATE_DW;
+}
+void step::set_step_off(){
+	flag_active = true;
+	_gate_bmp = GATE_OFF;
+}
+
+
 
 uint8_t step::get_step_gate_len(){
 	return gate_len_per;
@@ -67,9 +86,9 @@ void step::set_step_id(uint8_t id){
 	step_id = id;
 }
 
-void step::toogle_step(){
-	flag_active = !flag_active;
-}
+//void step::toogle_step(){
+//	flag_active = !flag_active;
+//}
 
 boolean step::step_status(){
 	return flag_active;
