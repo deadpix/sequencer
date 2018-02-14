@@ -13,11 +13,9 @@ void fct_step::init(sequencer* seq, char* name){
 static void color_active_step(track* t, uint8_t btn){
 	uint8_t id = errata_btn[btn];
 	if(t->arr_step[id].is_step_active()){
-		Serial.println("active");
 		t->get_led_matrix()->clr_n_restore(btn, BACKGROUND);
 	}
 	else {
-		Serial.println("inactive");
 		t->get_led_matrix()->save_n_set(LED_R_IDX, btn, BACKGROUND);
 	}
 }
@@ -101,14 +99,21 @@ void fct_step::on_release(uint8_t btn_id){
 	else {
 		if(t->arr_step[id].is_step_active()){
 			// check if the step was linked
-			if(t->arr_step[id].is_step_linked()){
-				// TODO should check track len and negative index
-				t->arr_step[id-1].unlink_step();
-				t->arr_step[id].unlink_step();
-			}
+//			if(t->arr_step[id].is_step_linked()){
+//				t->arr_step[id-1].unlink_step();
+//				t->arr_step[id].unlink_step();
+//			}
 //			 else {
-				t->arr_step[id].clr_step_active();
-				t->get_led_matrix()->clr_n_restore(btn_id, BACKGROUND);
+//			// TODO should check track len and negative index
+			if(t->arr_step[id-1].is_step_active()){
+				t->arr_step[id-1].set_step_dw();
+			}
+			if(t->arr_step[id+1].is_step_active()){
+				t->arr_step[id+1].set_step_up();	
+			}
+
+			t->arr_step[id].clr_step_active();
+			t->get_led_matrix()->clr_n_restore(btn_id, BACKGROUND);
 //			}
 		} else { 
 			t->arr_step[id].set_step_active();

@@ -11,7 +11,7 @@
 
 #define GATE_UP			(1<<0)
 #define GATE_DW			(1<<1)
-#define GATE_ON			(GATE_UP_MASK | GATE_DW_MASK)
+#define GATE_ON			(GATE_UP | GATE_DW)
 #define GATE_OFF		0x0
 
 struct note {

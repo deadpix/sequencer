@@ -52,11 +52,11 @@ void step::clr_step_active(){
 
 void step::set_step_up(){
 	flag_active = true;
-	_gate_bmp = GATE_UP;
+	_gate_bmp |= GATE_UP;
 }
 void step::set_step_dw(){
 	flag_active = true;
-	_gate_bmp = GATE_DW;
+	_gate_bmp |= GATE_DW;
 }
 void step::set_step_off(){
 	flag_active = true;
