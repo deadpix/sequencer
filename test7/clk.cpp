@@ -49,6 +49,8 @@ clk::clk(){
 	_ms 		= bpm_to_ms(_bpm);
 	_operation	= 1;
 	_resync 	= false;
+	_numerator	= 1;
+	_denominator	= 1;
 }
 
 clk::~clk(){
@@ -105,6 +107,19 @@ int clk::clk_set_bpm(uint16_t new_bpm){
 		ret = 1;
 	_bpm = new_bpm;
 	_ms = bpm_to_ms(_bpm);
+
+	return ret;
+}
+
+boolean clk::clk_set_ratio(uint32_t ms_ref, uint8_t numerator, uint8_t denominator){
+	boolean ret = true;
+	_numerator = numerator;
+	_denominator = denominator;
+	
+	_ms = ms_ref * _numerator / _denominator;
+	_bpm = ms_to_bpm(_ms);
+
+	// need to set lower limit for _ms (2ms, 5ms, 10ms ???)
 
 	return ret;
 }
@@ -172,6 +187,20 @@ uint32_t clk::clk_sync(uint32_t ms, uint16_t step){
 	return ret;
 }
 
+uint32_t clk::clk_sync_ratio(uint32_t ms, uint16_t step){
+	uint32_t ret = 0;
+
+	_ms = ms * _numerator * _denominator;
+	_bpm = ms_to_bpm(_ms);
+
+	if( ((step+1) % _numerator) == 0 ){
+		ret = _ms;
+		_elapsed_ms = 0;
+		_step_cnt = 0;
+	}
+	return ret;
+}
+
 uint32_t clk::clk_elapsed(){
 	uint32_t ret = 0;
 	if(_elapsed_ms > _ms){
@@ -193,10 +222,20 @@ uint32_t clk::master_sync(uint32_t mst_ms, uint16_t mst_cnt){
 	/* when _step_cnt = _operation, slave clk has to be synced with master */
 	else if( (_operation > 0) && (_step_cnt < (_operation - 1)) ){
 		ret = clk_elapsed(); 
-//		Serial.print("clk sync? ");
-//		Serial.print(_operation);
-//		Serial.print(" ");
-//		Serial.println(ret);
+	}
+	return ret;
+}
+uint32_t clk::master_sync_ratio(uint32_t mst_ms, uint16_t mst_cnt){
+	uint32_t ret = 0;
+
+	/* master has been synced or received new tick */
+	if(mst_ms > 0){
+		ret = clk_sync_ratio(mst_ms, mst_cnt);
+	}
+	/* with ratio, clock are synced on the numerator and slave clock self- */
+	/* check if counter is less than denom-1                               */
+	else if( /*(_denominator > _numerator) &&*/ (_step_cnt < (_denominator - 1)) ){
+		ret = clk_elapsed(); 
 	}
 	return ret;
 }

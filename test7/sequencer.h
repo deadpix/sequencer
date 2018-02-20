@@ -20,6 +20,11 @@
 //	byte play;
 //} transport_t;
 
+struct linked_step_ui {
+	elapsedMillis ms_cnt;
+	int step_id;
+};
+
 class sequencer : public prog {
 	private:
 		track  track_arr[SEQUENCER_NR_TRACK];
@@ -31,6 +36,8 @@ class sequencer : public prog {
 		static const uint8_t nr_track = 1;
 		uint8_t current_param_id;
 
+		struct linked_step_ui _ls_ui;
+		
 		sequencer();
 		~sequencer();
 		

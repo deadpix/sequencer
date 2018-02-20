@@ -44,7 +44,8 @@ class clk {
 		// diff from 0 and sup than 1: multiplier
 		int _operation; 
 		boolean _resync;
-		
+		uint8_t _numerator;
+		uint8_t _denominator;
 	
 	public:
 		clk();
@@ -63,6 +64,7 @@ class clk {
 		void clk_set_max_step(uint8_t);
 		
 		boolean clk_set_operation(int, uint32_t);
+		boolean clk_set_ratio(uint32_t, uint8_t, uint8_t);
 		void clk_sync_intern(uint32_t);
 		uint32_t clk_reset();
 
@@ -70,8 +72,10 @@ class clk {
 		uint32_t clk_sync_divider(uint32_t, uint16_t);
 		uint32_t clk_sync_multiplier(uint32_t);
 		uint32_t clk_sync(uint32_t, uint16_t);
+		uint32_t clk_sync_ratio(uint32_t, uint16_t);
 		
 		uint32_t master_sync(uint32_t, uint16_t);
+		uint32_t master_sync_ratio(uint32_t, uint16_t);
 };
 
 #endif

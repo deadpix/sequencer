@@ -18,12 +18,25 @@ track::track(){
 	_hw_fct = _dummy_fct;
 	_max_step = NR_STEP;
 	_play = false;
-	
+
+	arr_step = new step[NR_STEP];	
 	for(int i=0;i<NR_STEP;i++){
 		arr_step[i].set_step_id(i);
 	}
 }
+track::track(uint8_t nr_step){
+	curr_step_id = 0;
+	track_len = 16;
+	elapsed_ms = 0;
+	_hw_fct = _dummy_fct;
+	_max_step = nr_step;
+	_play = false;
 
+	arr_step = new step[nr_step];	
+	for(int i=0;i<nr_step;i++){
+		arr_step[i].set_step_id(i);
+	}
+}
 track::~track(){
 }
 
@@ -122,7 +135,7 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	
 	// need to determine if there is a new clock
 	//  --> res and clk_sync 
-	//  --> clk_ellasped() 
+	//  --> clk_ellasped() 	
 	
 	if(res){
 	
@@ -147,7 +160,6 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 }
 
 void track::on_push(uint8_t btn_id){
-
 //	if(arr_step[errata_btn[btn_id]].is_step_active())
 //		arr_step[errata_btn[btn_id]].clr_step_active();
 //	else 

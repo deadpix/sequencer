@@ -32,8 +32,10 @@ class track {
 		led_toogle _step_animation;
 		
 	public:
-		step arr_step[NR_STEP];
+//		step arr_step[NR_STEP];
+		step* arr_step;
 		track();
+		track(uint8_t);
 		~track();
 		
 		led_matrix * get_led_matrix();

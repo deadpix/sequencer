@@ -38,6 +38,68 @@ static bool btn_was_long_pushed(uint8_t btn_id, uint8_t lp_cnt, const struct led
 	return flg;
 }
 
+static bool link_steps(sequencer *s, uint8_t first, uint8_t second){
+	track* t = s->get_current_track();
+	uint8_t step_cnt = first;
+	bool res = false;
+
+	// check first if previous step already linked
+	uint8_t prev_step;
+	if(step_cnt == 0){
+		prev_step = t->get_max_step();
+	} else {
+		prev_step = step_cnt - 1;
+	}
+	if(!t->arr_step[prev_step].is_step_linked()){
+		t->arr_step[step_cnt].set_step_up();
+		t->arr_step[step_cnt].link_step();
+		t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[step_cnt], BACKGROUND);
+		res = true;
+		step_cnt = (step_cnt + 1) % t->get_max_step();
+	}	
+
+	while(step_cnt != second){
+		t->arr_step[step_cnt].set_step_off();
+		t->arr_step[step_cnt].link_step();
+		t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[step_cnt], BACKGROUND);
+		step_cnt = (step_cnt + 1) % t->get_max_step();
+	}
+	
+	// check if step after "second" is linked 
+	if(!t->arr_step[(step_cnt + 1) % t->get_max_step()].is_step_linked()){
+		t->arr_step[step_cnt].set_step_dw();
+		t->arr_step[step_cnt].link_step();
+		t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[step_cnt], BACKGROUND);
+	}
+	else {
+		t->arr_step[step_cnt].set_step_off();
+		t->arr_step[step_cnt].link_step();
+		t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[step_cnt], BACKGROUND);
+	}
+	return res;
+}
+
+static void unlink_steps(sequencer *s, uint8_t step){
+	track* t = s->get_current_track();
+	uint8_t tmp;
+	
+	//TODO reevaluate linked step
+
+	if(step == 0){
+		tmp = t->get_max_step();	
+	} else {
+		tmp = step - 1;
+	}
+	if(t->arr_step[tmp].is_step_active()){
+		t->arr_step[tmp].set_step_dw();
+	}
+	
+	tmp = (step + 1) % t->get_max_step();
+	if(!t->arr_step[tmp].is_step_active()){
+		t->arr_step[tmp].set_step_up();
+	}
+}
+
 
 void fct_step::on_push(uint8_t btn_id){
 	char str[7];
@@ -53,13 +115,17 @@ void fct_step::on_release(uint8_t btn_id){
 	uint8_t id = errata_btn[btn_id];
 	track* t = _seq->get_current_track();
 
-//	Serial.println("short relase");
-	
 	// check if the pushed button was long pushed button
-
 	if(_lp_cnt == 1){
 		// linked step
 		if(!btn_was_long_pushed(btn_id, _lp_cnt, _lp_ui)){
+			if(link_steps(_seq, errata_btn[_lp_ui[_lp_cnt-1]._id], errata_btn[btn_id])){
+				_seq->_ls_ui.ms_cnt = 0;
+				_seq->_ls_ui.step_id = _lp_ui[_lp_cnt-1]._id;
+				
+				
+			}
+/*
 			// linked step together
 			uint8_t first_push;
 			uint8_t second_push;
@@ -71,24 +137,16 @@ void fct_step::on_release(uint8_t btn_id){
 				first_push = errata_btn[btn_id];
 			}
 
-//			for(uint8_t i=first_push+1;i<=second_push;i++){
-//				t->arr_step[i].set_step_active();
-//				t->arr_step[i].link_step();
-//				t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[i], BACKGROUND);	
-//			}
-//			t->arr_step[second_push].set_step_active();
-//			t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[second_push], BACKGROUND);
-
 			t->arr_step[first_push].set_step_up();
 			t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[first_push], BACKGROUND);
 
 			for(uint8_t i=first_push+1;i<second_push;i++){
 				t->arr_step[i].set_step_off();
-////				t->arr_step[i].link_step();
 				t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[i], BACKGROUND);	
 			}
 			t->arr_step[second_push].set_step_dw();
 			t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[second_push], BACKGROUND);
+*/
 		}
 		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
 	} 
@@ -98,23 +156,20 @@ void fct_step::on_release(uint8_t btn_id){
 	} 
 	else {
 		if(t->arr_step[id].is_step_active()){
-			// check if the step was linked
-//			if(t->arr_step[id].is_step_linked()){
-//				t->arr_step[id-1].unlink_step();
-//				t->arr_step[id].unlink_step();
-//			}
-//			 else {
 //			// TODO should check track len and negative index
+			if(t->arr_step[id].is_step_linked()){
+				unlink_steps(_seq, id);
+			}
+/*
 			if(t->arr_step[id-1].is_step_active()){
 				t->arr_step[id-1].set_step_dw();
 			}
 			if(t->arr_step[id+1].is_step_active()){
 				t->arr_step[id+1].set_step_up();	
 			}
-
+*/
 			t->arr_step[id].clr_step_active();
 			t->get_led_matrix()->clr_n_restore(btn_id, BACKGROUND);
-//			}
 		} else { 
 			t->arr_step[id].set_step_active();
 			t->get_led_matrix()->save_n_set(LED_R_IDX, btn_id, BACKGROUND);
@@ -155,6 +210,12 @@ void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
 			_lp_ui[i]._ms = 0;
 		}
 	}
+//	if(_seq->_ls_ui.step_id != -1){
+//		if(ms_cnt > 50){
+//			
+//		}
+//
+//	}
 }
 
 void fct_step::on_start(){
