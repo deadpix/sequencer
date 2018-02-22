@@ -22,6 +22,7 @@ track::track(){
 	arr_step = new step[NR_STEP];	
 	for(int i=0;i<NR_STEP;i++){
 		arr_step[i].set_step_id(i);
+		arr_step[i].set_next_step(&(arr_step[(i+1)%NR_STEP]));
 	}
 }
 track::track(uint8_t nr_step){
@@ -35,6 +36,7 @@ track::track(uint8_t nr_step){
 	arr_step = new step[nr_step];	
 	for(int i=0;i<nr_step;i++){
 		arr_step[i].set_step_id(i);
+		arr_step[i].set_next_step(&(arr_step[(i+1)%nr_step]));
 	}
 }
 track::~track(){

@@ -30,6 +30,7 @@ class step {
 		bool flg_gate;
 //		gate _step_gate;
 		elapsedMillis gate_elapsed;
+		step* _next;
 	
 	public:
 		step();
@@ -51,6 +52,9 @@ class step {
 		void set_step_off();
 //		void toogle_step();
 		
+		void set_next_step(step*);
+		step* get_next_step();
+
 		uint8_t get_step_gate_len();
 		uint8_t get_step_id();
 		

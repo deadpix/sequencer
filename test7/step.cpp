@@ -63,7 +63,12 @@ void step::set_step_off(){
 	_gate_bmp = GATE_OFF;
 }
 
-
+void step::set_next_step(step* s){
+	_next = s;
+}
+step* step::get_next_step(){
+	return _next;
+}
 
 uint8_t step::get_step_gate_len(){
 	return gate_len_per;
