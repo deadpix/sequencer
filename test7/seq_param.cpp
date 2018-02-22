@@ -74,7 +74,7 @@ void seq_param::init(sequencer* const s, clk* const c){
 	for(int i=1;i<MAX_MULTIPLIER;i++){
 		_clk_mul_ui[i].init_animation(param::get_led_matrix(),(CLK_MULTIPLIER_LED_OFFSET+i), LED_R_IDX);
 //		_clk_mul[(i-1)].clk_set_operation((i+1), _clk_ref->clk_get_ms());
-		_clk_mul[(i-1)].clk_set_ratio(1, (i+1), _clk_ref->clk_get_ms());
+		_clk_mul[(i-1)].clk_set_ratio(_clk_ref->clk_get_ms(), 1, (i+1));
 	}
 
 }
@@ -89,7 +89,7 @@ void seq_param::on_push(uint8_t btn_id){
 	else if(btn_id > CLK_DIVIDER_LED_OFFSET && btn_id < CLK_MULTIPLIER_LED_OFFSET){ 
 		clk* c = _s->get_current_track()->get_clk();
 //		c->clk_set_operation((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1), _clk_ref->clk_get_ms());
-		c->clk_set_ratio((btn_id-CLK_DIVIDER_LED_OFFSET+1), 1, _clk_ref->clk_get_ms());
+		c->clk_set_ratio(_clk_ref->clk_get_ms(),(btn_id-CLK_DIVIDER_LED_OFFSET+1), 1);
 
 //		Serial.print("set divider ");
 //		Serial.println((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1));		
@@ -100,7 +100,7 @@ void seq_param::on_push(uint8_t btn_id){
 	else if(btn_id > CLK_MULTIPLIER_LED_OFFSET && btn_id < (CLK_MULTIPLIER_LED_OFFSET + 8)){
 		clk* c = _s->get_current_track()->get_clk();	
 //		c->clk_set_operation((btn_id-CLK_MULTIPLIER_LED_OFFSET+1), _clk_ref->clk_get_ms());
-		c->clk_set_ratio(1, (btn_id-CLK_MULTIPLIER_LED_OFFSET+1), _clk_ref->clk_get_ms());
+		c->clk_set_ratio(_clk_ref->clk_get_ms(), 1,(btn_id-CLK_MULTIPLIER_LED_OFFSET+1));
 
 //		Serial.print("set multiplier ");
 //		Serial.println((btn_id-CLK_MULTIPLIER_LED_OFFSET+1));
