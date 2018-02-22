@@ -36,7 +36,8 @@ void seq_param::clk_multiplier_ui(uint32_t mst_ms, uint16_t mst_step){
 		_clk_mul_ui[0].start_animation(LED_ANIMATION_PER * mst_ms / 100);
 
 		for(int i=0;i<(MAX_MULTIPLIER-1);i++){
-			_clk_mul[i].clk_sync(mst_ms, mst_step);
+//			_clk_mul[i].clk_sync(mst_ms, mst_step);
+			_clk_mul[i].clk_sync_ratio(mst_ms, mst_step);
 			_clk_mul_ui[i+1].turn_on_led();
 			_clk_mul_ui[i+1].start_animation(LED_ANIMATION_PER * _clk_mul[i].clk_get_ms() / 100);
 		}
@@ -72,7 +73,8 @@ void seq_param::init(sequencer* const s, clk* const c){
 	_clk_mul_ui[0].init_animation(param::get_led_matrix(),(CLK_MULTIPLIER_LED_OFFSET), LED_R_IDX);
 	for(int i=1;i<MAX_MULTIPLIER;i++){
 		_clk_mul_ui[i].init_animation(param::get_led_matrix(),(CLK_MULTIPLIER_LED_OFFSET+i), LED_R_IDX);
-		_clk_mul[(i-1)].clk_set_operation((i+1), _clk_ref->clk_get_ms());
+//		_clk_mul[(i-1)].clk_set_operation((i+1), _clk_ref->clk_get_ms());
+		_clk_mul[(i-1)].clk_set_ratio(1, (i+1), _clk_ref->clk_get_ms());
 	}
 
 }
@@ -86,17 +88,22 @@ void seq_param::on_push(uint8_t btn_id){
 	}
 	else if(btn_id > CLK_DIVIDER_LED_OFFSET && btn_id < CLK_MULTIPLIER_LED_OFFSET){ 
 		clk* c = _s->get_current_track()->get_clk();
-		c->clk_set_operation((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1), _clk_ref->clk_get_ms());
-		Serial.print("set divider ");
-		Serial.println((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1));		
+//		c->clk_set_operation((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1), _clk_ref->clk_get_ms());
+		c->clk_set_ratio((btn_id-CLK_DIVIDER_LED_OFFSET+1), 1, _clk_ref->clk_get_ms());
+
+//		Serial.print("set divider ");
+//		Serial.println((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1));		
+
 		_s->prog::display_str("div", 1);
 //		_s->prog::display_str((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1), 2);
 	}
 	else if(btn_id > CLK_MULTIPLIER_LED_OFFSET && btn_id < (CLK_MULTIPLIER_LED_OFFSET + 8)){
 		clk* c = _s->get_current_track()->get_clk();	
-		c->clk_set_operation((btn_id-CLK_MULTIPLIER_LED_OFFSET+1), _clk_ref->clk_get_ms());
-		Serial.print("set multiplier ");
-		Serial.println((btn_id-CLK_MULTIPLIER_LED_OFFSET+1));
+//		c->clk_set_operation((btn_id-CLK_MULTIPLIER_LED_OFFSET+1), _clk_ref->clk_get_ms());
+		c->clk_set_ratio(1, (btn_id-CLK_MULTIPLIER_LED_OFFSET+1), _clk_ref->clk_get_ms());
+
+//		Serial.print("set multiplier ");
+//		Serial.println((btn_id-CLK_MULTIPLIER_LED_OFFSET+1));
 		_s->prog::display_str("mult", 1);
 //		_s->prog::display_str((btn_id-CLK_MULTIPLIER_LED_OFFSET+1), 2);
 

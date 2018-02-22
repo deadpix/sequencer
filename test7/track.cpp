@@ -130,7 +130,8 @@ void track::set_play(bool play){
 }
 
 uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
-	uint32_t res = _c.master_sync(ms, mst_step_cnt);
+//	uint32_t res = _c.master_sync(ms, mst_step_cnt);
+	uint32_t res = _c.master_sync_ratio(ms, mst_step_cnt);	
 	step s = arr_step[curr_step_id];
 	
 	// need to determine if there is a new clock

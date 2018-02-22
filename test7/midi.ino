@@ -47,7 +47,8 @@ void init_midi(){
 	MIDI.begin(MIDI_CHANNEL_OMNI);
 	MIDI.turnThruOff();
 	
-	midi_sync.clk_set_operation(MIDI_SYNC_PPN,midi_sync.clk_get_ms());
+//	midi_sync.clk_set_operation(MIDI_SYNC_PPN,midi_sync.clk_get_ms());
+	midi_sync.clk_set_ratio(1, MIDI_SYNC_PPN, midi_sync.clk_get_ms());
 //	init_clk(&midi_sync);	
 }
 
