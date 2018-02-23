@@ -70,6 +70,14 @@ step* step::get_next_step(){
 	return _next;
 }
 
+void step::set_clk(clk* c){
+	_c = c;
+}
+
+clk* step::get_clk(){
+	return _c;
+}
+
 uint8_t step::get_step_gate_len(){
 	return gate_len_per;
 }

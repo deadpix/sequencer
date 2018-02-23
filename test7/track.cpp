@@ -23,6 +23,7 @@ track::track(){
 	for(int i=0;i<NR_STEP;i++){
 		arr_step[i].set_step_id(i);
 		arr_step[i].set_next_step(&(arr_step[(i+1)%NR_STEP]));
+		arr_step[i].set_clk(&_c);
 	}
 }
 track::track(uint8_t nr_step){
@@ -37,6 +38,7 @@ track::track(uint8_t nr_step){
 	for(int i=0;i<nr_step;i++){
 		arr_step[i].set_step_id(i);
 		arr_step[i].set_next_step(&(arr_step[(i+1)%nr_step]));
+		arr_step[i].set_clk(&_c);
 	}
 }
 track::~track(){
@@ -82,6 +84,8 @@ uint8_t track::get_max_step(){
 }
 void 	track::set_max_step(uint8_t max){
 	_max_step = max;
+	arr_step[step_id].set_next_step(&arr_step[0]);
+
 }
 boolean track::next_step(){
 	curr_step_id = (curr_step_id + 1) % _max_step; 

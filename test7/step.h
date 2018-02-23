@@ -8,6 +8,7 @@
 #endif
 
 #include "types.h"
+#include "clk.h"
 
 #define GATE_UP			(1<<0)
 #define GATE_DW			(1<<1)
@@ -31,7 +32,8 @@ class step {
 //		gate _step_gate;
 		elapsedMillis gate_elapsed;
 		step* _next;
-	
+		clk* _c;
+
 	public:
 		step();
 		~step();
@@ -54,6 +56,9 @@ class step {
 		
 		void set_next_step(step*);
 		step* get_next_step();
+
+		void set_clk(clk*);
+		ckk* get_clk();
 
 		uint8_t get_step_gate_len();
 		uint8_t get_step_id();
