@@ -22,7 +22,8 @@ class track {
 		uint8_t _track_id;
 		uint8_t _out_id;
 		bool	_play;	
-	
+		step*	_cur_step;
+
 		uint8_t track_len;
 		clk _c;
 		elapsedMillis elapsed_ms;
@@ -30,9 +31,11 @@ class track {
 		uint8_t output_id;
 		boolean mute_flg;
 		led_toogle _step_animation;
-		
+		LinkedList<track *> sub_track_list;
+
 	public:
 //		step arr_step[NR_STEP];
+		step* _mtx_btn_to_step[NR_STEP];
 		step* arr_step;
 		track();
 		track(uint8_t);
@@ -76,6 +79,5 @@ class track {
 	
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 };
-
 
 #endif

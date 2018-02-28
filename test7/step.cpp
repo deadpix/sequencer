@@ -1,4 +1,5 @@
 #include "step.h"
+#include "led_matrix.h"
 
 step::step(){
 	flag_active = false;
@@ -8,6 +9,7 @@ step::step(){
 	_note.velocity = 127;
 	_note.pitch = 37;
 	_gate_bmp = 0x0;
+	_color = LED_R_IDX;
 }
 
 step::~step(){
@@ -68,6 +70,13 @@ void step::set_next_step(step* s){
 }
 step* step::get_next_step(){
 	return _next;
+}
+
+void step::set_step_color(uint8_t color){
+	_color = color;
+}
+uint8_t step::get_step_color(){
+	return _color;
 }
 
 void step::set_clk(clk* c){

@@ -24,7 +24,9 @@ track::track(){
 		arr_step[i].set_step_id(i);
 		arr_step[i].set_next_step(&(arr_step[(i+1)%NR_STEP]));
 		arr_step[i].set_clk(&_c);
+		_mtx_btn_to_step[i] = &arr_step[i];
 	}
+	_cur_step = &arr_step[0];
 }
 track::track(uint8_t nr_step){
 	curr_step_id = 0;
@@ -39,7 +41,12 @@ track::track(uint8_t nr_step){
 		arr_step[i].set_step_id(i);
 		arr_step[i].set_next_step(&(arr_step[(i+1)%nr_step]));
 		arr_step[i].set_clk(&_c);
+		_mtx_btn_to_step[i] = &arr_step[i];
 	}
+	for(int i=nr_step;i<NR_STEP;i++){
+		_mtx_btn_to_step[i] = NULL;
+	}
+	_cur_step = &arr_step[0];
 }
 track::~track(){
 }
@@ -82,26 +89,30 @@ void track::set_step_note(uint16_t note, uint8_t step_id){
 uint8_t track::get_max_step(){
 	return _max_step;
 }
-void 	track::set_max_step(uint8_t max){
+void track::set_max_step(uint8_t max){
 	_max_step = max;
-	arr_step[step_id].set_next_step(&arr_step[0]);
+	arr_step[_max_step].set_next_step(&arr_step[0]);
 
 }
 boolean track::next_step(){
 	curr_step_id = (curr_step_id + 1) % _max_step; 
+	_cur_step = _cur_step->get_next_step();
 	// elapsed_ms = 0;
 
 	// FIXME: calculate of gate len only when clock is 
 	//	  changed or at init time
-	arr_step[curr_step_id].upd_step_gate_len(_c.clk_get_ms());
+//	arr_step[curr_step_id].upd_step_gate_len(_c.clk_get_ms());
+	_cur_step->upd_step_gate_len(_c.clk_get_ms());
 
-	return (arr_step[curr_step_id].is_step_active() /*&& !arr_step[curr_step_id].is_step_linked()*/);
+	return ( _cur_step->is_step_active() );
+//	return ( arr_step[curr_step_id].is_step_active() );
 }
 uint8_t track::get_current_step(){
 	return curr_step_id;
 }
 void track::step_reset(){
-	curr_step_id = 0;
+//	curr_step_id = 0;
+	_cur_step = &arr_step[0];
 }
 
 
@@ -137,19 +148,18 @@ void track::set_play(bool play){
 
 uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 //	uint32_t res = _c.master_sync(ms, mst_step_cnt);
-	uint32_t res = _c.master_sync_ratio(ms, mst_step_cnt);	
-	step s = arr_step[curr_step_id];
-	
-	// need to determine if there is a new clock
-	//  --> res and clk_sync 
-	//  --> clk_ellasped() 	
+//	uint32_t res = _c.master_sync_ratio(ms, mst_step_cnt);	
+	uint32_t res = _cur_step->get_clk()->master_sync_ratio(ms, mst_step_cnt);	
+//	step s = arr_step[curr_step_id];
 	
 	if(res){
-	
 		if(_play){	
 			if(next_step()){
-				if(arr_step[curr_step_id].reset_gate()){
-					_hw_fct(arr_step[curr_step_id]._note.pitch, arr_step[curr_step_id]._note.velocity, _out_id);
+//				if(arr_step[curr_step_id].reset_gate()){
+//					_hw_fct(arr_step[curr_step_id]._note.pitch, arr_step[curr_step_id]._note.velocity, _out_id);
+//				}
+				if(_cur_step->reset_gate()){
+					_hw_fct(_cur_step->_note.pitch, _cur_step->_note.velocity, _out_id);
 				}
 			}
 		}
@@ -158,21 +168,16 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
 
 	} else {
-		if(arr_step[curr_step_id].upd_gate()){
-			_hw_fct(s._note.pitch, 0, _out_id);
+//		if(arr_step[curr_step_id].upd_gate()){
+		if(_cur_step->upd_gate()){
+			_hw_fct(_cur_step->_note.pitch, 0, _out_id);
 		}
-               _step_animation.end_animation_n_restore();
+		_step_animation.end_animation_n_restore();
 	}
 	return res;
 }
 
 void track::on_push(uint8_t btn_id){
-//	if(arr_step[errata_btn[btn_id]].is_step_active())
-//		arr_step[errata_btn[btn_id]].clr_step_active();
-//	else 
-//		arr_step[errata_btn[btn_id]].set_step_active();
-//
-//	_lm.toogle_led_x(LED_R_IDX, btn_id);
 }
 void track::on_release(uint8_t btn_id){
 }

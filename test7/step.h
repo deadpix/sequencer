@@ -29,10 +29,12 @@ class step {
 		uint8_t gate_len_per; // percentage
 		uint32_t gate_len_ms; // percentage
 		bool flg_gate;
-//		gate _step_gate;
 		elapsedMillis gate_elapsed;
+		
 		step* _next;
 		clk* _c;
+	
+		uint8_t _color;
 
 	public:
 		step();
@@ -57,8 +59,12 @@ class step {
 		void set_next_step(step*);
 		step* get_next_step();
 
+		void set_step_color(uint8_t);
+		uint8_t get_step_color();
+
+
 		void set_clk(clk*);
-		ckk* get_clk();
+		clk* get_clk();
 
 		uint8_t get_step_gate_len();
 		uint8_t get_step_id();
