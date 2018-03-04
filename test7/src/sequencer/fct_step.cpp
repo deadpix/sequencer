@@ -146,7 +146,21 @@ void fct_step::on_release(uint8_t btn_id){
 		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
 	} 
 	else if(_lp_cnt == 2){
-		// create sub-track
+		// clear ui
+		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
+		t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[id]->get_step_color(), btn_id);
+		uint8_t from = errata_btn[_lp_ui[0]._id];
+		uint8_t to = errata_btn[_lp_ui[1]._id];
+		uint8_t nr_new_step = id + 1;
+		
+		if(from > to){
+			Serial.println("unable to insert sub-track");
+		} 
+		else {
+			
+
+
+		}
 
 	} 
 	else {

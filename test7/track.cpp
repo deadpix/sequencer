@@ -9,8 +9,6 @@ static void _dummy_fct(uint16_t arg1, uint8_t arg2, uint8_t arg3){
 	Serial.println("track dummy callback function");
 }
 
-
-						  
 track::track(){
 	curr_step_id = 0;
 	track_len = 16;
@@ -24,6 +22,7 @@ track::track(){
 		arr_step[i].set_step_id(i);
 		arr_step[i].set_next_step(&(arr_step[(i+1)%NR_STEP]));
 		arr_step[i].set_clk(&_c);
+		arr_step[i]._step_ui_id = i;
 		_mtx_btn_to_step[i] = &arr_step[i];
 	}
 	_cur_step = &arr_step[0];
@@ -41,6 +40,7 @@ track::track(uint8_t nr_step){
 		arr_step[i].set_step_id(i);
 		arr_step[i].set_next_step(&(arr_step[(i+1)%nr_step]));
 		arr_step[i].set_clk(&_c);
+		arr_step[i]._step_ui_id = i;
 		_mtx_btn_to_step[i] = &arr_step[i];
 	}
 	for(int i=nr_step;i<NR_STEP;i++){
@@ -90,28 +90,35 @@ uint8_t track::get_max_step(){
 	return _max_step;
 }
 void track::set_max_step(uint8_t max){
+	
+	if(_max_step < max){
+		for(int i=_max_step;i<max;i++){
+			arr_step[i-1].set_next_step(&arr_step[i%NR_STEP]);
+		}
+	} else {
+		arr_step[_max_step-1].set_next_step(&arr_step[_max_step%NR_STEP]);
+	}
+		
+	for(int i=max;i<NR_STEP;i++){
+		arr_step[i-1].set_next_step(&arr_step[0]);
+	}
 	_max_step = max;
-	arr_step[_max_step].set_next_step(&arr_step[0]);
 
 }
 boolean track::next_step(){
-	curr_step_id = (curr_step_id + 1) % _max_step; 
 	_cur_step = _cur_step->get_next_step();
-	// elapsed_ms = 0;
+	curr_step_id = _cur_step->_step_ui_id;
 
 	// FIXME: calculate of gate len only when clock is 
 	//	  changed or at init time
-//	arr_step[curr_step_id].upd_step_gate_len(_c.clk_get_ms());
 	_cur_step->upd_step_gate_len(_c.clk_get_ms());
 
 	return ( _cur_step->is_step_active() );
-//	return ( arr_step[curr_step_id].is_step_active() );
 }
 uint8_t track::get_current_step(){
 	return curr_step_id;
 }
 void track::step_reset(){
-//	curr_step_id = 0;
 	_cur_step = &arr_step[0];
 }
 
