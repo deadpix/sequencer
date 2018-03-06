@@ -40,13 +40,13 @@ track::track(uint8_t nr_step){
 		arr_step[i].set_step_id(i);
 		arr_step[i].set_next_step(&(arr_step[(i+1)%nr_step]));
 		arr_step[i].set_clk(&_c);
-		arr_step[i]._step_ui_id = i;
-		_mtx_btn_to_step[i] = &arr_step[i];
+//		arr_step[i]._step_ui_id = i;
+//		_mtx_btn_to_step[i] = &arr_step[i];
 	}
-	for(int i=nr_step;i<NR_STEP;i++){
-		_mtx_btn_to_step[i] = NULL;
-	}
-	_cur_step = &arr_step[0];
+//	for(int i=nr_step;i<NR_STEP;i++){
+//		_mtx_btn_to_step[i] = NULL;
+//	}
+//	_cur_step = &arr_step[0];
 }
 track::~track(){
 }

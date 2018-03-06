@@ -119,16 +119,29 @@ static void unlink_steps(sequencer *s, uint8_t step){
 
 
 static void shift_step_ui(track* t, step* s, int shift){
+	int ret;
 	uint8_t id = s->_step_ui_id + shift;
-	
+	Serial.print("shift_step_ui ");
+	Serial.println(id);	
+
+//	t->get_led_matrix()->clr_n_restore(errata_step[s->_step_ui_id], BACKGROUND);	
 	if( id >= NR_STEP ){
 		id = NR_STEP - 1;
-		t->_mtx_btn_to_step(id) = NULL;
+		t->_mtx_btn_to_step[id] = NULL;
 	}
 	else {
-		t->_mtx_btn_to_step(id) = s;
+		t->_mtx_btn_to_step[id] = s;
+		if(s->is_step_active()){
+			Serial.print("active step ");
+			Serial.println(errata_step[id]);
+			t->get_led_matrix()->set_led_x(s->get_step_color(), errata_step[id]);
+			ret = t->get_led_matrix()->save_n_set(s->get_step_color(), errata_step[id], BACKGROUND);
+			if(ret < 0)
+				Serial.println("Fail to save_n_set");
+		}
 	}
 	s->_step_ui_id = id;
+	
 }
 
 void fct_step::on_push(uint8_t btn_id){
@@ -175,11 +188,36 @@ void fct_step::on_release(uint8_t btn_id){
 			Serial.println("unable to insert sub-track");
 		} 
 		else {
-			step* s = t->_mtx_btn_to_step[from+1];
+			// clear step from:to-1
+			for(int i=from;i<(from+nr_new_step);i++){
+				t->_mtx_btn_to_step[id]->clr_step_active();
+				t->get_led_matrix()->clr_n_restore(errata_step[i], BACKGROUND);	
+			}
+
+			// shift ui
+			step* s = t->_mtx_btn_to_step[to];
+			step* step_to = s;
 			while(s != &t->arr_step[0]){
 				shift_step_ui(t, s, nr_new_step);
 				s = s->get_next_step();
-			}	
+			}
+		
+
+			// create new track
+			track* st = new track(nr_new_step-1);
+			clk* c = st->get_clk();
+		       	c->clk_set_ratio(t->get_clk()->clk_get_ms(),(to-from), nr_new_step);
+			
+			// chain new steps
+			t->_mtx_btn_to_step[from]->set_next_step(&(st->arr_step[0]));
+			st->arr_step[nr_new_step-2].set_next_step(step_to);
+
+			// set ui id
+			for(int i=1;i<(nr_new_step);i++){
+				t->_mtx_btn_to_step[from+i] = &(st->arr_step[i-1]);
+				t->_mtx_btn_to_step[from+i]->_step_ui_id = from + i;
+			}
+			
 
 		}
 
