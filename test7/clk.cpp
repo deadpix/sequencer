@@ -193,6 +193,15 @@ uint32_t clk::clk_sync_ratio(uint32_t ms, uint16_t step){
 	_ms = ms * _numerator / _denominator;
 	_bpm = ms_to_bpm(_ms);
 
+	Serial.print("step ");
+	Serial.print(step);
+	Serial.print(" _numerator ");
+	Serial.print(_numerator);
+	Serial.print(" _ms ");
+	Serial.println(_ms);
+//	Serial.print();
+//	Serial.print();
+
 	if( ((step+1) % _numerator) == 0 ){
 		ret = _ms;
 		_elapsed_ms = 0;
@@ -235,7 +244,14 @@ uint32_t clk::master_sync_ratio(uint32_t mst_ms, uint16_t mst_cnt){
 	/* with ratio, clock are synced on the numerator and slave clock self- */
 	/* check if counter is less than denom-1                               */
 	else if( /*(_denominator > _numerator) &&*/ (_step_cnt < (_denominator - 1)) ){
-		ret = clk_elapsed(); 
+		ret = clk_elapsed();
+		Serial.print("_denominator ");
+		Serial.print(_denominator);
+		Serial.print(" _dstep_cnt ");
+		Serial.print(_step_cnt);
+		Serial.print(" ret ");
+		Serial.println(ret);
+
 	}
 	return ret;
 }

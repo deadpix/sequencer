@@ -124,17 +124,16 @@ static void shift_step_ui(track* t, step* s, int shift){
 	Serial.print("shift_step_ui ");
 	Serial.println(id);	
 
-//	t->get_led_matrix()->clr_n_restore(errata_step[s->_step_ui_id], BACKGROUND);	
 	if( id >= NR_STEP ){
 		id = NR_STEP - 1;
 		t->_mtx_btn_to_step[id] = NULL;
 	}
 	else {
+//		t->get_led_matrix()->clr_n_restore(errata_step[id], BACKGROUND);	
 		t->_mtx_btn_to_step[id] = s;
 		if(s->is_step_active()){
 			Serial.print("active step ");
 			Serial.println(errata_step[id]);
-			t->get_led_matrix()->set_led_x(s->get_step_color(), errata_step[id]);
 			ret = t->get_led_matrix()->save_n_set(s->get_step_color(), errata_step[id], BACKGROUND);
 			if(ret < 0)
 				Serial.println("Fail to save_n_set");
@@ -177,36 +176,44 @@ void fct_step::on_release(uint8_t btn_id){
 		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
 	} 
 	else if(_lp_cnt == 2){
-		// clear ui
-		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
-		t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[id]->get_step_color(), btn_id);
 		uint8_t from = errata_btn[_lp_ui[0]._id];
 		uint8_t to = errata_btn[_lp_ui[1]._id];
 		uint8_t nr_new_step = id + 1;
 		
+		// clear ui
+		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
+		t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[id]->get_step_color(), btn_id);
+	
 		if(from > to){
 			Serial.println("unable to insert sub-track");
 		} 
 		else {
+			Serial.print("from ");
+			Serial.print(from);
+			Serial.print(" to ");
+			Serial.print(to);
+			Serial.print(" nr_new_step ");
+			Serial.println(nr_new_step);
 			// clear step from:to-1
-			for(int i=from;i<(from+nr_new_step);i++){
-				t->_mtx_btn_to_step[id]->clr_step_active();
+			for(int i=from;i<(to);i++){
+				t->_mtx_btn_to_step[i]->clr_step_active();
 				t->get_led_matrix()->clr_n_restore(errata_step[i], BACKGROUND);	
 			}
 
 			// shift ui
 			step* s = t->_mtx_btn_to_step[to];
 			step* step_to = s;
+			for(int i=to;i<NR_STEP;i++){
+				t->get_led_matrix()->clr_n_restore(errata_step[i], BACKGROUND);
+			}
 			while(s != &t->arr_step[0]){
-				shift_step_ui(t, s, nr_new_step);
+				shift_step_ui(t, s, (nr_new_step-(to-from)));
 				s = s->get_next_step();
 			}
-		
 
 			// create new track
 			track* st = new track(nr_new_step-1);
-			clk* c = st->get_clk();
-		       	c->clk_set_ratio(t->get_clk()->clk_get_ms(),(to-from), nr_new_step);
+		       	st->get_clk()->clk_set_ratio(t->get_clk()->clk_get_ms(),(to-from), nr_new_step);
 			
 			// chain new steps
 			t->_mtx_btn_to_step[from]->set_next_step(&(st->arr_step[0]));

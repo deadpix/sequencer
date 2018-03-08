@@ -166,7 +166,9 @@ void led_matrix::clr_n_restore(uint16_t nr, uint8_t ground){
 	if(_led_status_arr[nr].bmp){
 		uint8_t level_hi = BIT::get_highest_bit_set(_led_status_arr[nr].bmp);
 		Serial.print("restore high ");
-		Serial.println(level_hi);
+		Serial.print(level_hi);
+		Serial.print(" nr ");
+		Serial.println(nr);
 		set_led_x(_led_status_arr[nr].color[level_hi], nr);
 	}
 }

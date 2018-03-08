@@ -109,9 +109,11 @@ boolean track::next_step(){
 	_cur_step = _cur_step->get_next_step();
 	curr_step_id = _cur_step->_step_ui_id;
 
+	Serial.print("curr_step_id ");
+	Serial.println(curr_step_id);
 	// FIXME: calculate of gate len only when clock is 
 	//	  changed or at init time
-	_cur_step->upd_step_gate_len(_c.clk_get_ms());
+	_cur_step->upd_step_gate_len(_cur_step->get_clk()->clk_get_ms());
 
 	return ( _cur_step->is_step_active() );
 }
@@ -162,9 +164,6 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	if(res){
 		if(_play){	
 			if(next_step()){
-//				if(arr_step[curr_step_id].reset_gate()){
-//					_hw_fct(arr_step[curr_step_id]._note.pitch, arr_step[curr_step_id]._note.velocity, _out_id);
-//				}
 				if(_cur_step->reset_gate()){
 					_hw_fct(_cur_step->_note.pitch, _cur_step->_note.velocity, _out_id);
 				}
@@ -172,7 +171,7 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 		}
 		// step animation only for the current track
 		_step_animation.init_animation_n_save(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
-		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
+		_step_animation.start_animation((_cur_step->get_next_step()->get_clk()->clk_get_ms() * CLK_LEN_PER / 100.));
 
 	} else {
 //		if(arr_step[curr_step_id].upd_gate()){
