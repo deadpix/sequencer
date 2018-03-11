@@ -40,8 +40,10 @@ class step {
 		step();
 		~step();
 		struct note _note;
+		struct clk_def _clk_def;
 		uint8_t _step_ui_id;
 		
+
 //		void step_init_gate(uint8_t (*hw_wr)(uint8_t, uint8_t));
 	//	void check_gate(uint32_t);
 		bool reset_gate();

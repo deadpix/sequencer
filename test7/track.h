@@ -23,20 +23,25 @@ class track {
 		uint8_t _out_id;
 		bool	_play;	
 		step*	_cur_step;
+		step*	_first_step;
+		step*  	_last_step;
 
 		uint8_t track_len;
 		clk _c;
 		elapsedMillis elapsed_ms;
 		led_matrix _lm;
-		uint8_t output_id;
 		boolean mute_flg;
 		led_toogle _step_animation;
-		LinkedList<track *> sub_track_list;
+//		LinkedList<track *> sub_track_list;
 
 	public:
 //		step arr_step[NR_STEP];
+		LinkedList<step *> _step_list;
 		step* _mtx_btn_to_step[NR_STEP];
-		step* arr_step;
+//		step* arr_step;
+		struct clk_def _clk_def;
+
+
 		track();
 		track(uint8_t);
 		~track();
@@ -54,10 +59,10 @@ class track {
 		uint8_t get_out_id();
 
 		void set_all_step_note(uint16_t);
-		void set_step_note(uint16_t, uint8_t );
+//		void set_step_note(uint16_t, uint8_t );
 		
-		boolean is_step_on(uint8_t id);
-		boolean next_step();
+//		boolean is_step_on(uint8_t id);
+		boolean next_step(uint32_t);
 		uint8_t get_current_step();
 //		void toogle_step_x(uint8_t id);
 		void step_reset();

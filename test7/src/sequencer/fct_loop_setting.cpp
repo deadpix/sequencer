@@ -17,7 +17,7 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 	uint8_t id = errata_btn[btn_id];
 	track* t = _seq->get_current_track();
 	uint8_t nr_step = t->get_max_step();
-	
+
 	upd_display(_seq, id);
 
 	if((id+1) != nr_step){

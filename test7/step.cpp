@@ -10,6 +10,8 @@ step::step(){
 	_note.pitch = 37;
 	_gate_bmp = 0x0;
 	_color = LED_R_IDX;
+	_clk_def.numerator = 1;
+	_clk_def.denominator = 1;
 }
 
 step::~step(){

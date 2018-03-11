@@ -33,6 +33,13 @@
 
 #include <elapsedMillis.h>
 
+struct clk_def {
+	uint8_t numerator;
+	uint8_t denominator;
+};
+
+
+
 class clk {
 	private:
 		uint16_t _step_cnt;

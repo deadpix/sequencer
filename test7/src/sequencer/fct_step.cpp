@@ -41,23 +41,16 @@ static bool link_steps(sequencer *s, uint8_t first, uint8_t second){
 		prev_step = step_cnt - 1;
 	}
 
-//	if(!t->arr_step[prev_step].is_step_linked()){
 		if(!t->_mtx_btn_to_step[prev_step]->is_step_linked()){
-//			t->arr_step[step_cnt].set_step_up();
-//			t->arr_step[step_cnt].link_step();
 			t->_mtx_btn_to_step[step_cnt]->set_step_up();
 			t->_mtx_btn_to_step[step_cnt]->link_step();
 
-//			t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[step_cnt], BACKGROUND);
 			t->get_led_matrix()->save_n_set(t->_mtx_btn_to_step[step_cnt]->get_step_color(), errata_step[step_cnt], BACKGROUND);
 			res = true;
 			step_cnt = (step_cnt + 1) % t->get_max_step();
 		}	
 
 	while(step_cnt != second){
-//		t->arr_step[step_cnt].set_step_off();
-//		t->arr_step[step_cnt].link_step();
-//		t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[step_cnt], BACKGROUND);
 		t->_mtx_btn_to_step[step_cnt]->set_step_off();
 		t->_mtx_btn_to_step[step_cnt]->link_step();
 		t->get_led_matrix()->save_n_set(t->_mtx_btn_to_step[step_cnt]->get_step_color(), errata_step[step_cnt], BACKGROUND);
@@ -66,18 +59,11 @@ static bool link_steps(sequencer *s, uint8_t first, uint8_t second){
 	
 	// check if step after "second" is linked 
 	if(!t->_mtx_btn_to_step[(step_cnt + 1) % t->get_max_step()]->is_step_linked()){
-//	if(!t->arr_step[(step_cnt + 1) % t->get_max_step()].is_step_linked()){
-//		t->arr_step[step_cnt].set_step_dw();
-//		t->arr_step[step_cnt].link_step();
-//		t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[step_cnt], BACKGROUND);
 		t->_mtx_btn_to_step[step_cnt]->set_step_dw();
 		t->_mtx_btn_to_step[step_cnt]->link_step();
 		t->get_led_matrix()->save_n_set(t->_mtx_btn_to_step[step_cnt]->get_step_color(), errata_step[step_cnt], BACKGROUND);
 	}
 	else {
-//		t->arr_step[step_cnt].set_step_off();
-//		t->arr_step[step_cnt].link_step();
-//		t->get_led_matrix()->save_n_set(LED_R_IDX, errata_step[step_cnt], BACKGROUND);
 		t->_mtx_btn_to_step[step_cnt]->set_step_off();
 		t->_mtx_btn_to_step[step_cnt]->link_step();
 		t->get_led_matrix()->save_n_set(t->_mtx_btn_to_step[step_cnt]->get_step_color(), errata_step[step_cnt], BACKGROUND);
@@ -105,16 +91,6 @@ static void unlink_steps(sequencer *s, uint8_t step){
 	if(!t->_mtx_btn_to_step[tmp]->is_step_active()){
 		t->_mtx_btn_to_step[tmp]->set_step_up();
 	}
-
-/*
-	if(t->arr_step[tmp].is_step_active()){
-		t->arr_step[tmp].set_step_dw();
-	}
-	tmp = (step + 1) % t->get_max_step();
-	if(!t->arr_step[tmp].is_step_active()){
-		t->arr_step[tmp].set_step_up();
-	}
-	*/
 }
 
 
@@ -195,6 +171,7 @@ void fct_step::on_release(uint8_t btn_id){
 			Serial.print(" nr_new_step ");
 			Serial.println(nr_new_step);
 			// clear step from:to-1
+/*
 			for(int i=from;i<(to);i++){
 				t->_mtx_btn_to_step[i]->clr_step_active();
 				t->get_led_matrix()->clr_n_restore(errata_step[i], BACKGROUND);	
@@ -213,18 +190,23 @@ void fct_step::on_release(uint8_t btn_id){
 
 			// create new track
 			track* st = new track(nr_new_step-1);
-		       	st->get_clk()->clk_set_ratio(t->get_clk()->clk_get_ms(),(to-from), nr_new_step);
+//		       	st->get_clk()->clk_set_ratio(t->get_clk()->clk_get_ms(),(to-from), nr_new_step);
 			
 			// chain new steps
 			t->_mtx_btn_to_step[from]->set_next_step(&(st->arr_step[0]));
 			st->arr_step[nr_new_step-2].set_next_step(step_to);
 
+			t->_mtx_btn_to_step[from]->_clk_def.numerator = (to-from);
+			t->_mtx_btn_to_step[from]->_clk_def.denominator = nr_new_step;
+
 			// set ui id
 			for(int i=1;i<(nr_new_step);i++){
 				t->_mtx_btn_to_step[from+i] = &(st->arr_step[i-1]);
 				t->_mtx_btn_to_step[from+i]->_step_ui_id = from + i;
+				t->_mtx_btn_to_step[from+i]->_clk_def.numerator = (to-from);
+				t->_mtx_btn_to_step[from+i]->_clk_def.denominator = nr_new_step;
 			}
-			
+*/			
 
 		}
 

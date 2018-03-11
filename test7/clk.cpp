@@ -112,12 +112,17 @@ int clk::clk_set_bpm(uint16_t new_bpm){
 }
 
 boolean clk::clk_set_ratio(uint32_t ms_ref, uint8_t numerator, uint8_t denominator){
-	boolean ret = true;
-	_numerator = numerator;
-	_denominator = denominator;
+	boolean ret = false;
+	if(_numerator != numerator || _denominator != denominator){
+		_numerator = numerator;
+		_denominator = denominator;
 	
-	_ms = ms_ref * _numerator / _denominator;
-	_bpm = ms_to_bpm(_ms);
+		_ms = ms_ref * _numerator / _denominator;
+		_bpm = ms_to_bpm(_ms);
+		
+		_step_cnt = 0;
+		ret = true;
+	}
 
 	// need to set lower limit for _ms (2ms, 5ms, 10ms ???)
 
@@ -245,12 +250,12 @@ uint32_t clk::master_sync_ratio(uint32_t mst_ms, uint16_t mst_cnt){
 	/* check if counter is less than denom-1                               */
 	else if( /*(_denominator > _numerator) &&*/ (_step_cnt < (_denominator - 1)) ){
 		ret = clk_elapsed();
-		Serial.print("_denominator ");
-		Serial.print(_denominator);
-		Serial.print(" _dstep_cnt ");
-		Serial.print(_step_cnt);
-		Serial.print(" ret ");
-		Serial.println(ret);
+//		Serial.print("_denominator ");
+//		Serial.print(_denominator);
+//		Serial.print(" _dstep_cnt ");
+//		Serial.print(_step_cnt);
+//		Serial.print(" ret ");
+//		Serial.println(ret);
 
 	}
 	return ret;

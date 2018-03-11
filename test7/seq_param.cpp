@@ -87,25 +87,22 @@ void seq_param::on_push(uint8_t btn_id){
 		param::_lm.set_led_x(LED_GBR_IDX, btn_id);
 	}
 	else if(btn_id > CLK_DIVIDER_LED_OFFSET && btn_id < CLK_MULTIPLIER_LED_OFFSET){ 
-		clk* c = _s->get_current_track()->get_clk();
-//		c->clk_set_operation((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1), _clk_ref->clk_get_ms());
-		c->clk_set_ratio(_clk_ref->clk_get_ms(),(btn_id-CLK_DIVIDER_LED_OFFSET+1), 1);
-
-//		Serial.print("set divider ");
-//		Serial.println((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1));		
+//		clk* c = _s->get_current_track()->get_clk();
+//		c->clk_set_ratio(_clk_ref->clk_get_ms(),(btn_id-CLK_DIVIDER_LED_OFFSET+1), 1);
+		
+		_s->get_current_track()->_clk_def.numerator = (btn_id-CLK_DIVIDER_LED_OFFSET+1);
+	       _s->get_current_track()->_clk_def.denominator = 1;	
 
 		_s->prog::display_str("div", 1);
-//		_s->prog::display_str((-1)*(btn_id-CLK_DIVIDER_LED_OFFSET+1), 2);
 	}
 	else if(btn_id > CLK_MULTIPLIER_LED_OFFSET && btn_id < (CLK_MULTIPLIER_LED_OFFSET + 8)){
-		clk* c = _s->get_current_track()->get_clk();	
-//		c->clk_set_operation((btn_id-CLK_MULTIPLIER_LED_OFFSET+1), _clk_ref->clk_get_ms());
-		c->clk_set_ratio(_clk_ref->clk_get_ms(), 1,(btn_id-CLK_MULTIPLIER_LED_OFFSET+1));
+//		clk* c = _s->get_current_track()->get_clk();	
+//		c->clk_set_ratio(_clk_ref->clk_get_ms(), 1,(btn_id-CLK_MULTIPLIER_LED_OFFSET+1));
 
-//		Serial.print("set multiplier ");
-//		Serial.println((btn_id-CLK_MULTIPLIER_LED_OFFSET+1));
+		_s->get_current_track()->_clk_def.numerator = 1;
+		_s->get_current_track()->_clk_def.denominator = (btn_id-CLK_MULTIPLIER_LED_OFFSET+1);
+
 		_s->prog::display_str("mult", 1);
-//		_s->prog::display_str((btn_id-CLK_MULTIPLIER_LED_OFFSET+1), 2);
 
 	}
 	else {
