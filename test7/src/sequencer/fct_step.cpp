@@ -32,7 +32,7 @@ static bool link_steps(sequencer *s, uint8_t first, uint8_t second){
 	track* t = s->get_current_track();
 	uint8_t step_cnt = first;
 	bool res = false;
-
+/*
 	// check first if previous step already linked
 	uint8_t prev_step;
 	if(step_cnt == 0){
@@ -68,13 +68,14 @@ static bool link_steps(sequencer *s, uint8_t first, uint8_t second){
 		t->_mtx_btn_to_step[step_cnt]->link_step();
 		t->get_led_matrix()->save_n_set(t->_mtx_btn_to_step[step_cnt]->get_step_color(), errata_step[step_cnt], BACKGROUND);
 	}
+*/
 	return res;
 }
 
 static void unlink_steps(sequencer *s, uint8_t step){
 	track* t = s->get_current_track();
 	uint8_t tmp;
-	
+/*	
 	//TODO reevaluate linked step
 
 	if(step == 0){
@@ -91,14 +92,15 @@ static void unlink_steps(sequencer *s, uint8_t step){
 	if(!t->_mtx_btn_to_step[tmp]->is_step_active()){
 		t->_mtx_btn_to_step[tmp]->set_step_up();
 	}
+*/
 }
 
 
 static void shift_step_ui(track* t, step* s, int shift){
 	int ret;
 	uint8_t id = s->_step_ui_id + shift;
-	Serial.print("shift_step_ui ");
-	Serial.println(id);	
+//	Serial.print("shift_step_ui ");
+//	Serial.println(id);	
 
 	if( id >= NR_STEP ){
 		id = NR_STEP - 1;
@@ -108,11 +110,11 @@ static void shift_step_ui(track* t, step* s, int shift){
 //		t->get_led_matrix()->clr_n_restore(errata_step[id], BACKGROUND);	
 		t->_mtx_btn_to_step[id] = s;
 		if(s->is_step_active()){
-			Serial.print("active step ");
-			Serial.println(errata_step[id]);
+//			Serial.print("active step ");
+//			Serial.println(errata_step[id]);
 			ret = t->get_led_matrix()->save_n_set(s->get_step_color(), errata_step[id], BACKGROUND);
-			if(ret < 0)
-				Serial.println("Fail to save_n_set");
+//			if(ret < 0)
+//				Serial.println("Fail to save_n_set");
 		}
 	}
 	s->_step_ui_id = id;
@@ -140,7 +142,7 @@ void fct_step::on_release(uint8_t btn_id){
 	if(_lp_cnt == 1){
 		// linked step
 		/* Temporarily disabled */
-	   /*	
+	   	/*	
 		if(!btn_was_long_pushed(btn_id, _lp_cnt, _lp_ui)){
 			if(link_steps(_seq, errata_btn[_lp_ui[_lp_cnt-1]._id], errata_btn[btn_id])){
 				_seq->_ls_ui.ms_cnt = 0;
@@ -171,23 +173,60 @@ void fct_step::on_release(uint8_t btn_id){
 			Serial.print(" nr_new_step ");
 			Serial.println(nr_new_step);
 			// clear step from:to-1
-/*
-			for(int i=from;i<(to);i++){
-				t->_mtx_btn_to_step[i]->clr_step_active();
-				t->get_led_matrix()->clr_n_restore(errata_step[i], BACKGROUND);	
+			step* s = t->_mtx_btn_to_step[from]->get_next_step();
+			while(s != t->_mtx_btn_to_step[to]){
+				
+				Serial.print("delete step ");
+				Serial.println(s->get_step_id());
+
+				// clear ui
+				t->get_led_matrix()->clr_n_restore(errata_step[s->_step_ui_id]
+						, BACKGROUND);	
+
+				// delete step
+				step* tmp = s->get_next_step();
+				t->_step_list.remove(s->get_step_id());
+				delete s;
+				s = tmp;
 			}
 
+//			for(int i=from;i<(to);i++){
+//				t->_mtx_btn_to_step[i]->clr_step_active();
+//				t->get_led_matrix()->clr_n_restore(errata_step[i], BACKGROUND);	
+//			}
+
+			
 			// shift ui
-			step* s = t->_mtx_btn_to_step[to];
+			s = t->_mtx_btn_to_step[to];
 			step* step_to = s;
 			for(int i=to;i<NR_STEP;i++){
 				t->get_led_matrix()->clr_n_restore(errata_step[i], BACKGROUND);
 			}
-			while(s != &t->arr_step[0]){
+			while(s != t->get_first_step()){
 				shift_step_ui(t, s, (nr_new_step-(to-from)));
 				s = s->get_next_step();
 			}
+			
+			s = t->_mtx_btn_to_step[from];
+			s->_clk_def.numerator = (to-from);
+			s->_clk_def.denominator = nr_new_step;
+			/* create new step */
+			for(int i=0;i<(nr_new_step-1);i++){
+				step* tmp = new step;
+				tmp->_step_ui_id = from + i + 1;
+				tmp->_clk_def.numerator = (to-from);
+				tmp->_clk_def.denominator = nr_new_step;
 
+				t->_mtx_btn_to_step[from + i + 1] = tmp;
+				t->_step_list.add(tmp);
+				tmp->set_step_id(t->_step_list.size() - 1);
+
+				s->set_next_step(tmp);
+				s = tmp;
+			}
+			s->set_next_step(t->_mtx_btn_to_step[to]);	
+
+			/*
 			// create new track
 			track* st = new track(nr_new_step-1);
 //		       	st->get_clk()->clk_set_ratio(t->get_clk()->clk_get_ms(),(to-from), nr_new_step);

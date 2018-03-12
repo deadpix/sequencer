@@ -58,6 +58,13 @@ class track {
 		void set_out_id(uint8_t id);
 		uint8_t get_out_id();
 
+		step* get_first_step(){
+			return _first_step;	
+		}
+		step* get_last_step(){
+			return _last_step;
+		}
+
 		void set_all_step_note(uint16_t);
 //		void set_step_note(uint16_t, uint8_t );
 		

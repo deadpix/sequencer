@@ -42,12 +42,12 @@ track::track(){
 //	arr_step = new step[NR_STEP];	
 	for(int i=0;i<NR_STEP;i++){
 		step *s = new step;
-		s->set_step_id(i);
 //		s.set_next_step(&(arr_step[(i+1)%NR_STEP]));
 //		s.set_clk(&_c);
 		s->_step_ui_id = i;
 		_mtx_btn_to_step[i] = s;
 		_step_list.add(s);
+		s->set_step_id(_step_list.size() - 1);
 	}
 	_cur_step = _step_list.get(0);
 	_first_step = _step_list.get(0);
