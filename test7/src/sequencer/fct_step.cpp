@@ -172,6 +172,7 @@ void fct_step::on_release(uint8_t btn_id){
 			Serial.print(to);
 			Serial.print(" nr_new_step ");
 			Serial.println(nr_new_step);
+
 			// clear step from:to-1
 			step* s = t->_mtx_btn_to_step[from]->get_next_step();
 			while(s != t->_mtx_btn_to_step[to]){
@@ -197,12 +198,18 @@ void fct_step::on_release(uint8_t btn_id){
 
 			
 			// shift ui
-			s = t->_mtx_btn_to_step[to];
+//			s = t->_mtx_btn_to_step[to];
 			step* step_to = s;
 			for(int i=to;i<NR_STEP;i++){
+				Serial.print("clr led ");
+				Serial.println(i);
 				t->get_led_matrix()->clr_n_restore(errata_step[i], BACKGROUND);
 			}
 			while(s != t->get_first_step()){
+
+				Serial.print("shift step ");
+				Serial.println(s->get_step_id());
+
 				shift_step_ui(t, s, (nr_new_step-(to-from)));
 				s = s->get_next_step();
 			}
@@ -211,18 +218,23 @@ void fct_step::on_release(uint8_t btn_id){
 			s->_clk_def.numerator = (to-from);
 			s->_clk_def.denominator = nr_new_step;
 			/* create new step */
-			for(int i=0;i<(nr_new_step-1);i++){
+			for(int i=1;i<(nr_new_step);i++){
 				step* tmp = new step;
-				tmp->_step_ui_id = from + i + 1;
+				tmp->_step_ui_id = from + i;
 				tmp->_clk_def.numerator = (to-from);
 				tmp->_clk_def.denominator = nr_new_step;
 
-				t->_mtx_btn_to_step[from + i + 1] = tmp;
+				t->_mtx_btn_to_step[from + i] = tmp;
 				t->_step_list.add(tmp);
 				tmp->set_step_id(t->_step_list.size() - 1);
 
 				s->set_next_step(tmp);
 				s = tmp;
+
+				Serial.print("new step ");
+				Serial.println(s->get_step_id());
+
+
 			}
 			s->set_next_step(t->_mtx_btn_to_step[to]);	
 
