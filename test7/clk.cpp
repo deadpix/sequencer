@@ -207,11 +207,12 @@ uint32_t clk::clk_sync_ratio(uint32_t ms, uint16_t step){
 //	Serial.print();
 //	Serial.print();
 
-	if( ((step+1) % _numerator) == 0 ){
+//	if( ((step+1) % _numerator) == 0 ){
+//	if( ((step+1) % _denominator) == 0 ){
 		ret = _ms;
 		_elapsed_ms = 0;
 		_step_cnt = 0;
-	}
+//	}
 	return ret;
 }
 
@@ -242,20 +243,27 @@ uint32_t clk::master_sync(uint32_t mst_ms, uint16_t mst_cnt){
 uint32_t clk::master_sync_ratio(uint32_t mst_ms, uint16_t mst_cnt){
 	uint32_t ret = 0;
 
+	if(mst_ms){
+		Serial.print("mst_ms ");
+		Serial.println(mst_ms);
+	}
+
 	/* master has been synced or received new tick */
-	if(mst_ms > 0){
+	if(mst_ms > 0 && _step_cnt >= (_denominator - 1)){
 		ret = clk_sync_ratio(mst_ms, mst_cnt);
 	}
 	/* with ratio, clock are synced on the numerator and slave clock self- */
 	/* check if counter is less than denom-1                               */
 	else if( /*(_denominator > _numerator) &&*/ (_step_cnt < (_denominator - 1)) ){
 		ret = clk_elapsed();
-//		Serial.print("_denominator ");
-//		Serial.print(_denominator);
-//		Serial.print(" _dstep_cnt ");
-//		Serial.print(_step_cnt);
-//		Serial.print(" ret ");
-//		Serial.println(ret);
+		if(ret){
+			Serial.print("_denominator ");
+			Serial.print(_denominator);
+			Serial.print(" _dstep_cnt ");
+			Serial.print(_step_cnt);
+			Serial.print(" ret ");
+			Serial.println(ret);
+		}
 
 	}
 	return ret;

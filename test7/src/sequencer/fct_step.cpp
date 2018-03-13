@@ -186,8 +186,9 @@ void fct_step::on_release(uint8_t btn_id){
 
 				// delete step
 				step* tmp = s->get_next_step();
-				t->_step_list.remove(s->get_step_id());
-				delete s;
+				track::delete_step(&t->_step_list,s);
+//				t->_step_list.remove(s->get_step_id());
+//				delete s;
 				s = tmp;
 			}
 
@@ -225,7 +226,7 @@ void fct_step::on_release(uint8_t btn_id){
 				tmp->_clk_def.denominator = nr_new_step;
 
 				t->_mtx_btn_to_step[from + i] = tmp;
-				t->_step_list.add(tmp);
+				t->_step_list.add(from + i, tmp);
 				tmp->set_step_id(t->_step_list.size() - 1);
 
 				s->set_next_step(tmp);
@@ -236,7 +237,7 @@ void fct_step::on_release(uint8_t btn_id){
 
 
 			}
-			s->set_next_step(t->_mtx_btn_to_step[to]);	
+			s->set_next_step(step_to);	
 
 			/*
 			// create new track

@@ -41,6 +41,8 @@ class track {
 //		step* arr_step;
 		struct clk_def _clk_def;
 
+		static bool delete_step(LinkedList<step *> *l, step* s);
+
 
 		track();
 		track(uint8_t);

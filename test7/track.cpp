@@ -8,6 +8,20 @@ static void (*_hw_fct)(uint16_t, uint8_t, uint8_t);
 static void _dummy_fct(uint16_t arg1, uint8_t arg2, uint8_t arg3){
 	Serial.println("track dummy callback function");
 }
+
+bool track::delete_step(LinkedList<step *> *l, step* s){
+	bool ret = false;
+	for(int i=0;i<l->size();i++){
+		if(s == l->get(i)){
+			l->remove(i);
+			delete s;
+			ret = true;
+			break;
+		}
+	}
+	return ret;
+}
+
 static void chain_step(LinkedList<step *> *list, step* start, step* end){
 	bool flg_chain = false;
 
