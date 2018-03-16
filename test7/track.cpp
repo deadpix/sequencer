@@ -51,7 +51,7 @@ track::track(){
 	_play = false;
 	_clk_def.numerator = 1;
 	_clk_def.denominator = 1;	
-	_mst_clk_cnt = 0;
+	_mst_clk_cnt = 1;
 
 
 //	arr_step = new step[NR_STEP];	
@@ -171,18 +171,18 @@ boolean track::next_step(uint32_t mst_ms){
 	_cur_step = _cur_step->get_next_step();
 	curr_step_id = _cur_step->_step_ui_id;
 
-//	Serial.print("numerator ");
-//	Serial.print(_clk_def.numerator * _cur_step->_clk_def.numerator);
-//	Serial.print(" denominator ");
-//	Serial.println(_clk_def.denominator * _cur_step->_clk_def.denominator);
+	Serial.print("numerator ");
+	Serial.print(_clk_def.numerator * _cur_step->_clk_def.numerator);
+	Serial.print(" denominator ");
+	Serial.println(_clk_def.denominator * _cur_step->_clk_def.denominator);
 
 	
 
-	if(_c.clk_set_ratio(mst_ms
+	_c.clk_set_ratio(mst_ms
 	, _clk_def.numerator * _cur_step->_clk_def.numerator
-	, _clk_def.denominator * _cur_step->_clk_def.denominator )){
-		_mst_clk_cnt = 0;
-	}
+	, _clk_def.denominator * _cur_step->_clk_def.denominator );
+//		_mst_clk_cnt = 0;
+	
 	// FIXME: calculate of gate len only when clock is 
 	//	  changed or at init time
 //	_cur_step->upd_step_gate_len(_cur_step->get_clk()->clk_get_ms());
@@ -230,8 +230,8 @@ void track::set_play(bool play){
 
 uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 //	uint32_t res = _c.master_sync(ms, mst_step_cnt);
-	uint32_t res = _c.master_sync_ratio(ms, /*mst_step_cnt*/_mst_clk_cnt);	
-	if(ms > 0) _mst_clk_cnt++;
+	uint32_t res = _c.master_sync_ratio(ms, /*mst_step_cnt*/&_mst_clk_cnt);	
+//	if(ms > 0) _mst_clk_cnt++;
 //	uint32_t res = _cur_step->get_clk()->master_sync_ratio(ms, mst_step_cnt);	
 //	step s = arr_step[curr_step_id];
 	

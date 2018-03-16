@@ -82,7 +82,7 @@ class clk {
 		uint32_t clk_sync_ratio(uint32_t, uint16_t);
 		
 		uint32_t master_sync(uint32_t, uint16_t);
-		uint32_t master_sync_ratio(uint32_t, uint16_t);
+		uint32_t master_sync_ratio(uint32_t, uint16_t*);
 };
 
 #endif

@@ -240,13 +240,32 @@ uint32_t clk::master_sync(uint32_t mst_ms, uint16_t mst_cnt){
 	}
 	return ret;
 }
-uint32_t clk::master_sync_ratio(uint32_t mst_ms, uint16_t mst_cnt){
+uint32_t clk::master_sync_ratio(uint32_t mst_ms, uint16_t* mst_cnt){
 	uint32_t ret = 0;
 
 	if(mst_ms){
 		Serial.print("mst_ms ");
-		Serial.println(mst_ms);
+		Serial.print(mst_ms);
+		Serial.print(" _numerator ");
+		Serial.print(_numerator);
+		Serial.print(" mst_cnt ");
+		Serial.println(*mst_cnt);
 	}
+
+	if(mst_ms > 0){
+	       if(*mst_cnt >= _numerator){
+			ret = clk_sync_ratio(mst_ms, *mst_cnt);
+			*mst_cnt = 1;
+	       } else {
+			Serial.println("inc mst counter");	
+	       	       *mst_cnt = *mst_cnt + 1;
+
+	       }
+		
+	} else if(_step_cnt < (_denominator - 1)){
+		ret = clk_elapsed();
+	}
+
 
 //	if(mst_ms > 0 && _step_cnt >= _numerator
 

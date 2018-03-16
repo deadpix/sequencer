@@ -26,7 +26,7 @@ class track {
 		step*	_first_step;
 		step*  	_last_step;
 		
-		uint8_t _mst_clk_cnt;
+		uint16_t _mst_clk_cnt;
 
 		uint8_t track_len;
 		clk _c;
