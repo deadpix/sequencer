@@ -51,7 +51,8 @@ track::track(){
 	_play = false;
 	_clk_def.numerator = 1;
 	_clk_def.denominator = 1;	
-	
+	_mst_clk_cnt = 0;
+
 
 //	arr_step = new step[NR_STEP];	
 	for(int i=0;i<NR_STEP;i++){
@@ -69,6 +70,7 @@ track::track(){
 	chain_step(&_step_list, _first_step, _last_step);
 //	_cur_step = &arr_step[0];
 }
+/*
 track::track(uint8_t nr_step){
 	curr_step_id = 0;
 	track_len = 16;
@@ -94,7 +96,12 @@ track::track(uint8_t nr_step){
 //	}
 //	_cur_step = &arr_step[0];
 }
+*/
 track::~track(){
+	for(int i=0;i<_step_list.size();i++){
+		step* s = _step_list.remove(i);
+		delete s;
+	}
 }
 
 void track::init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t)){
@@ -171,9 +178,11 @@ boolean track::next_step(uint32_t mst_ms){
 
 	
 
-	_c.clk_set_ratio(mst_ms
+	if(_c.clk_set_ratio(mst_ms
 	, _clk_def.numerator * _cur_step->_clk_def.numerator
-	, _clk_def.denominator * _cur_step->_clk_def.denominator );
+	, _clk_def.denominator * _cur_step->_clk_def.denominator )){
+		_mst_clk_cnt = 0;
+	}
 	// FIXME: calculate of gate len only when clock is 
 	//	  changed or at init time
 //	_cur_step->upd_step_gate_len(_cur_step->get_clk()->clk_get_ms());
@@ -185,8 +194,7 @@ uint8_t track::get_current_step(){
 	return curr_step_id;
 }
 void track::step_reset(){
-//	_cur_step = &arr_step[0];
-	_cur_step = _step_list.get(0);
+	_cur_step = _first_step;
 }
 
 
@@ -222,7 +230,8 @@ void track::set_play(bool play){
 
 uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 //	uint32_t res = _c.master_sync(ms, mst_step_cnt);
-	uint32_t res = _c.master_sync_ratio(ms, mst_step_cnt);	
+	uint32_t res = _c.master_sync_ratio(ms, /*mst_step_cnt*/_mst_clk_cnt);	
+	if(ms > 0) _mst_clk_cnt++;
 //	uint32_t res = _cur_step->get_clk()->master_sync_ratio(ms, mst_step_cnt);	
 //	step s = arr_step[curr_step_id];
 	

@@ -25,6 +25,8 @@ class track {
 		step*	_cur_step;
 		step*	_first_step;
 		step*  	_last_step;
+		
+		uint8_t _mst_clk_cnt;
 
 		uint8_t track_len;
 		clk _c;
@@ -45,7 +47,7 @@ class track {
 
 
 		track();
-		track(uint8_t);
+//		track(uint8_t);
 		~track();
 		
 		led_matrix * get_led_matrix();
