@@ -121,6 +121,20 @@ static void shift_step_ui(track* t, step* s, int shift){
 	
 }
 
+static void clear_steps(step* step_from, step* step_to, track* t){
+//	step* s = t->_mtx_btn_to_step[from]->get_next_step();
+	step* s = step_from;
+	while(s != step_to){
+		// clear ui
+		t->get_led_matrix()->clr_n_restore(errata_step[s->_step_ui_id],BACKGROUND);	
+
+		// delete step
+		step* tmp = s->get_next_step();
+		track::delete_step(&t->_step_list,s);
+		s = tmp;
+	}
+}
+
 void fct_step::on_push(uint8_t btn_id){
 	char str[7];
 	uint8_t id = errata_btn[btn_id];
@@ -175,22 +189,27 @@ void fct_step::on_release(uint8_t btn_id){
 
 			// clear step from:to-1
 			step* s = t->_mtx_btn_to_step[from]->get_next_step();
-			while(s != t->_mtx_btn_to_step[to]){
-				
-				Serial.print("delete step ");
-				Serial.println(s->get_step_id());
+			step* step_to = t->_mtx_btn_to_step[to];
+		
+			clear_steps(s, t->_mtx_btn_to_step[to], t);
+		
 
-				// clear ui
-				t->get_led_matrix()->clr_n_restore(errata_step[s->_step_ui_id]
-						, BACKGROUND);	
-
-				// delete step
-				step* tmp = s->get_next_step();
-				track::delete_step(&t->_step_list,s);
-//				t->_step_list.remove(s->get_step_id());
-//				delete s;
-				s = tmp;
-			}
+//			while(s != t->_mtx_btn_to_step[to]){
+//				
+////				Serial.print("delete step ");
+////				Serial.println(s->get_step_id());
+//
+//				// clear ui
+//				t->get_led_matrix()->clr_n_restore(errata_step[s->_step_ui_id]
+//						, BACKGROUND);	
+//
+//				// delete step
+//				step* tmp = s->get_next_step();
+//				track::delete_step(&t->_step_list,s);
+////				t->_step_list.remove(s->get_step_id());
+////				delete s;
+//				s = tmp;
+//			}
 
 //			for(int i=from;i<(to);i++){
 //				t->_mtx_btn_to_step[i]->clr_step_active();
@@ -202,14 +221,14 @@ void fct_step::on_release(uint8_t btn_id){
 //			s = t->_mtx_btn_to_step[to];
 			step* step_to = s;
 			for(int i=to;i<NR_STEP;i++){
-				Serial.print("clr led ");
-				Serial.println(i);
+//				Serial.print("clr led ");
+//				Serial.println(i);
 				t->get_led_matrix()->clr_n_restore(errata_step[i], BACKGROUND);
 			}
 			while(s != t->get_first_step()){
 
-				Serial.print("shift step ");
-				Serial.println(s->get_step_id());
+//				Serial.print("shift step ");
+//				Serial.println(s->get_step_id());
 
 				shift_step_ui(t, s, (nr_new_step-(to-from)));
 				s = s->get_next_step();
@@ -232,33 +251,12 @@ void fct_step::on_release(uint8_t btn_id){
 				s->set_next_step(tmp);
 				s = tmp;
 
-				Serial.print("new step ");
-				Serial.println(s->get_step_id());
+//				Serial.print("new step ");
+//				Serial.println(s->get_step_id());
 
 
 			}
 			s->set_next_step(step_to);	
-
-			/*
-			// create new track
-			track* st = new track(nr_new_step-1);
-//		       	st->get_clk()->clk_set_ratio(t->get_clk()->clk_get_ms(),(to-from), nr_new_step);
-			
-			// chain new steps
-			t->_mtx_btn_to_step[from]->set_next_step(&(st->arr_step[0]));
-			st->arr_step[nr_new_step-2].set_next_step(step_to);
-
-			t->_mtx_btn_to_step[from]->_clk_def.numerator = (to-from);
-			t->_mtx_btn_to_step[from]->_clk_def.denominator = nr_new_step;
-
-			// set ui id
-			for(int i=1;i<(nr_new_step);i++){
-				t->_mtx_btn_to_step[from+i] = &(st->arr_step[i-1]);
-				t->_mtx_btn_to_step[from+i]->_step_ui_id = from + i;
-				t->_mtx_btn_to_step[from+i]->_clk_def.numerator = (to-from);
-				t->_mtx_btn_to_step[from+i]->_clk_def.denominator = nr_new_step;
-			}
-*/			
 
 		}
 
@@ -300,14 +298,13 @@ void fct_step::on_long_push(uint8_t btn_id){
 	
 }
 void fct_step::on_long_release(uint8_t btn_id){
-	Serial.println("on long release");
+//	Serial.println("on long release");
 }
 
 void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
 	track* t = _seq->get_current_track();
 	for(uint8_t i = 0; i<_lp_cnt; i++){
 		if(_lp_ui[i]._ms >= LONG_PRESS_MS){
-//			t->get_led_matrix()->toogle_led_x(LED_R_IDX, _lp_ui[i]._id);
 			t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[_lp_ui[i]._id]->get_step_color(), _lp_ui[i]._id);
 			_lp_ui[i]._ms = 0;
 		}
