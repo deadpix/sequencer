@@ -1,9 +1,12 @@
 #include "mainwindow.h" 
+
 #include <QCoreApplication>
 const char* red   = "background-color: red";
 const char* green = "background-color: green";
 const char* blue  = "background-color: blue";
 const char* white = "background-color: white";
+
+static elapsedMillis ms;
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 	// Create the button, make "this" the parent
@@ -36,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 	param_btn = new QPushButton("param", this);
 	param_btn->setGeometry(QRect(QPoint(pos_x + 60, 60 * 9), QSize(50, 50)));
 
+	ms = 0;
 
 //	m_button = new QPushButton("My Button", this);
 //	// set size and location of the button
@@ -48,7 +52,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
  
 void MainWindow::handleButton(int id)
 {
-	qDebug ("click on btn %d\r\n",id);
+	unsigned long long tmp = ms;
+	qDebug ("click on btn %d: ms=%d\r\n",id,tmp);
+	ms = 0;
 }
 void MainWindow::handleTimerUI(){
 	matrix_btn[step_cnt]->setStyleSheet(white);

@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
  
+#include "elapsedMillis.h"
+
 #include <QMainWindow>
 #include <QPushButton>
 #include <QSignalMapper>
@@ -29,7 +31,8 @@ class MainWindow : public QMainWindow {
 	
 	QSignalMapper mapper;
 	QTimer *ui_timer;
- };
+	
+};
  
 
 #endif // MAINWINDOW_H
