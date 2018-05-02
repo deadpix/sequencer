@@ -26,22 +26,22 @@ static void midi_note_on(uint16_t note, uint8_t vel, uint8_t chan){
 	}
 }
 
-void init_midi_seq(sequencer* s){
-	track* t;
-	s->set_current_track(0);
-	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
-		t = s->get_track(i);
-		t->set_out_id(i+1);
-		t->set_all_step_note(MIDI_DRUM_GM[i]);
-		t->init_hw_clbk(midi_note_on);
-		
-	}
-}
+//void init_midi_seq(sequencer* s){
+//	track* t;
+//	s->set_current_track(0);
+//	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
+//		t = s->get_track(i);
+//		t->set_out_id(i+1);
+//		t->set_all_step_note(MIDI_DRUM_GM[i]);
+//		t->init_hw_clbk(midi_note_on);
+//		
+//	}
+//}
 
 // TEMPORARY
-void init_midi_controller(test_proj_one* p){
-	p->init_hw_clbk(midi_note_on);
-}
+//void init_midi_controller(test_proj_one* p){
+//	p->init_hw_clbk(midi_note_on);
+//}
 
 void init_midi(){
 	MIDI.begin(MIDI_CHANNEL_OMNI);

@@ -25,7 +25,15 @@
 #include <Adafruit_MCP23017.h>
 #include <LinkedList.h>
 
+#if defined(ARDUINO) && ARDUINO >= 100
+	#include <Arduino.h>
+#else
+	#include <WProgram.h>
+#endif
+
+
 #include "types.h"
+#include "sequenception.h"
 #include "led_matrix.h"
 #include "Bounce_array.h"
 #include "clk.h"
@@ -44,7 +52,8 @@
 #include "src/sequencer/fct_loop_setting.h"
 #include "seq_param.h"
 
-static Main sequenception;
+
+static sequenception sequenception;
 
 gui	 *gui_ctrl;
 //menu  menu_ctrl;
@@ -192,6 +201,8 @@ void setup(){
 	setup_gui();
 	init_matrix_btn();
 	init_midi();
+	sequenception.fct_midi = midi_note_on;
+	sequenception.fct_tempo_change = tempo_change_handler;
 
 	// timer
 	ui_timer.begin(upd_gui, 1000);
@@ -199,7 +210,8 @@ void setup(){
 //	midi_timer.begin(upd_midi, 8000);
 
 	// data initialization
-	init_all_prog();
+//	init_all_prog();
+	sequenception.init(gui_ctrl);
 	
 	// MUST BE LAST...
 	init_menu_btn(sequenception.current_prog);
@@ -210,7 +222,8 @@ void setup(){
 void loop(){
 	uint32_t clk_res = 0;
 	if(check_clk){
-		clk_res = tempo_setting.check_mst_clk();
+//		clk_res = sequenception.tempo_setting.check_mst_clk();
+		clk_res = sequenception.eval_mst_clk();
 		check_clk = false;
 	}
 	if(btn_flag){
@@ -228,5 +241,6 @@ void loop(){
 	if(midi_flag)
 		midi_flag = false;
 		
-	midi_seq.check_clks(clk_res, sequenception.mst_clk->clk_get_step_cnt());
+//	midi_seq.check_clks(clk_res, sequenception.mst_clk->clk_get_step_cnt());
+	sequenception.loop(clk_res);
 }

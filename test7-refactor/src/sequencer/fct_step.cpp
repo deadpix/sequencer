@@ -219,7 +219,7 @@ void fct_step::on_release(uint8_t btn_id){
 			
 			// shift ui
 //			s = t->_mtx_btn_to_step[to];
-			step* step_to = s;
+			step_to = s;
 			for(int i=to;i<NR_STEP;i++){
 //				Serial.print("clr led ");
 //				Serial.println(i);
