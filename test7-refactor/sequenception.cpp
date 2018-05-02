@@ -2,9 +2,8 @@
 
 static const uint8_t MIDI_DRUM_GM[8] = {37, 36, 42, 82, 40, 38, 46, 44};
 
-static void (*fct_midi)(uint16_t, uint8_t, uint8_t);
-static void (*fct_tempo_change)(uint32_t);
-
+void (*sequenception::fct_midi)(uint16_t, uint8_t, uint8_t);
+void (*sequenception::fct_tempo_change)(uint32_t);
 
 
 static void dummy_fct_midi(uint16_t arg1, uint8_t arg2, uint8_t arg3){
