@@ -2,6 +2,20 @@
 
 static const uint8_t MIDI_DRUM_GM[8] = {37, 36, 42, 82, 40, 38, 46, 44};
 
+menu sequenception::menu_ctrl;
+prog* sequenception::prog_arr[MATRIX_NR_COL];
+uint8_t sequenception::nr_prog;
+tempo sequenception::tempo_setting;
+sequencer sequenception::midi_seq;
+test_proj_one sequenception::p1;
+test_proj_two sequenception::p2;
+seq_param sequenception::seq_param_ui;
+fct_step sequenception::seq_option1;
+fct_loop_setting sequenception::seq_option2;
+prog* sequenception::current_prog;
+led_matrix* sequenception::lm_ptr;
+clk* sequenception::mst_clk;
+
 void (*sequenception::fct_midi)(uint16_t, uint8_t, uint8_t);
 void (*sequenception::fct_tempo_change)(uint32_t);
 

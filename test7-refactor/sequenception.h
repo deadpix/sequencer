@@ -34,22 +34,22 @@ class sequenception {
 		void init_midi_controller();
 
 	public:
-		/*static*/ menu menu_ctrl;
-		/*static*/ prog *prog_arr[MATRIX_NR_COL];
-		/*static*/ uint8_t nr_prog;
+		static menu menu_ctrl;
+		static prog *prog_arr[MATRIX_NR_COL];
+		static uint8_t nr_prog;
 
-		/*static*/ tempo tempo_setting;
-		/*static*/ sequencer midi_seq;
-		/*static*/ test_proj_one p1;
-		/*static*/ test_proj_two p2;
+		static tempo tempo_setting;
+		static sequencer midi_seq;
+		static test_proj_one p1;
+		static test_proj_two p2;
 
-		/*static*/ seq_param seq_param_ui;
-		/*static*/ fct_step seq_option1;
-		/*static*/ fct_loop_setting seq_option2;
+		static seq_param seq_param_ui;
+		static fct_step seq_option1;
+		static fct_loop_setting seq_option2;
 
-		/*static*/ prog* current_prog;
-		/*static*/ led_matrix* lm_ptr;
-		/*static*/ clk* mst_clk;
+		static prog* current_prog;
+		static led_matrix* lm_ptr;
+		static clk* mst_clk;
 
 		static void (*fct_midi)(uint16_t, uint8_t, uint8_t);
 		static void (*fct_tempo_change)(uint32_t);
