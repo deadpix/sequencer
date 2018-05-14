@@ -24,6 +24,8 @@ class MainWindow : public QMainWindow {
 	private slots:
 		void handleButton(int);
 		void handleTimerUI();
+		void handleParamBtn();
+		void handleMenuBtn();
 	private:
 		QPushButton *menu_btn, *param_btn;
 		QPushButton *matrix_btn[MATRIX_NR_BTNS];

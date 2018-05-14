@@ -4,7 +4,13 @@
 const char* red   = "background-color: red";
 const char* green = "background-color: green";
 const char* blue  = "background-color: blue";
+const char* yellow = "background-color: yellow";
+const char* magenta = "background-color: magenta";
+const char* cyan = "background-color: cyan";
+
+
 const char* white = "background-color: white";
+
 
 static elapsedMillis ms;
 
@@ -33,11 +39,15 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 	connect(ui_timer, SIGNAL(timeout()), this, SLOT(handleTimerUI()));
 	ui_timer->start(100);
 
+
 	menu_btn = new QPushButton("menu", this);
 	menu_btn->setGeometry(QRect(QPoint(pos_x, 60 * 9), QSize(50, 50)));
 
 	param_btn = new QPushButton("param", this);
 	param_btn->setGeometry(QRect(QPoint(pos_x + 60, 60 * 9), QSize(50, 50)));
+
+	connect(menu_btn, SIGNAL (released()), this, SLOT (handleParamBtn()));
+	connect(param_btn, SIGNAL (released()), this, SLOT (handleMenuBtn()));
 
 	ms = 0;
 
@@ -49,14 +59,79 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 //	// Connect button signal to appropriate slot
 //	connect(m_button, SIGNAL (released()), this, SLOT (handleButton()));
 }
- 
+
+void MainWindow::handleParamBtn(){
+	qDebug ("handle param button");
+}
+
+void MainWindow::handleMenuBtn(){
+	qDebug ("handle menu button");
+}
+
 void MainWindow::handleButton(int id)
 {
 	unsigned long long tmp = ms;
-	qDebug ("click on btn %d: ms=%d\r\n",id,tmp);
+	qDebug ("click on btn %d: ms=%d",id,tmp);
 	ms = 0;
 }
+
+static upd_btn_color_row(u32* bmp_ret, u32 bmp, const char* color, int row_id, QPushButton *matrix_btn[MATRIX_NR_BTNS]){
+	int bit = 0;
+	for_eachset_bit(bit, &bmp, 8){
+		if(!is_bit_set(*bmp_ret, bit)){
+			matrix_btn[row_id * 8 + bit]->setStyleSheet(color);
+			set_bits(bmp_ret, bit, 1);
+		}
+	}	
+}
+
+static void upd_btn_color(led_matrix* lm, QPushButton* matrix_btn[MATRIX_NR_BTNS]){
+	led_t* leds = lm->get_led_arr();
+	uint32_t tmp = 0x0;
+	uint32_t set_led_bmp = 0x0;
+	for(int i=0;i<LED_MATRIX_NR_GROUND;i++){
+		set_led_bmp = 0x0;
+
+		tmp = 0x0;
+		tmp = leds[i].bitmap[0] | leds[i].bitmap[1] | leds[i].bitmap[2];
+		upd_btn_color_row(&set_led_bmp, tmp, white, i, matrix_btn);
+
+		tmp = 0x0;
+		tmp = leds[i].bitmap[0] | leds[i].bitmap[1];
+		upd_btn_color_row(&set_led_bmp, tmp, yellow, i, matrix_btn);
+
+		tmp = 0x0;
+		tmp = leds[i].bitmap[0] | leds[i].bitmap[2];
+		upd_btn_color_row(&set_led_bmp, tmp, magenta, i, matrix_btn);
+
+		tmp = 0x0;
+		tmp = leds[i].bitmap[1] | leds[i].bitmap[2];
+		upd_btn_color_row(&set_led_bmp, tmp, cyan, i, matrix_btn);
+	
+		tmp = 0x0;
+		tmp = leds[i].bitmap[0];
+		upd_btn_color_row(&set_led_bmp, tmp, red, i, matrix_btn);
+	
+		tmp = 0x0;
+		tmp = leds[i].bitmap[1];
+		upd_btn_color_row(&set_led_bmp, tmp, green, i, matrix_btn);
+
+		tmp = 0x0;
+		tmp = leds[i].bitmap[2];	
+		upd_btn_color_row(&set_led_bmp, tmp, blue, i, matrix_btn);
+	
+
+	}
+
+}
+
 void MainWindow::handleTimerUI(){
+
+		
+
+
+
+
 	matrix_btn[step_cnt]->setStyleSheet(white);
       	step_cnt = (step_cnt + 1) % MATRIX_NR_BTNS;
 	matrix_btn[step_cnt]->setStyleSheet(red);
