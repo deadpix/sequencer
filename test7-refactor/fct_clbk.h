@@ -1,11 +1,12 @@
 #ifndef __FCT_CLBK_H__
 #define __FCT_CLBK_H__
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include <Arduino.h>
-#else
-	#include <WProgram.h>
-#endif
+#include <stdint.h>
+//#if defined(ARDUINO) && ARDUINO >= 100
+//	#include <Arduino.h>
+//#else
+//	#include <WProgram.h>
+//#endif
 
 class fct_clbk {
 	private:

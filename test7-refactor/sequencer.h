@@ -1,11 +1,12 @@
 #ifndef __SEQUENCE_H__
 #define __SEQUENCE_H__
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include <Arduino.h>
-#else
-	#include <WProgram.h>
-#endif
+//#if defined(ARDUINO) && ARDUINO >= 100
+//	#include <Arduino.h>
+//#else
+//	#include <WProgram.h>
+//#endif
+#include <stdint.h>
 
 #include "types.h"
 #include "prog.h"

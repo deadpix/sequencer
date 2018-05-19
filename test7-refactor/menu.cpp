@@ -1,9 +1,9 @@
 #include "menu.h"
 
 static led_matrix* default_clbk_func(/*void* ptr, */uint8_t id1, uint8_t id2/*, led_matrix* lm*/){
-	Serial.print("program ");
-	Serial.print(id1);
-	Serial.println(" has no menu function");
+//	Serial.print("program ");
+//	Serial.print(id1);
+//	Serial.println(" has no menu function");
 	return NULL;
 }
 static void default_entry_func(void){

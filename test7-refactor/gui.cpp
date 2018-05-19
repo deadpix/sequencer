@@ -3,9 +3,9 @@
 static void (*refresh_fct)(char**);
 
 static void dummy_fct(char** str){
-	Serial.println(str[0]);
-	Serial.println(str[1]);
-	Serial.println(str[2]);
+//	Serial.println(str[0]);
+//	Serial.println(str[1]);
+//	Serial.println(str[2]);
 }
 
 //gui::gui() : buffer { "a", "b", "c" }{

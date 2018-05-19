@@ -1,12 +1,12 @@
 #ifndef __BIT_H__
 #define __BIT_H__
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include <Arduino.h>
-#else
-	#include <WProgram.h>
-#endif
-
+//#if defined(ARDUINO) && ARDUINO >= 100
+//	#include <Arduino.h>
+//#else
+//	#include <WProgram.h>
+//#endif
+#include <stdint.h>
 
 namespace BIT {
 	int  is_bit_set(uint16_t reg, int bit_pos);

@@ -1,11 +1,13 @@
 #ifndef __PROG_H__
 #define __PROG_H__
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include <Arduino.h>
-#else
-	#include <WProgram.h>
-#endif
+#include <stdint.h>
+
+//#if defined(ARDUINO) && ARDUINO >= 100
+//	#include <Arduino.h>
+//#else
+//	#include <WProgram.h>
+//#endif
 
 class param;
 

@@ -1,11 +1,12 @@
 #ifndef __GUI_H__
 #define __GUI_H__
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include <Arduino.h>
-#else
-	#include <WProgram.h>
-#endif
+//#if defined(ARDUINO) && ARDUINO >= 100
+//	#include <Arduino.h>
+//#else
+//	#include <WProgram.h>
+//#endif
+#include <stdint.h>
 
 
 #define GUI_NR_LINES			3

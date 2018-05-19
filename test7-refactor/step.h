@@ -1,11 +1,12 @@
 #ifndef __STEP_H__
 #define __STEP_H__
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include <Arduino.h>
-#else
-	#include <WProgram.h>
-#endif
+#include <stdint.h>
+//#if defined(ARDUINO) && ARDUINO >= 100
+//	#include <Arduino.h>
+//#else
+//	#include <WProgram.h>
+//#endif
 
 #include "types.h"
 #include "clk.h"

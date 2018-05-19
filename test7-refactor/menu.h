@@ -1,18 +1,19 @@
 #ifndef __MENU_H__
 #define __MENU_H__
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include <Arduino.h>
-#else
-	#include <WProgram.h>
-#endif
+#include <stdint.h>
+//#if defined(ARDUINO) && ARDUINO >= 100
+//	#include <Arduino.h>
+//#else
+//	#include <WProgram.h>
+//#endif
 
 #include "types.h"
 #include "led_matrix.h"
 #include "prog.h"
 
 
-typedef boolean (* menu_clbk_def)(uint8_t, uint8_t, led_matrix*);
+typedef bool (* menu_clbk_def)(uint8_t, uint8_t, led_matrix*);
 typedef led_matrix* (* menu_clbk_type)(/*void*,*/ uint8_t, uint8_t/*, led_matrix**/);
 typedef void (* menu_entry_type)(void);
 

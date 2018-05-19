@@ -24,11 +24,13 @@
 #ifndef __BTN_STATE_H__
 #define __BTN_STATE_H__
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include <Arduino.h>
-#else
-	#include <WProgram.h>
-#endif
+//#if defined(ARDUINO) && ARDUINO >= 100
+//	#include <Arduino.h>
+//#else
+//	#include <WProgram.h>
+//#endif
+
+#include <stdint.h>
 
 #include "types.h"
 #include "bit.h"
@@ -36,8 +38,8 @@
 #define BIT_PER_BYTE	8	
 class btn_state {
 	private:
-		byte short_push[MATRIX_NR_COL];
-		byte long_push[MATRIX_NR_COL];
+		uint8_t short_push[MATRIX_NR_COL];
+		uint8_t long_push[MATRIX_NR_COL];
 	
 	public:
 		btn_state();

@@ -150,7 +150,6 @@ int led_matrix::save_n_toogle(uint8_t color, uint16_t nr, uint8_t ground){
 	} 
 //	else if(_led_status_arr[nr].bmp == 0){
 	else {
-//		Serial.println("toogle");
 		_led_status_arr[nr].bmp = (1 << ground);
 		_led_status_arr[nr].color[ground] = color;
 		toogle_led_x(color, nr);
@@ -165,10 +164,6 @@ void led_matrix::clr_n_restore(uint16_t nr, uint8_t ground){
 
 	if(_led_status_arr[nr].bmp){
 		uint8_t level_hi = BIT::get_highest_bit_set(_led_status_arr[nr].bmp);
-		Serial.print("restore high ");
-		Serial.print(level_hi);
-		Serial.print(" nr ");
-		Serial.println(nr);
 		set_led_x(_led_status_arr[nr].color[level_hi], nr);
 	}
 }
@@ -187,12 +182,12 @@ void led_matrix::led_ovw(uint8_t color, uint16_t nr){
 void led_matrix::dump_led_matrix(){
 	for(int i=0;i<LED_MATRIX_NR_GROUND;i++){
 		for(int j=0;j<LED_MATRIX_NR_COLORS;j++){
-			Serial.print("led_arr[");
-			Serial.print(i);
-			Serial.print("].bitmap[");
-			Serial.print(j);
-			Serial.print("] = ");
-			Serial.println(led_arr[i].bitmap[j]);
+//			Serial.print("led_arr[");
+//			Serial.print(i);
+//			Serial.print("].bitmap[");
+//			Serial.print(j);
+//			Serial.print("] = ");
+//			Serial.println(led_arr[i].bitmap[j]);
 		}
 	}	
 }

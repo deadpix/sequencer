@@ -25,11 +25,13 @@
 #ifndef _LIB_CLK_H_
 #define _LIB_CLK_H_
 
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include <Arduino.h>
-#else
-	#include <WProgram.h>
-#endif
+#include <stdint.h>
+
+//#if defined(ARDUINO) && ARDUINO >= 100
+//	#include <Arduino.h>
+//#else
+//	#include <WProgram.h>
+//#endif
 
 #include <elapsedMillis.h>
 
