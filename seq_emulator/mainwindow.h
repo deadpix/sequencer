@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
  
 #include "elapsedMillis.h"
+#include "led_matrix.h"
 
 #include <QMainWindow>
 #include <QPushButton>
@@ -26,14 +27,16 @@ class MainWindow : public QMainWindow {
 		void handleTimerUI();
 		void handleParamBtn();
 		void handleMenuBtn();
+		void handleMainLoop();
 	private:
 		QPushButton *menu_btn, *param_btn;
 		QPushButton *matrix_btn[MATRIX_NR_BTNS];
 		int step_cnt;
+		led_matrix lm;
 	
 	QSignalMapper mapper;
-	QTimer *ui_timer;
-	
+	QTimer *ui_timer;	
+	QTimer *loop_timer;	
 };
  
 

@@ -1,16 +1,16 @@
 #include "mainwindow.h" 
-
+#include "bit.h"
+#include "types.h"
+#include <stdint.h>
 #include <QCoreApplication>
+
 const char* red   = "background-color: red";
 const char* green = "background-color: green";
 const char* blue  = "background-color: blue";
 const char* yellow = "background-color: yellow";
 const char* magenta = "background-color: magenta";
 const char* cyan = "background-color: cyan";
-
-
 const char* white = "background-color: white";
-
 
 static elapsedMillis ms;
 
@@ -40,6 +40,11 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 	ui_timer->start(100);
 
 
+	loop_timer = new QTimer(this);
+	connect(loop_timer, SIGNAL(timeout()), this, SLOT(handleMainLoop()));
+	loop_timer->start(10);
+
+
 	menu_btn = new QPushButton("menu", this);
 	menu_btn->setGeometry(QRect(QPoint(pos_x, 60 * 9), QSize(50, 50)));
 
@@ -58,6 +63,16 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 //
 //	// Connect button signal to appropriate slot
 //	connect(m_button, SIGNAL (released()), this, SLOT (handleButton()));
+
+
+	lm.set_led_x(LED_B_IDX, 1);
+	lm.set_led_x(LED_R_IDX, 2);
+	lm.set_led_x(LED_G_IDX, 4);
+	lm.set_led_x(LED_GB_IDX, 10);
+	lm.set_led_x(LED_RB_IDX, 25);
+	lm.set_led_x(LED_RG_IDX, 32);
+	lm.set_led_x(LED_GB_IDX, 47);
+	lm.set_led_x(LED_GBR_IDX, 63);
 }
 
 void MainWindow::handleParamBtn(){
@@ -75,37 +90,38 @@ void MainWindow::handleButton(int id)
 	ms = 0;
 }
 
-static upd_btn_color_row(u32* bmp_ret, u32 bmp, const char* color, int row_id, QPushButton *matrix_btn[MATRIX_NR_BTNS]){
+static void upd_btn_color_row(uint16_t* bmp_ret, uint16_t bmp, const char* color, int row_id, QPushButton *matrix_btn[MATRIX_NR_BTNS]){
 	int bit = 0;
 	for_eachset_bit(bit, &bmp, 8){
-		if(!is_bit_set(*bmp_ret, bit)){
+		if(!BIT::is_bit_set(*bmp_ret, bit)){
 			matrix_btn[row_id * 8 + bit]->setStyleSheet(color);
-			set_bits(bmp_ret, bit, 1);
+			BIT::set_bits(bmp_ret, bit, 1);
 		}
 	}	
 }
 
 static void upd_btn_color(led_matrix* lm, QPushButton* matrix_btn[MATRIX_NR_BTNS]){
 	led_t* leds = lm->get_led_arr();
-	uint32_t tmp = 0x0;
-	uint32_t set_led_bmp = 0x0;
+	uint16_t tmp = 0x0;
+	uint16_t set_led_bmp = 0x0;
 	for(int i=0;i<LED_MATRIX_NR_GROUND;i++){
 		set_led_bmp = 0x0;
 
 		tmp = 0x0;
-		tmp = leds[i].bitmap[0] | leds[i].bitmap[1] | leds[i].bitmap[2];
+		tmp = leds[i].bitmap[0] & leds[i].bitmap[1] & leds[i].bitmap[2];
 		upd_btn_color_row(&set_led_bmp, tmp, white, i, matrix_btn);
+		qDebug("col%d set_led_bmp=%x",i,set_led_bmp);
 
 		tmp = 0x0;
-		tmp = leds[i].bitmap[0] | leds[i].bitmap[1];
+		tmp = leds[i].bitmap[0] & leds[i].bitmap[1];
 		upd_btn_color_row(&set_led_bmp, tmp, yellow, i, matrix_btn);
 
 		tmp = 0x0;
-		tmp = leds[i].bitmap[0] | leds[i].bitmap[2];
+		tmp = leds[i].bitmap[0] & leds[i].bitmap[2];
 		upd_btn_color_row(&set_led_bmp, tmp, magenta, i, matrix_btn);
 
 		tmp = 0x0;
-		tmp = leds[i].bitmap[1] | leds[i].bitmap[2];
+		tmp = leds[i].bitmap[1] & leds[i].bitmap[2];
 		upd_btn_color_row(&set_led_bmp, tmp, cyan, i, matrix_btn);
 	
 		tmp = 0x0;
@@ -126,13 +142,11 @@ static void upd_btn_color(led_matrix* lm, QPushButton* matrix_btn[MATRIX_NR_BTNS
 }
 
 void MainWindow::handleTimerUI(){
-
-		
-
-
-
-
-	matrix_btn[step_cnt]->setStyleSheet(white);
-      	step_cnt = (step_cnt + 1) % MATRIX_NR_BTNS;
-	matrix_btn[step_cnt]->setStyleSheet(red);
+//	matrix_btn[step_cnt]->setStyleSheet(white);
+  //    	step_cnt = (step_cnt + 1) % MATRIX_NR_BTNS;
+//	matrix_btn[step_cnt]->setStyleSheet(red);
+	
+	upd_btn_color(&lm, matrix_btn);
+}
+void MainWindow::handleMainLoop(){
 }
