@@ -1,9 +1,9 @@
 #include <SoftwareSerial.h>
 #include <MIDI.h>
-#include "clk.h"
-#include "sequencer.h"
-#include "track.h"
-#include "test_proj_one.h"
+#include "src/clk.h"
+#include "src/sequencer.h"
+#include "src/track.h"
+#include "src/test_proj_one.h"
 
 SoftwareSerial SoftSerial(0, 1);
 MIDI_CREATE_INSTANCE(SoftwareSerial, SoftSerial, MIDI);

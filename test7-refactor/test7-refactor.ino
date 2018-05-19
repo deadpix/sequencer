@@ -32,25 +32,25 @@
 #endif
 
 
-#include "types.h"
-#include "sequenception.h"
-#include "led_matrix.h"
-#include "Bounce_array.h"
-#include "clk.h"
-#include "prog.h"
-#include "menu.h"
+#include "src/types.h"
+#include "src/sequenception.h"
+#include "src/led_matrix.h"
+#include "src/Bounce_array.h"
+#include "src/clk.h"
+#include "src/prog.h"
+#include "src/menu.h"
 
-#include "track.h"
-#include "step.h"
-#include "sequencer.h"
-#include "gui.h"
+#include "src/track.h"
+#include "src/step.h"
+#include "src/sequencer.h"
+#include "src/gui.h"
 
-#include "tempo.h"
-#include "test_proj_one.h"
-#include "test_proj_two.h"
+#include "src/tempo.h"
+#include "src/test_proj_one.h"
+#include "src/test_proj_two.h"
 #include "src/sequencer/fct_step.h"
 #include "src/sequencer/fct_loop_setting.h"
-#include "seq_param.h"
+#include "src/seq_param.h"
 
 
 static sequenception sequenception;

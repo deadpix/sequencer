@@ -9,9 +9,9 @@
 #include <stdint.h>
 
 
-#include "../../fct_clbk.h"
-#include "../../sequencer.h"
-#include "../../btn_state.h"
+#include "../fct_clbk.h"
+#include "../sequencer.h"
+#include "../btn_state.h"
 
 //#include <elapsedMillis.h>
 

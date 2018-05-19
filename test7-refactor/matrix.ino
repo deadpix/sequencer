@@ -24,9 +24,9 @@
 #include <i2c_t3.h>
 #include <Adafruit_MCP23017.h>
 
-#include "types.h"
-#include "led_matrix.h"
-#include "Bounce_array.h"
+#include "src/types.h"
+#include "src/led_matrix.h"
+#include "src/Bounce_array.h"
 
 
 #define latchPin 		22

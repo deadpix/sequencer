@@ -9,8 +9,8 @@
 #include <stdint.h>
 
 
-#include "../../fct_clbk.h"
-#include "../../sequencer.h"
+#include "../fct_clbk.h"
+#include "../sequencer.h"
 
 class fct_loop_setting: public fct_clbk {
 	private:

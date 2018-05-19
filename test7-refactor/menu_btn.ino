@@ -25,9 +25,9 @@
 #include <i2c_t3.h>
 #include <Bounce2.h>
 //#include <Adafruit_MCP23017.h>
-#include "Bounce_array.h"
-#include "prog.h"
-#include "param.h"
+#include "src/Bounce_array.h"
+#include "src/prog.h"
+#include "src/param.h"
 
 #define NR_MENU_BTN		4
 #define MENU_BTN_BOUNCE_TIME	5

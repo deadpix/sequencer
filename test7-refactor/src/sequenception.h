@@ -19,8 +19,8 @@
 #include "test_proj_two.h"
 #include "gui.h"
 #include "clk.h"
-#include "src/sequencer/fct_step.h"
-#include "src/sequencer/fct_loop_setting.h"
+#include "sequencer/fct_step.h"
+#include "sequencer/fct_loop_setting.h"
 #include "seq_param.h"
 
 

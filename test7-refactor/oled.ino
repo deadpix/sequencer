@@ -1,4 +1,4 @@
-#include "gui.h"
+#include "src/gui.h"
 #include <SPI.h>  // Include SPI if you're using SPI
 #include <SFE_MicroOLED.h>  // Include the SFE_MicroOLED library
 
