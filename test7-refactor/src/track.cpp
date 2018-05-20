@@ -6,7 +6,7 @@
 static void (*_hw_fct)(uint16_t, uint8_t, uint8_t);
 
 static void _dummy_fct(uint16_t arg1, uint8_t arg2, uint8_t arg3){
-	Serial.println("track dummy callback function");
+//	Serial.println("track dummy callback function");
 }
 
 bool track::delete_step(LinkedList<step *> *l, step* s){
@@ -167,14 +167,14 @@ void track::set_max_step(uint8_t max){
 	_max_step = max;
 */
 }
-boolean track::next_step(uint32_t mst_ms){
+bool track::next_step(uint32_t mst_ms){
 	_cur_step = _cur_step->get_next_step();
 	curr_step_id = _cur_step->_step_ui_id;
 
-	Serial.print("numerator ");
-	Serial.print(_clk_def.numerator * _cur_step->_clk_def.numerator);
-	Serial.print(" denominator ");
-	Serial.println(_clk_def.denominator * _cur_step->_clk_def.denominator);
+//	Serial.print("numerator ");
+//	Serial.print(_clk_def.numerator * _cur_step->_clk_def.numerator);
+//	Serial.print(" denominator ");
+//	Serial.println(_clk_def.denominator * _cur_step->_clk_def.denominator);
 
 	
 

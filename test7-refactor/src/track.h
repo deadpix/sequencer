@@ -33,7 +33,7 @@ class track {
 		clk _c;
 		elapsedMillis elapsed_ms;
 		led_matrix _lm;
-		boolean mute_flg;
+		bool mute_flg;
 		led_toogle _step_animation;
 //		LinkedList<track *> sub_track_list;
 
@@ -73,13 +73,13 @@ class track {
 		void set_all_step_note(uint16_t);
 //		void set_step_note(uint16_t, uint8_t );
 		
-//		boolean is_step_on(uint8_t id);
-		boolean next_step(uint32_t);
+//		bool is_step_on(uint8_t id);
+		bool next_step(uint32_t);
 		uint8_t get_current_step();
 //		void toogle_step_x(uint8_t id);
 		void step_reset();
 
-		uint32_t check_event(uint32_t, uint16_t/*boolean, clk *c*/);
+		uint32_t check_event(uint32_t, uint16_t/*bool, clk *c*/);
 		void init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t));
 
 		void init_menu();

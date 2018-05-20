@@ -1,11 +1,18 @@
 #include "fct_loop_setting.h"
 #include "../errata.h"
 
+#include <cstdlib>
+
 #define BASE10	10
+
+
+
+
+
 
 static void upd_display(sequencer* seq, uint8_t val){
 	char str[7];
-	seq->prog::display_str(itoa(val,str,BASE10), 2);
+//	seq->prog::display_str(itoa(val,str,BASE10), 2);
 }
 
 void fct_loop_setting::init(sequencer* seq, char* name){

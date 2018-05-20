@@ -111,8 +111,8 @@ int clk::clk_set_bpm(uint16_t new_bpm){
 	return ret;
 }
 
-boolean clk::clk_set_ratio(uint32_t ms_ref, uint8_t numerator, uint8_t denominator){
-	boolean ret = false;
+bool clk::clk_set_ratio(uint32_t ms_ref, uint8_t numerator, uint8_t denominator){
+	bool ret = false;
 	if(_numerator != numerator || _denominator != denominator){
 		_numerator = numerator;
 		_denominator = denominator;
@@ -129,8 +129,8 @@ boolean clk::clk_set_ratio(uint32_t ms_ref, uint8_t numerator, uint8_t denominat
 	return ret;
 }
 
-boolean clk::clk_set_operation(int op, uint32_t ms_ref){
-	boolean ret = true;
+bool clk::clk_set_operation(int op, uint32_t ms_ref){
+	bool ret = true;
 
 	if(op < 0){
 		_ms = ms_ref * abs(op);
@@ -198,12 +198,12 @@ uint32_t clk::clk_sync_ratio(uint32_t ms, uint16_t step){
 	_ms = ms * _numerator / _denominator;
 	_bpm = ms_to_bpm(_ms);
 
-	Serial.print("step ");
-	Serial.print(step);
-	Serial.print(" _numerator ");
-	Serial.print(_numerator);
-	Serial.print(" _ms ");
-	Serial.println(_ms);
+//	Serial.print("step ");
+//	Serial.print(step);
+//	Serial.print(" _numerator ");
+//	Serial.print(_numerator);
+//	Serial.print(" _ms ");
+//	Serial.println(_ms);
 //	Serial.print();
 //	Serial.print();
 
@@ -243,21 +243,21 @@ uint32_t clk::master_sync(uint32_t mst_ms, uint16_t mst_cnt){
 uint32_t clk::master_sync_ratio(uint32_t mst_ms, uint16_t* mst_cnt){
 	uint32_t ret = 0;
 
-	if(mst_ms){
-		Serial.print("mst_ms ");
-		Serial.print(mst_ms);
-		Serial.print(" _numerator ");
-		Serial.print(_numerator);
-		Serial.print(" mst_cnt ");
-		Serial.println(*mst_cnt);
-	}
+//	if(mst_ms){
+//		Serial.print("mst_ms ");
+//		Serial.print(mst_ms);
+//		Serial.print(" _numerator ");
+//		Serial.print(_numerator);
+//		Serial.print(" mst_cnt ");
+//		Serial.println(*mst_cnt);
+//	}
 
 	if(mst_ms > 0){
 	       if(*mst_cnt >= _numerator){
 			ret = clk_sync_ratio(mst_ms, *mst_cnt);
 			*mst_cnt = 1;
 	       } else {
-			Serial.println("inc mst counter");	
+//			Serial.println("inc mst counter");	
 	       	       *mst_cnt = *mst_cnt + 1;
 
 	       }

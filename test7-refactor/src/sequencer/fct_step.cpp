@@ -138,7 +138,7 @@ static void clear_steps(step* step_from, step* step_to, track* t){
 void fct_step::on_push(uint8_t btn_id){
 	char str[7];
 	uint8_t id = errata_btn[btn_id];
-	_seq->prog::display_str(itoa(btn_id,str,BASE10), 2);
+//	_seq->prog::display_str(itoa(btn_id,str,BASE10), 2);
 	track* t = _seq->get_current_track();
 
 	if(t->_mtx_btn_to_step[id]){
@@ -177,15 +177,15 @@ void fct_step::on_release(uint8_t btn_id){
 		t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[id]->get_step_color(), btn_id);
 	
 		if(from > to){
-			Serial.println("unable to insert sub-track");
+//			Serial.println("unable to insert sub-track");
 		} 
 		else {
-			Serial.print("from ");
-			Serial.print(from);
-			Serial.print(" to ");
-			Serial.print(to);
-			Serial.print(" nr_new_step ");
-			Serial.println(nr_new_step);
+//			Serial.print("from ");
+//			Serial.print(from);
+//			Serial.print(" to ");
+//			Serial.print(to);
+//			Serial.print(" nr_new_step ");
+//			Serial.println(nr_new_step);
 
 			// clear step from:to-1
 			step* s = t->_mtx_btn_to_step[from]->get_next_step();

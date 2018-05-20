@@ -31,6 +31,7 @@
 //	#include <WProgram.h>
 //#endif
 
+#include <stdint.h>
 #include <elapsedMillis.h>
 
 #define GATE_HIGH		127

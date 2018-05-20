@@ -35,7 +35,7 @@
 #include "src/types.h"
 #include "src/sequenception.h"
 #include "src/led_matrix.h"
-#include "src/Bounce_array.h"
+#include "Bounce_array.h"
 #include "src/clk.h"
 #include "src/prog.h"
 #include "src/menu.h"

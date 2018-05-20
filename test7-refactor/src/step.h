@@ -24,7 +24,7 @@ struct note {
 class step {
 	private:
 		uint8_t step_id;
-		boolean flag_active;
+		bool flag_active;
 		bool _linked;
 		uint8_t _gate_bmp;
 		uint8_t gate_len_per; // percentage
@@ -52,7 +52,7 @@ class step {
 		void set_step_gate_len(uint32_t ms, uint8_t len);
 		void upd_step_gate_len(uint32_t);
 
-		boolean is_step_active();
+		bool is_step_active();
 		void set_step_active();
 		void clr_step_active();
 		void set_step_up();
@@ -76,7 +76,7 @@ class step {
 		void step_set_note(uint8_t, uint16_t);
 		
 		void set_step_id(uint8_t id);
-		boolean step_status();
+		bool step_status();
 		void link_step();
 		void unlink_step();
 		bool is_step_linked();

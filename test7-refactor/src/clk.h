@@ -52,7 +52,7 @@ class clk {
 		// diff from 0 and less than -1: divider
 		// diff from 0 and sup than 1: multiplier
 		int _operation; 
-		boolean _resync;
+		bool _resync;
 		uint8_t _numerator;
 		uint8_t _denominator;
 	
@@ -72,8 +72,8 @@ class clk {
 
 		void clk_set_max_step(uint8_t);
 		
-		boolean clk_set_operation(int, uint32_t);
-		boolean clk_set_ratio(uint32_t, uint8_t, uint8_t);
+		bool clk_set_operation(int, uint32_t);
+		bool clk_set_ratio(uint32_t, uint8_t, uint8_t);
 		void clk_sync_intern(uint32_t);
 		uint32_t clk_reset();
 

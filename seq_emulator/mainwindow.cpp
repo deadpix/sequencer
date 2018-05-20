@@ -1,6 +1,6 @@
 #include "mainwindow.h" 
-#include "bit.h"
-#include "types.h"
+#include "../test7-refactor/src/bit.h"
+#include "../test7-refactor/src/types.h"
 #include <stdint.h>
 #include <QCoreApplication>
 

@@ -40,7 +40,7 @@ bool step::upd_gate(){
 //int step::check_gate(uint32_t ms){
 //}
 
-boolean step::is_step_active(){
+bool step::is_step_active(){
 	return flag_active;
 }
 
@@ -114,7 +114,7 @@ void step::set_step_id(uint8_t id){
 //	flag_active = !flag_active;
 //}
 
-boolean step::step_status(){
+bool step::step_status(){
 	return flag_active;
 }
 

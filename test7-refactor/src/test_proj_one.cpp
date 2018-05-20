@@ -7,7 +7,7 @@ static const uint8_t MIDI_DRUM_GM[16] = {37, 36, 42, 82, 40, 38, 46, 44, 48, 47,
 static void (*_hw_fct)(uint16_t, uint8_t, uint8_t);
 
 static void _dummy_fct(uint16_t arg1, uint8_t arg2, uint8_t arg3){
-	Serial.println("midi controller dummy callback function");
+//	Serial.println("midi controller dummy callback function");
 }
 
 

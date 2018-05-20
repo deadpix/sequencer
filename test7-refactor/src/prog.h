@@ -31,7 +31,7 @@ class prog {
 		void set_prog_id(uint8_t);
 		uint8_t get_prog_id(void);
 		prog* get_prog(void);
-		virtual led_matrix* get_led_matrix(void);
+		virtual led_matrix* get_led_matrix(void) {};
 		
 		param* get_param();
 		void set_param(param*);

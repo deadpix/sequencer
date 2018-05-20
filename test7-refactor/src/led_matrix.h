@@ -33,8 +33,8 @@
 //#endif
 
 #include "types.h" 
-#include <LinkedList.h>
 #include "led_state.h"
+#include <LinkedList.h>
 
 #define LED_MATRIX_NR_LEDS			MATRIX_NR_ROW
 #define LED_MATRIX_NR_GROUND		MATRIX_NR_COL

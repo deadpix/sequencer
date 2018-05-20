@@ -26,7 +26,7 @@
 
 #include "src/types.h"
 #include "src/led_matrix.h"
-#include "src/Bounce_array.h"
+#include "Bounce_array.h"
 
 
 #define latchPin 		22

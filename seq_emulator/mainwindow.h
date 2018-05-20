@@ -1,8 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
  
-#include "elapsedMillis.h"
-#include "led_matrix.h"
+#include <elapsedMillis.h>
+#include "../test7-refactor/src/led_matrix.h"
 
 #include <QMainWindow>
 #include <QPushButton>

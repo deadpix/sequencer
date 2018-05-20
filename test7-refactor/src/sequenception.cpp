@@ -21,10 +21,10 @@ void (*sequenception::fct_tempo_change)(uint32_t);
 
 
 static void dummy_fct_midi(uint16_t arg1, uint8_t arg2, uint8_t arg3){
-	Serial.println("dummy midi function");
+//	Serial.println("dummy midi function");
 }
 static void dummy_fct_tempo_change(uint32_t arg1){
-	Serial.println("dummy tempo change function");
+//	Serial.println("dummy tempo change function");
 }
 sequenception::sequenception(){
 	fct_midi = dummy_fct_midi;

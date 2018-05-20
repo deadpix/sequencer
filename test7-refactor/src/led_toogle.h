@@ -14,7 +14,7 @@ class led_toogle {
 	private:
 		elapsedMillis _time_cnt;
 		led_matrix* _lm;
-		boolean _state;
+		bool _state;
 		uint16_t _led_id;
 		uint8_t _color;
 		uint32_t _animation_time;
