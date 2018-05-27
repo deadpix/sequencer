@@ -1,8 +1,13 @@
 #include "mainwindow.h" 
 #include "../test7-refactor/src/bit.h"
 #include "../test7-refactor/src/types.h"
-#include <stdint.h>
+#include "../test7-refactor/src/sequenception.h"
+#include "../test7-refactor/src/gui.h"
+
+//#include <stdint.h>
+//#include <string.h>
 #include <QCoreApplication>
+#include <hw_debug.h>
 
 const char* red   = "background-color: red";
 const char* green = "background-color: green";
@@ -40,11 +45,11 @@ static void init_menu_btn(prog* p){
 }
 
 void MainWindow::setup(){
-	gui_ctrl = setup_oled();
+	oled_gui.init_gui(refresh_oled);
 	sequenception.fct_midi = midi_note_on;
 	sequenception.fct_tempo_change = tempo_change_handler;
-	sequenception.init(sequenception.current_prog);
-
+	sequenception.init(&oled_gui);
+	sequenception.menu_ctrl.set_next_prog(sequenception.current_prog);
 }
 
 
@@ -89,8 +94,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 	param_btn = new QPushButton("param", this);
 	param_btn->setGeometry(QRect(QPoint(pos_x + 60, 60 * 9), QSize(50, 50)));
 
-	connect(menu_btn, SIGNAL (released()), this, SLOT (handleParamBtn()));
-	connect(param_btn, SIGNAL (released()), this, SLOT (handleMenuBtn()));
+	connect(param_btn, SIGNAL (released()), this, SLOT (handleParamBtn()));
+	connect(menu_btn, SIGNAL (released()), this, SLOT (handleMenuBtn()));
 
 	menu_btn_status = BTN_RELEASED;
 	param_btn_status = BTN_RELEASED;
@@ -150,11 +155,12 @@ void MainWindow::handleMenuBtn(){
 void MainWindow::handleButtonPress(int id)
 {
 	qDebug ("press on btn %d",id);
-	btn_status[id] = BTN_LONG_PUSH;
-	btn_ms[i].btn_ms = 0;
+	btn_status[id] = BTN_PUSHED;
+	btn_ms[id] = 0;
 }
 void MainWindow::handleButtonRelease(int id)
 {
+	dbg::printf("test %d",id);
 	if(btn_status[id] == BTN_LONG_PUSHED){
 		qDebug("long release %d",id);
 	}
@@ -167,12 +173,12 @@ void MainWindow::handleButtonRelease(int id)
 	btn_status[id] = BTN_RELEASED;
 }
 
-static void check_matrix_btn(struct _btn_status status[MATRIX_NR_BTNS], elapsedMillis ms[MATRIX_NR_BTNS]){
+void MainWindow::check_matrix_btn(){
 	for(int i=0;i<MATRIX_NR_BTNS;i++){
-		if(status[i] == BTN_PUSHED){
-			if(ms[i] > LONG_PRESS_TIME_MS){
-				status[i] == BTN_LONG_PUSHED;
-				qDebug ("long press on btn %d",id);
+		if(btn_status[i] == BTN_PUSHED){
+			if(btn_ms[i] > LONG_PRESS_TIME_MS){
+				btn_status[i] = BTN_LONG_PUSHED;
+				qDebug ("long press on btn %d status=%d",i,btn_status[i]);
 			}
 		}
 	}
@@ -198,7 +204,6 @@ static void upd_btn_color(led_matrix* lm, QPushButton* matrix_btn[MATRIX_NR_BTNS
 		tmp = 0x0;
 		tmp = leds[i].bitmap[0] & leds[i].bitmap[1] & leds[i].bitmap[2];
 		upd_btn_color_row(&set_led_bmp, tmp, white, i, matrix_btn);
-		qDebug("col%d set_led_bmp=%x",i,set_led_bmp);
 
 		tmp = 0x0;
 		tmp = leds[i].bitmap[0] & leds[i].bitmap[1];
@@ -235,7 +240,7 @@ void MainWindow::handleTimerUI(){
 //	matrix_btn[step_cnt]->setStyleSheet(red);
 	
 	upd_btn_color(&lm, matrix_btn);
-	check_matrix_btn(btn_status, btn_ms);
+	check_matrix_btn();
 }
 void MainWindow::handleMainLoop(){
 }

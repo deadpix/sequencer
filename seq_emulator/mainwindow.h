@@ -43,10 +43,11 @@ class MainWindow : public QMainWindow {
 		QPushButton *matrix_btn[MATRIX_NR_BTNS];
 		int step_cnt;
 		led_matrix lm;
-		volatile uint8_t btn_status[MATRIX_NR_BTNS];
+		uint8_t btn_status[MATRIX_NR_BTNS];
 		elapsedMillis btn_ms[MATRIX_NR_BTNS];
 		uint8_t menu_btn_status;
 		uint8_t param_btn_status;
+		void check_matrix_btn();
 		void setup();
 	
 	QSignalMapper mapper_press;
