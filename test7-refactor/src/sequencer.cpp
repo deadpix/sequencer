@@ -1,5 +1,5 @@
 #include "sequencer.h"
-
+#include <hw_debug.h>
 sequencer::sequencer(){
 	current_param_id = 0;
 	for(int i=0;i<(MATRIX_NR_COL*MATRIX_NR_ROW);i++){
@@ -105,8 +105,9 @@ void sequencer::on_long_release(uint8_t btn_id){
 }
 
 void sequencer::update_ui(uint32_t mst_ms, uint16_t mst_step){
-	if(fct_arr[current_param_id])
+	if(fct_arr[current_param_id]){
 		fct_arr[current_param_id]->update_ui(mst_ms,mst_step);
+	}
 }
 led_matrix* sequencer::get_led_matrix(){
 	current->get_led_matrix();

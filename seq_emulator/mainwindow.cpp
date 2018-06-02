@@ -16,11 +16,13 @@ const char* yellow = "background-color: yellow";
 const char* magenta = "background-color: magenta";
 const char* cyan = "background-color: cyan";
 const char* white = "background-color: white";
+const char* gray = "background-color: gray";
 
 static elapsedMillis ms;
 static gui oled_gui;
 static gui *gui_ctrl;
 static sequenception sequenception;
+static param* param_ptr;
 
 static void tempo_change_handler(uint32_t ms){
 	qDebug("tempo_change_handler ms=%d",ms);
@@ -50,6 +52,7 @@ void MainWindow::setup(){
 	sequenception.fct_tempo_change = tempo_change_handler;
 	sequenception.init(&oled_gui);
 	sequenception.menu_ctrl.set_next_prog(sequenception.current_prog);
+	param_ptr = NULL;
 }
 
 
@@ -102,6 +105,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 
 	ms = 0;
 
+	setup();
 //	m_button = new QPushButton("My Button", this);
 //	// set size and location of the button
 //	m_button->setGeometry(QRect(QPoint(50, 10),
@@ -111,14 +115,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 //	connect(m_button, SIGNAL (released()), this, SLOT (handleButton()));
 
 
-	lm.set_led_x(LED_B_IDX, 1);
-	lm.set_led_x(LED_R_IDX, 2);
-	lm.set_led_x(LED_G_IDX, 4);
-	lm.set_led_x(LED_GB_IDX, 10);
-	lm.set_led_x(LED_RB_IDX, 25);
-	lm.set_led_x(LED_RG_IDX, 32);
-	lm.set_led_x(LED_GB_IDX, 47);
-	lm.set_led_x(LED_GBR_IDX, 63);
+//	lm.set_led_x(LED_B_IDX, 1);
+//	lm.set_led_x(LED_R_IDX, 2);
+//	lm.set_led_x(LED_G_IDX, 4);
+//	lm.set_led_x(LED_GB_IDX, 10);
+//	lm.set_led_x(LED_RB_IDX, 25);
+//	lm.set_led_x(LED_RG_IDX, 32);
+//	lm.set_led_x(LED_GB_IDX, 47);
+//	lm.set_led_x(LED_GBR_IDX, 63);
 }
 
 void MainWindow::handleParamBtn(){
@@ -127,12 +131,29 @@ void MainWindow::handleParamBtn(){
 		param_btn->setStyleSheet(red);
 		param_btn_status = BTN_PUSHED;
 		menu_btn->setEnabled(false);
+	
 		qDebug ("handle param button");
+	
+		param_ptr = sequenception.current_prog->get_param();
+		if(param_ptr){
+			sequenception.lm_ptr = param_ptr->get_led_matrix();
+			sequenception.current_prog = param_ptr;
+			param_ptr->param_on_enter();
+		}
+
 	} else {
 		param_btn->setStyleSheet(white);
 		param_btn_status = BTN_RELEASED;
 		menu_btn->setEnabled(true);
+
 		qDebug ("param menu button");
+		
+		if(param_ptr){
+			sequenception.current_prog = param_ptr->get_prog();
+			sequenception.lm_ptr = sequenception.current_prog->get_led_matrix();
+			param_ptr->param_on_leave();
+		}
+
 	}
 }
 
@@ -143,29 +164,38 @@ void MainWindow::handleMenuBtn(){
 		menu_btn_status = BTN_PUSHED;
 		param_btn->setEnabled(false);
 		qDebug ("handle menu button");
+		sequenception.menu_ctrl.menu_enter();
+		sequenception.lm_ptr = sequenception.menu_ctrl.get_menu_led_matrix();
+		sequenception.current_prog = sequenception.prog_arr[sequenception.nr_prog];
+
 	} else {
 		menu_btn->setStyleSheet(white);
 		menu_btn_status = BTN_RELEASED;
 		param_btn->setEnabled(true);
 		qDebug ("release menu button");
+		sequenception.current_prog = sequenception.menu_ctrl.get_next_prog();
+		sequenception.current_prog->display_title();
+		sequenception.lm_ptr = sequenception.current_prog->get_led_matrix();
+		sequenception.menu_ctrl.menu_leave();
 	}
 	
 }
 
 void MainWindow::handleButtonPress(int id)
 {
-	qDebug ("press on btn %d",id);
 	btn_status[id] = BTN_PUSHED;
 	btn_ms[id] = 0;
+	sequenception.current_prog->on_push(id);
 }
 void MainWindow::handleButtonRelease(int id)
 {
-	dbg::printf("test %d",id);
 	if(btn_status[id] == BTN_LONG_PUSHED){
 		qDebug("long release %d",id);
+		sequenception.current_prog->on_long_release(id);
 	}
 	else if(btn_status[id] == BTN_PUSHED){
-		qDebug("release %d",id); 
+		qDebug("release %d",id);
+		sequenception.current_prog->on_release(id);
 	} 
 	else {
 		qDebug("Fatal error in handleButtonRelease for button %d!!!!!",id);
@@ -178,7 +208,6 @@ void MainWindow::check_matrix_btn(){
 		if(btn_status[i] == BTN_PUSHED){
 			if(btn_ms[i] > LONG_PRESS_TIME_MS){
 				btn_status[i] = BTN_LONG_PUSHED;
-				qDebug ("long press on btn %d status=%d",i,btn_status[i]);
 			}
 		}
 	}
@@ -193,12 +222,21 @@ static void upd_btn_color_row(uint16_t* bmp_ret, uint16_t bmp, const char* color
 		}
 	}	
 }
+static void rst_btn_color_row(const char* color, int row_id, QPushButton *matrix_btn[MATRIX_NR_BTNS]){
+	for(int i=0;i<8;i++){	
+		matrix_btn[row_id * 8 + i]->setStyleSheet(color);
+	}	
+}
+
 
 static void upd_btn_color(led_matrix* lm, QPushButton* matrix_btn[MATRIX_NR_BTNS]){
 	led_t* leds = lm->get_led_arr();
 	uint16_t tmp = 0x0;
 	uint16_t set_led_bmp = 0x0;
 	for(int i=0;i<LED_MATRIX_NR_GROUND;i++){
+
+		rst_btn_color_row(gray, i, matrix_btn);
+
 		set_led_bmp = 0x0;
 
 		tmp = 0x0;
@@ -239,8 +277,18 @@ void MainWindow::handleTimerUI(){
   //    	step_cnt = (step_cnt + 1) % MATRIX_NR_BTNS;
 //	matrix_btn[step_cnt]->setStyleSheet(red);
 	
-	upd_btn_color(&lm, matrix_btn);
+	upd_btn_color(sequenception.lm_ptr, matrix_btn);
 	check_matrix_btn();
+	uint32_t clk_res = sequenception.eval_mst_clk();
+
+
+	if(sequenception.current_prog == sequenception.prog_arr[sequenception.nr_prog]){
+		sequenception.menu_ctrl.menu_update();
+	} 
+	else {
+		sequenception.current_prog->update_ui(clk_res, sequenception.mst_clk->clk_get_step_cnt());
+	}
+	sequenception.loop(clk_res);
 }
 void MainWindow::handleMainLoop(){
 }
