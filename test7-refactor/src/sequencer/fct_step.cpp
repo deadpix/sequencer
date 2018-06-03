@@ -1,5 +1,6 @@
 #include "fct_step.h"
 #include "../errata.h"
+#include <hw_debug.h>
 
 #define BASE10	10
 #define LONG_PRESS_MS	100

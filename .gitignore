@@ -1,2 +1,6 @@
 *.o
 cscope.*
+seq_emulator/Makefile
+seq_emulator/moc_mainwindow.cpp
+seq_emulator/seq
+*.swp

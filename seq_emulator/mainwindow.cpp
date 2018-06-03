@@ -58,6 +58,7 @@ void MainWindow::setup(){
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 	// Create the button, make "this" the parent
+
 	const int pos_x = 10, pos_y = 10, btn_size = 50;
 	int x = pos_x;
 	int y = pos_y;
@@ -81,6 +82,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent){
 	}
 	connect(&mapper_press, SIGNAL(mapped(int)), this, SLOT(handleButtonPress(int)));
 	connect(&mapper_release, SIGNAL(mapped(int)), this, SLOT(handleButtonRelease(int)));
+
+//	for(int i=0;i<3;i++){
+//		oled_label[i] = new QLabel(this);
+//		oled_label[i]->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+//		oled_label[i]->setText("test ");
+//	}
+
 
 	ui_timer = new QTimer(this);
 	connect(ui_timer, SIGNAL(timeout()), this, SLOT(handleTimerUI()));
@@ -208,6 +216,7 @@ void MainWindow::check_matrix_btn(){
 		if(btn_status[i] == BTN_PUSHED){
 			if(btn_ms[i] > LONG_PRESS_TIME_MS){
 				btn_status[i] = BTN_LONG_PUSHED;
+				sequenception.current_prog->on_long_push(i);
 			}
 		}
 	}

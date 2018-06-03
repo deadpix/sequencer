@@ -51,4 +51,3 @@ HEADERS += mainwindow.h \
 	   ../test7-refactor/src/track.h \
 	   ../test7-refactor/src/sequencer/fct_loop_setting.h \
 	   ../test7-refactor/src/sequencer/fct_step.h \
-

@@ -9,6 +9,7 @@
 #include <QSignalMapper>
 #include <QTimer>
 #include <QMutex>
+#include <QLabel>
 
 #define MATRIX_ROW	8
 #define MATRIX_COL	8
@@ -41,6 +42,7 @@ class MainWindow : public QMainWindow {
 		QMutex mutex;
 		QPushButton *menu_btn, *param_btn;
 		QPushButton *matrix_btn[MATRIX_NR_BTNS];
+        QLabel *oled_label[3];
 		int step_cnt;
 		led_matrix lm;
 		uint8_t btn_status[MATRIX_NR_BTNS];
@@ -49,6 +51,7 @@ class MainWindow : public QMainWindow {
 		uint8_t param_btn_status;
 		void check_matrix_btn();
 		void setup();
+		Ui::MainWindow* ui;
 	
 	QSignalMapper mapper_press;
 	QSignalMapper mapper_release;

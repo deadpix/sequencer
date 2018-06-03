@@ -23,7 +23,7 @@ class test_proj_one : public prog {
 		void on_push(uint8_t btn_id);
 		void on_long_push(uint8_t btn_id){};
 		void on_release(uint8_t btn_id);
-		void on_long_release(uint8_t btn_id){};
+		void on_long_release(uint8_t btn_id);
 
 		void menu_enter();
 		void menu_leave();

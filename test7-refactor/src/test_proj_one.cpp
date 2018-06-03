@@ -37,10 +37,6 @@ void test_proj_one::menu_update(){
 
 void test_proj_one::on_push(uint8_t btn_id){
 	_lm.set_led_x(LED_GBR_IDX, btn_id);
-
-	//Serial.print(MIDI_DRUM_GM[btn_id]);
-			
-
 	_hw_fct(MIDI_DRUM_GM[btn_id], 127, 1);
 }
 void test_proj_one::on_release(uint8_t btn_id){
@@ -50,8 +46,15 @@ void test_proj_one::on_release(uint8_t btn_id){
 	lt->start_animation(BTN_LED_DELAY_MS);
 	_btn_animation_list.add(lt);
 
-//	_btn_animation.init_animation(&_lm, btn_id, LED_GBR_IDX);
-//	_btn_animation.start_animation(BTN_LED_DELAY_MS);
+	_hw_fct(MIDI_DRUM_GM[btn_id], 0, 1);
+}
+void test_proj_one::on_long_release(uint8_t btn_id){
+	_lm.toogle_led_x(LED_GBR_IDX, btn_id);	
+	led_toogle* lt = new led_toogle();
+	lt->init_animation(&_lm, btn_id, LED_GBR_IDX);
+	lt->start_animation(BTN_LED_DELAY_MS);
+	_btn_animation_list.add(lt);
+
 	_hw_fct(MIDI_DRUM_GM[btn_id], 0, 1);
 }
 
