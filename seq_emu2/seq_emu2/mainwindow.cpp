@@ -20,6 +20,7 @@ static elapsedMillis ms;
 static gui oled_gui;
 static sequenception sequenception;
 static param* param_ptr;
+static QLabel* oled[OLED_LINE];
 
 static void tempo_change_handler(uint32_t ms){
 	qDebug("tempo_change_handler ms=%d",ms);
@@ -29,9 +30,13 @@ static void midi_note_on(uint16_t note, uint8_t vel, uint8_t chan){
 }
 
 static void refresh_oled(char** line_arr){
-	qDebug("OLED[0]: %s",line_arr[0]);
-	qDebug("OLED[1]: %s",line_arr[1]);
-	qDebug("OLED[2]: %s",line_arr[2]);
+//	qDebug("OLED[0]: %s",line_arr[0]);
+//	qDebug("OLED[1]: %s",line_arr[1]);
+//	qDebug("OLED[2]: %s",line_arr[2]);
+	oled[0]->setText(line_arr[0]);
+	oled[1]->setText(line_arr[1]);
+	oled[2]->setText(line_arr[2]);
+
 }
 
 #define BTN_RELEASED	0

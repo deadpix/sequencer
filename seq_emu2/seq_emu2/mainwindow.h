@@ -46,7 +46,7 @@ private:
 	QPushButton* btnMatrix[MATRIX_NR_BTN];
 	QPushButton* btnMenu;
 	QPushButton* btnParam;
-	QLabel*	     oled[OLED_LINE];
+//	QLabel*	     oled[OLED_LINE];
 
 	uint8_t btnMatrixStatus[MATRIX_NR_BTN];
 	elapsedMillis btnMatrixMs[MATRIX_NR_BTN];
