@@ -4,3 +4,10 @@ seq_emulator/Makefile
 seq_emulator/moc_mainwindow.cpp
 seq_emulator/seq
 *.swp
+seq_emu2/seq_emu2/Makefile
+seq_emu2/seq_emu2/moc_mainwindow.cpp
+seq_emu2/seq_emu2/ui_mainwindow.h
+seq_emu2/seq_emu2/seq_emu2.pro.user
+seq_emu2/seq_emu2/seq_emu2
+
+

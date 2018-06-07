@@ -1,12 +1,15 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <elapsedMillis.h>
+#include "../../test7-refactor/src/led_matrix.h"
+
 #include <QMainWindow>
-#include <QSignalMapper>
 #include <QPushButton>
+#include <QSignalMapper>
+#include <QTimer>
 #include <QLabel>
 #include <QtDebug>
-#include <QTimer>
 
 #define MATRIX_NR_COL	8
 #define MATRIX_NR_ROW	8
@@ -44,6 +47,14 @@ private:
 	QPushButton* btnMenu;
 	QPushButton* btnParam;
 	QLabel*	     oled[OLED_LINE];
+
+	uint8_t btnMatrixStatus[MATRIX_NR_BTN];
+	elapsedMillis btnMatrixMs[MATRIX_NR_BTN];
+	uint8_t btnMenuStatus;
+	uint8_t btnParamStatus;
+	void checkBtnMatrix();
+	void setup();
+
 };
 
 #endif // MAINWINDOW_H
