@@ -53,6 +53,7 @@ typedef volatile uint32_t mat_row_bmp_t;
 
 #define MICRO_OLED_GUI 	1
 
+typedef uint8_t (*cbck_fct_rd)(uint8_t pin);
 
 
 #endif

@@ -28,6 +28,7 @@
 #include "src/led_matrix.h"
 #include "Bounce_array.h"
 
+//typedef uint8_t (*cbck_fct_rd)(uint8_t pin);
 
 #define latchPin 		22
 #define clockPin 		23
@@ -50,6 +51,7 @@
 
 #define DEBUG 1
 #define LONG_PRESS_TIME_MS	1000
+#define NR_CBCK		3
 
 Adafruit_MCP23017 mcp;
 uint8_t		grd_cnt;
@@ -70,19 +72,35 @@ static uint8_t btn_read_pins[BTN_NUM_ROW] = {7,8,6,9,5,10,4,11};
 
 static ArrBounce btn_row[BTN_NUM_COL];
 
+cbck_fct_rd cbck_fct_rd_arr[NR_CBCK];
+
+int init_rd_cbck(cbck_fct_rd fct_ptr, uint8_t fct_id){
+	int res = 1;
+	if(fct_id < NR_CBCK){
+		res = 0;
+		cbck_fct_rd_arr[fct_id] = fct_ptr;
+	}
+	return res;
+}
 static uint8_t btn_matrix_digitalRead(uint8_t pin){
 	return mcp.digitalRead(pin);
 }
+
+uint8_t mcp_digitalRead(uint8_t pin, uint8_t fct_id){
+	return cbck_fct_rd_arr[fct_id](pin);
+}
+
 static void init_matrix_btn(){
 	int i;
 	btn_col_idx = 0;
 	flag_btn_active = false;
 
+	init_rd_cbck(&btn_matrix_digitalRead, 0);
 	mcp.begin(6);
 	Wire.setClock(1000000);
 
 	for(i=0;i<BTN_NUM_COL;i++){
-		btn_row[i].init_ArrBounce(btn_read_pins, BOUNCE_TIME, BTN_NUM_ROW, &btn_matrix_digitalRead);
+		btn_row[i].init_ArrBounce(btn_read_pins, BOUNCE_TIME, BTN_NUM_ROW, &mcp_digitalRead, 0);
 		btn_status.pushed_bmp[i] = 0x0;
 		btn_status.long_pushed_bmp[i] = 0x0;
 	}
