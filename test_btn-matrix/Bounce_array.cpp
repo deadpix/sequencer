@@ -11,9 +11,9 @@
 #define UNSTABLE_STATE  1
 #define STATE_CHANGED   3
 
-static uint8_t (*dig_read)(uint8_t);
+static uint8_t (*dig_read)(uint8_t, uint8_t);
 
-void ArrBounce::init_ptrfunc(uint8_t (*rd_func)(uint8_t)){
+void ArrBounce::init_ptrfunc(uint8_t (*rd_func)(uint8_t, uint8_t)){
 //	ArrBounce::dig_read = rd_func;
 	dig_read = rd_func;
 }
@@ -26,17 +26,18 @@ ArrBounce::ArrBounce()
     , pin(0)
 {}
 
-void ArrBounce::init_ArrBounce(uint8_t* pin_arr, unsigned long interval_millis, int size, uint8_t (*rd_func)(uint8_t)){
+void ArrBounce::init_ArrBounce(uint8_t* pin_arr, unsigned long interval_millis, int size, uint8_t (*rd_func)(uint8_t, uint8_t), uint8_t c_id){
 	this->size = size;
 	interval(interval_millis);
 	previous_millis = new unsigned long int[size];
 	state = new unsigned char[size];
 	pin = new unsigned char[size];
+	cbck_id = c_id;
 	attach(pin_arr, rd_func);
 } 
 
 
-void ArrBounce::attach(uint8_t* pin_arr, uint8_t (*rd_func)(uint8_t)) {
+void ArrBounce::attach(uint8_t* pin_arr, uint8_t (*rd_func)(uint8_t, uint8_t)) {
 	dig_read = rd_func;
 	for(int i=0;i<this->size;i++){
 		this->attach(pin_arr[i], i);
@@ -49,7 +50,7 @@ void ArrBounce::attach(int pin, int idx) {
     this->pin[idx] = pin;
     state[idx] = 0;
 //    if (digitalRead(pin)) {
-    if (dig_read(pin)) {
+    if (dig_read(pin, cbck_id)) {
         state[idx] = _BV(DEBOUNCED_STATE) | _BV(UNSTABLE_STATE);
     }
 #ifdef BOUNCE_LOCK_OUT
@@ -77,7 +78,7 @@ bool ArrBounce::update(int idx)
     // Ignore everything if we are locked out
     if (millis() - previous_millis[idx] >= interval_millis) {
 //        bool currentState = digitalRead(pin[idx]);
-		bool currentState = dig_read(pin[idx]);
+		bool currentState = dig_read(pin[idx], cbck_id);
         if ((bool)(state[idx] & _BV(DEBOUNCED_STATE)) != currentState) {
             previous_millis[idx] = millis();
             state[idx] ^= _BV(DEBOUNCED_STATE);
@@ -90,7 +91,7 @@ bool ArrBounce::update(int idx)
     // Read the state of the switch port into a temporary variable.
 
 //	bool readState = digitalRead(pin[idx]);
-	bool readState = dig_read(pin[idx]);
+	bool readState = dig_read(pin[idx], cbck_id);
 
 
     // Clear Changed State Flag - will be reset if we confirm a button state change.
@@ -127,7 +128,7 @@ bool ArrBounce::update(int idx)
 
     // Read the state of the switch in a temporary variable.
 //    bool currentState = digitalRead(pin[idx]);
-    bool currentState = dig_read(pin[idx]);
+    bool currentState = dig_read(pin[idx], cbck_id);
 
  //	Serial.print("digitalRead(pin[idx]) " );
  	//Serial.println(digitalRead(pin[idx]));

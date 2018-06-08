@@ -4,7 +4,23 @@
 #include "Bounce_array.h"
 
 #define BOUNCE_TIME	5 
+#define NR_CBCK		3
 
+typedef uint8_t (*cbck_fct_rd)(uint8_t pin);
+cbck_fct_rd cbck_fct_rd_arr[NR_CBCK];
+
+int init_rd_cbck(cbck_fct_rd fct_ptr, uint8_t fct_id){
+	int res = 1;
+	if(fct_id < NR_CBCK){
+		res = 0;
+		cbck_fct_rd_arr[fct_id] = fct_ptr;
+	}
+	return res;
+}
+
+uint8_t matrix_digitalRead(uint8_t pin, uint8_t fct_id){
+	return cbck_fct_rd_arr[fct_id](pin);
+}
 
 //static uint8_t col_pin[NR_COL] = {8,9};
 //static uint8_t row_pin[NR_ROW] = {10,11};
@@ -31,6 +47,9 @@ uint8_t btn_matrix_digitalRead(uint8_t pin){
 
 static void init(){
 	selected_col = 0;
+
+	init_rd_cbck(btn_matrix_digitalRead, 0);	
+
 	for(int i=0;i<NR_ROW;i++){
 		pinMode(row_pin[i], INPUT_PULLUP);
 		
@@ -38,7 +57,7 @@ static void init(){
 
 
 	for(int i=0;i<NR_COL;i++){
-		btn_row[i].init_ArrBounce(row_pin, BOUNCE_TIME, NR_ROW, &btn_matrix_digitalRead);
+		btn_row[i].init_ArrBounce(row_pin, BOUNCE_TIME, NR_ROW, &matrix_digitalRead, 0);
 		pinMode(col_pin[i], OUTPUT);
 		digitalWrite(col_pin[i], HIGH);
 	}

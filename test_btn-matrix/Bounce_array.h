@@ -53,7 +53,7 @@ class ArrBounce
     // Create an instance of the bounce library
     ArrBounce();
 
-    void attach(uint8_t* pin_arr, uint8_t (*rd_func)(uint8_t));
+    void attach(uint8_t* pin_arr, uint8_t (*rd_func)(uint8_t, uint8_t));
 
     // Attach to a pin (and also sets initial state)
     void attach(int pin, int idx);
@@ -78,19 +78,20 @@ class ArrBounce
     // Returns the rising pin state
     bool rose(int idx);
 
-	void init_ptrfunc(uint8_t (*rd_func)(uint8_t));
+	void init_ptrfunc(uint8_t (*rd_func)(uint8_t,uint8_t));
 
-	void init_ArrBounce(uint8_t* pin_arr, unsigned long interval_millis, int size, uint8_t (*rd_func)(uint8_t));
+	void init_ArrBounce(uint8_t* pin_arr, unsigned long interval_millis, int size, uint8_t (*rd_func)(uint8_t, uint8_t), uint8_t c_id);
 	
     // Partial compatibility for programs written with Bounce version 1
     bool risingEdge(int idx) { return rose(idx); }
     bool fallingEdge(int idx) { return fell(idx); }
-    ArrBounce(uint8_t* pin_arr, unsigned long interval_millis, int size, uint8_t (*rd_func)(uint8_t) ) : ArrBounce() {
+    ArrBounce(uint8_t* pin_arr, unsigned long interval_millis, int size, uint8_t (*rd_func)(uint8_t, uint8_t), uint8_t c_id) : ArrBounce() {
 		this->size = size;
 		interval(interval_millis);
 		previous_millis = new unsigned long int[size];
 		state = new unsigned char[size];
         pin = new unsigned char[size];
+		cbck_id = c_id;
 		attach(pin_arr, rd_func);
 	}
 
@@ -100,6 +101,7 @@ class ArrBounce
     uint8_t* state;
     uint8_t* pin;
 	int size;
+	uint8_t cbck_id;
 };
 
 #endif
