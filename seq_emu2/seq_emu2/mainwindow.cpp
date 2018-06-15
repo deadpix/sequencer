@@ -89,7 +89,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	
 	uiTimer = new QTimer(this);
 	connect(uiTimer, SIGNAL(timeout()), this, SLOT(handleTimerUI()));
-	uiTimer->start(100);
+	uiTimer->start(10);
 
 	for(int i=0;i<OLED_LINE;i++){
 		str = QString("oled_%1").arg(i);
@@ -216,8 +216,6 @@ static void updBtnColor(led_matrix* lm, QPushButton* matrix_btn[MATRIX_NR_BTN]){
 
 void MainWindow::handleTimerUI(){
 //	qDebug("timer expired");
-	updBtnColor(sequenception.lm_ptr, btnMatrix);
-	checkBtnMatrix();
 	uint32_t clk_res = sequenception.eval_mst_clk();
 
 	if(sequenception.current_prog == sequenception.prog_arr[sequenception.nr_prog]){
@@ -228,6 +226,8 @@ void MainWindow::handleTimerUI(){
 	}
 	sequenception.loop(clk_res);
 
+	updBtnColor(sequenception.lm_ptr, btnMatrix);
+	checkBtnMatrix();
 }
 void MainWindow::handleParamBtn(){
 	if(!btnParamStatus){
