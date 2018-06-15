@@ -24,6 +24,7 @@
 
 #include "clk.h"
 #include "types.h"
+#include <hw_debug.h>
 
 #define MAX_DIVIDER 	16
 #define DELAY_MS		50
@@ -197,6 +198,8 @@ uint32_t clk::clk_sync_ratio(uint32_t ms, uint16_t step){
 
 	_ms = ms * _numerator / _denominator;
 	_bpm = ms_to_bpm(_ms);
+
+	dbg::printf("_ms=%d _bmp=%d\n",_ms,_bpm);		
 
 //	Serial.print("step ");
 //	Serial.print(step);

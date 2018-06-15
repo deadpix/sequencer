@@ -29,7 +29,7 @@ class step {
 		uint8_t _gate_bmp;
 		uint8_t gate_len_per; // percentage
 		uint32_t gate_len_ms; // percentage
-		bool flg_gate;
+		bool _flg_gate;
 		elapsedMillis gate_elapsed;
 		
 		step* _next;

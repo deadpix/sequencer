@@ -246,7 +246,7 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 		// step animation only for the current track
 		_step_animation.init_animation_n_save(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
 //		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
-		_step_animation.start_animation(50);
+		_step_animation.start_animation(20);
 
 	} else {
 //		if(arr_step[curr_step_id].upd_gate()){

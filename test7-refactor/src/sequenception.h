@@ -33,6 +33,7 @@ class sequenception {
 		void init_sequencer();
 		void init_midi_seq();
 		void init_midi_controller();
+		void set_default_prog(prog*);
 
 	public:
 		static menu menu_ctrl;

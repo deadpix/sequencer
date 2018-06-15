@@ -57,6 +57,12 @@ void sequenception::init_sequencer(){
 	seq_param_ui.param::set_prog(&midi_seq);
 }
 
+void sequenception::set_default_prog(prog* p){
+	lm_ptr = p->get_led_matrix();
+	current_prog = (prog *) &midi_seq;
+	current_prog->display_title();	
+}
+
 void sequenception::init_all_prog(gui *g){
 	nr_prog = 0;
 	led_matrix* menu_lmtx = menu_ctrl.get_menu_led_matrix();
@@ -84,11 +90,6 @@ void sequenception::init_all_prog(gui *g){
 		prog_arr[i]->set_gui(g);
 	}
 	
-	lm_ptr = p1.get_led_matrix();
-	current_prog = prog_arr[1];
-	current_prog->display_title();
-
-	
 	tempo_setting.init(fct_tempo_change, &midi_seq);
 	mst_clk = tempo_setting.get_mst_clk();
 	mst_clk->clk_set_max_step(NR_STEP);
@@ -98,6 +99,7 @@ void sequenception::init_all_prog(gui *g){
 	init_midi_controller();
 	init_sequencer();
 
+	set_default_prog((prog *) &midi_seq);
 }
 
 void sequenception::init(gui *g){

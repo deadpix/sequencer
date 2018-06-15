@@ -22,12 +22,6 @@
  *  SOFTWARE.
  */ 
 
-//#if defined(ARDUINO) && ARDUINO >= 100
-//	#include <Arduino.h>
-//#else
-//	#include <WProgram.h>
-//#endif
-
 #include "gate.h"
 
 static uint8_t (*_hw_wr_cbck)(uint8_t, uint8_t);
@@ -72,9 +66,6 @@ void gate::set_hw_cbck(uint8_t port, uint8_t (*hw_wr)(uint8_t, uint8_t)){
 }
 
 int gate::rst_gate(uint8_t gate_val){
-//	if(!_hw_wr_cbck)	
-//		return GATE_ERROR;
-
 	_gate_value = gate_val;
 	_elapsed_ms = 0;
 	if(_hw_wr_cbck) _hw_wr_cbck(_port, _gate_value);
@@ -83,9 +74,6 @@ int gate::rst_gate(uint8_t gate_val){
 	return GATE_STARTED;
 }
 int gate::rst_gate(){
-//	if(!_hw_wr_cbck)	
-//		return GATE_ERROR;
-
 	_elapsed_ms = 0;
 	if(_hw_wr_cbck) _hw_wr_cbck(_port, _gate_value);
 	_gate_state = GATE_STARTED;
@@ -93,9 +81,6 @@ int gate::rst_gate(){
 	return GATE_STARTED;
 }
 int gate::upd_gate(){
-//	if(!_hw_wr_cbck)	
-//		return GATE_ERROR;
-
 	if(_gate_state != GATE_STARTED)
 		return GATE_FINISHED;
 

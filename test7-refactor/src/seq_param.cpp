@@ -1,5 +1,6 @@
 #include "seq_param.h"
 
+
 #define CLK_DIVIDER_LED_OFFSET		8
 #define CLK_MULTIPLIER_LED_OFFSET	16
 #define LED_ANIMATION_PER		20
@@ -86,7 +87,7 @@ void seq_param::on_push(uint8_t btn_id){
 		param::_lm.clr_led_x(LED_GB_IDX, _s->get_current_param());
 		param::_lm.set_led_x(LED_GBR_IDX, btn_id);
 	}
-	else if(btn_id > CLK_DIVIDER_LED_OFFSET && btn_id < CLK_MULTIPLIER_LED_OFFSET){ 
+	else if(btn_id >= CLK_DIVIDER_LED_OFFSET && btn_id < CLK_MULTIPLIER_LED_OFFSET){ 
 //		clk* c = _s->get_current_track()->get_clk();
 //		c->clk_set_ratio(_clk_ref->clk_get_ms(),(btn_id-CLK_DIVIDER_LED_OFFSET+1), 1);
 		
@@ -95,7 +96,7 @@ void seq_param::on_push(uint8_t btn_id){
 
 		_s->prog::display_str("div", 1);
 	}
-	else if(btn_id > CLK_MULTIPLIER_LED_OFFSET && btn_id < (CLK_MULTIPLIER_LED_OFFSET + 8)){
+	else if(btn_id >= CLK_MULTIPLIER_LED_OFFSET && btn_id < (CLK_MULTIPLIER_LED_OFFSET + 8)){
 //		clk* c = _s->get_current_track()->get_clk();	
 //		c->clk_set_ratio(_clk_ref->clk_get_ms(), 1,(btn_id-CLK_MULTIPLIER_LED_OFFSET+1));
 
@@ -103,7 +104,6 @@ void seq_param::on_push(uint8_t btn_id){
 		_s->get_current_track()->_clk_def.denominator = (btn_id-CLK_MULTIPLIER_LED_OFFSET+1);
 
 		_s->prog::display_str("mult", 1);
-
 	}
 	else {
 		_s->prog::display_str("undef", 1);

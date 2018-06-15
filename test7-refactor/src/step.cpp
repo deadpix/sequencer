@@ -5,7 +5,7 @@ step::step(){
 	flag_active = false;
 	_linked = false;
 	gate_len_per = 20;
-	flg_gate = false;
+	_flg_gate = false;
 	_note.velocity = 127;
 	_note.pitch = 37;
 	_gate_bmp = 0x0;
@@ -24,15 +24,17 @@ void step::step_set_note(uint8_t vel, uint16_t pitch){
 
 bool step::reset_gate(){
 	gate_elapsed = 0;
-//	flg_gate = true;
+	_flg_gate = true;
 	return (_gate_bmp & GATE_UP);
 }
 bool step::upd_gate(){
 	bool res = false;
 
-	if( (_gate_bmp & GATE_DW) && (gate_elapsed > gate_len_ms) ){
+	if( (_gate_bmp & GATE_DW) 
+		&& (gate_elapsed > gate_len_ms) 
+		&& _flg_gate){
 		res = true;
-//		flg_gate = false;
+		_flg_gate = false;
 	}
 	return res;
 }

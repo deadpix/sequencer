@@ -6,6 +6,7 @@ sequencer::sequencer(){
 		fct_arr[i] = NULL;
 	}
 	_ls_ui.step_id = -1;
+	set_track_start(true);
 }
 
 sequencer::~sequencer(){
@@ -39,7 +40,7 @@ fct_clbk* sequencer::get_fct(uint8_t idx){
 
 void sequencer::check_clks(uint32_t mst_ms, uint16_t mst_step){
 	track* t;
-	for(int i=0;i<1/*SEQUENCER_NR_TRACK*/;i++){
+	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
 		t = &track_arr[i];
 		t->check_event(mst_ms, mst_step);
 	}
