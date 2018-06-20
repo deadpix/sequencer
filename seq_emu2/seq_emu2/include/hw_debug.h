@@ -1,6 +1,8 @@
 #ifndef __HW_DEBUG_H__
 #define __HW_DEBUG_H__
 
+#include <QtDebug>
+#include <string>
 #include <cstdlib>
 #include <cstdio>
 #include <cstring>

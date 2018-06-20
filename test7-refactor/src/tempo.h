@@ -29,7 +29,7 @@ class tempo : public prog {
 		tempo();
 		~tempo();
 
-		void init(void (*)(uint32_t), sequencer*);
+		void init(void (*)(uint32_t), sequencer*, bool);
 		
 		led_matrix* get_led_matrix(void);
 		clk* get_mst_clk();

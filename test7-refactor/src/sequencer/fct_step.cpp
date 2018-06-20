@@ -181,56 +181,17 @@ void fct_step::on_release(uint8_t btn_id){
 //			Serial.println("unable to insert sub-track");
 		} 
 		else {
-//			Serial.print("from ");
-//			Serial.print(from);
-//			Serial.print(" to ");
-//			Serial.print(to);
-//			Serial.print(" nr_new_step ");
-//			Serial.println(nr_new_step);
-
 			// clear step from:to-1
 			step* s = t->_mtx_btn_to_step[from]->get_next_step();
-			step* step_to = t->_mtx_btn_to_step[to];
-		
+			step* step_to = t->_mtx_btn_to_step[to];	
 			clear_steps(s, t->_mtx_btn_to_step[to], t);
 		
-
-//			while(s != t->_mtx_btn_to_step[to]){
-//				
-////				Serial.print("delete step ");
-////				Serial.println(s->get_step_id());
-//
-//				// clear ui
-//				t->get_led_matrix()->clr_n_restore(errata_step[s->_step_ui_id]
-//						, BACKGROUND);	
-//
-//				// delete step
-//				step* tmp = s->get_next_step();
-//				track::delete_step(&t->_step_list,s);
-////				t->_step_list.remove(s->get_step_id());
-////				delete s;
-//				s = tmp;
-//			}
-
-//			for(int i=from;i<(to);i++){
-//				t->_mtx_btn_to_step[i]->clr_step_active();
-//				t->get_led_matrix()->clr_n_restore(errata_step[i], BACKGROUND);	
-//			}
-
-			
-			// shift ui
-//			s = t->_mtx_btn_to_step[to];
 			step_to = s;
 			for(int i=to;i<NR_STEP;i++){
-//				Serial.print("clr led ");
-//				Serial.println(i);
 				t->get_led_matrix()->clr_n_restore(errata_step[i], BACKGROUND);
 			}
+			// shift step
 			while(s != t->get_first_step()){
-
-//				Serial.print("shift step ");
-//				Serial.println(s->get_step_id());
-
 				shift_step_ui(t, s, (nr_new_step-(to-from)));
 				s = s->get_next_step();
 			}
@@ -238,12 +199,14 @@ void fct_step::on_release(uint8_t btn_id){
 			s = t->_mtx_btn_to_step[from];
 			s->_clk_def.numerator = (to-from);
 			s->_clk_def.denominator = nr_new_step;
+			s->set_step_color(LED_B_IDX);
 			/* create new step */
 			for(int i=1;i<(nr_new_step);i++){
 				step* tmp = new step;
 				tmp->_step_ui_id = from + i;
 				tmp->_clk_def.numerator = (to-from);
 				tmp->_clk_def.denominator = nr_new_step;
+				tmp->set_step_color(LED_B_IDX);
 
 				t->_mtx_btn_to_step[from + i] = tmp;
 				t->_step_list.add(from + i, tmp);
@@ -251,11 +214,6 @@ void fct_step::on_release(uint8_t btn_id){
 
 				s->set_next_step(tmp);
 				s = tmp;
-
-//				Serial.print("new step ");
-//				Serial.println(s->get_step_id());
-
-
 			}
 			s->set_next_step(step_to);	
 
@@ -303,6 +261,8 @@ void fct_step::on_long_release(uint8_t btn_id){
 }
 
 void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
+
+	dbg::printf("update_ui mst_step=%d\n",mst_step);
 	track* t = _seq->get_current_track();
 	for(uint8_t i = 0; i<_lp_cnt; i++){
 		if(_lp_ui[i]._ms >= LONG_PRESS_MS){
@@ -310,6 +270,7 @@ void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
 			_lp_ui[i]._ms = 0;
 		}
 	}
+
 }
 
 void fct_step::on_start(){

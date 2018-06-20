@@ -1,5 +1,6 @@
 #include "track.h"
 #include "errata.h"
+#include <hw_debug.h>
 
 #define CLK_LEN_PER 	(20)
 

@@ -34,12 +34,14 @@ class track {
 		elapsedMillis elapsed_ms;
 		led_matrix _lm;
 		bool mute_flg;
-		led_toogle _step_animation;
 //		LinkedList<track *> sub_track_list;
 
 	public:
 //		step arr_step[NR_STEP];
 		LinkedList<step *> _step_list;
+		LinkedList<step *> _sub_step_list;
+		led_toogle _step_animation;
+
 		step* _mtx_btn_to_step[NR_STEP];
 //		step* arr_step;
 		struct clk_def _clk_def;

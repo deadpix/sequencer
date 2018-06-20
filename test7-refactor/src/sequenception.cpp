@@ -90,7 +90,7 @@ void sequenception::init_all_prog(gui *g){
 		prog_arr[i]->set_gui(g);
 	}
 	
-	tempo_setting.init(fct_tempo_change, &midi_seq);
+	tempo_setting.init(fct_tempo_change, &midi_seq, true);
 	mst_clk = tempo_setting.get_mst_clk();
 	mst_clk->clk_set_max_step(NR_STEP);
 	fct_tempo_change(mst_clk->clk_get_ms());

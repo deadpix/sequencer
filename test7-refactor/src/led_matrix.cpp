@@ -22,6 +22,7 @@
  *  SOFTWARE.
  */
 
+#include <hw_debug.h>
 #include "led_matrix.h"
 #include "bit.h"
 
@@ -47,12 +48,12 @@ led_t* led_matrix::get_led_arr(){
 	return led_arr;
 }
 
-uint8_t led_matrix::get_led_x_state(uint8_t color, uint16_t x, uint16_t y){
-	return (led_arr[x].bitmap[color] >> y) & 0x1;
-}
-void led_matrix::set_led_x_state(uint8_t color, uint16_t x, uint16_t y, uint8_t state){
-	led_arr[x].bitmap[color] |= (state<<y);
-}
+//uint8_t led_matrix::get_led_x_state(uint8_t color, uint16_t x, uint16_t y){
+//	return (led_arr[x].bitmap[color] >> y) & 0x1;
+//}
+//void led_matrix::set_led_x_state(uint8_t color, uint16_t x, uint16_t y, uint8_t state){
+//	led_arr[x].bitmap[color] |= (state<<y);
+//}
 
 
 int led_matrix::set_led_x_coor(uint8_t color, uint16_t x, uint16_t y){
@@ -84,8 +85,6 @@ int led_matrix::set_led_x(uint8_t color, uint16_t nr){
 
 	return 1;
 }
-
-
 
 int led_matrix::clr_led_x(uint8_t color, uint16_t nr){
 	uint16_t x = nr / LED_MATRIX_NR_LEDS;
@@ -169,13 +168,11 @@ void led_matrix::clr_n_restore(uint16_t nr, uint8_t ground){
 }
 void led_matrix::led_off(uint16_t nr){
 	for(int i=0;i<LED_MATRIX_NR_COLORS;i++){
-		clr_led_x(i, nr);
+		clr_led_x((1<<i), nr);
 	}
 }
 void led_matrix::led_ovw(uint8_t color, uint16_t nr){
-	for(int i=0;i<LED_MATRIX_NR_COLORS;i++){
-		clr_led_x(i, nr);
-	}
+	led_off(nr);
 	set_led_x(color, nr);
 }
 

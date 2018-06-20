@@ -1,12 +1,16 @@
 #include "tempo.h"
+#include <hw_debug.h>
 
 #define DEBUG				1
-#define LED_ANIMATION_MS	60
+#define LED_ANIMATION_MS		60
 
 #define BPM_BTN_ID			0
 #define TAP_BTN_ID			1
 #define START_BTN_ID			2
 #define RESET_BTN_ID			3
+
+#define PLAY_BTN_COLOR			LED_B_IDX
+#define PAUSE_BTN_COLOR			LED_R_IDX
 
 static void (*on_tempo_change)(uint32_t ms);
 
@@ -19,14 +23,20 @@ tempo::tempo(){
 tempo::~tempo(){
 }
 
-void tempo::init(void (*fct)(uint32_t), sequencer* seq){
+void tempo::init(void (*fct)(uint32_t), sequencer* seq, bool play){
+	_play = play;
 	led_matrix* lm = get_menu_lm();
 	_tap_animation.init_animation(lm,(prog_id*MATRIX_NR_COL+TAP_BTN_ID), LED_GBR_IDX);
 	_clk_animation.init_animation(lm,(prog_id*MATRIX_NR_COL+BPM_BTN_ID), LED_R_IDX);
 
 	on_tempo_change = fct;
 	_seq = seq;
-	lm->set_led_x(LED_R_IDX, START_BTN_ID);
+	if(_play){	
+		lm->set_led_x(PLAY_BTN_COLOR, START_BTN_ID);
+	} else {
+		lm->set_led_x(PAUSE_BTN_COLOR, START_BTN_ID);
+	}
+	_seq->set_track_start(_play);
 	lm->set_led_x(LED_R_IDX, RESET_BTN_ID);
 	
 }
@@ -78,6 +88,7 @@ uint32_t tempo::check_mst_clk(){
 
 void tempo::menu_enter(){
 	_in_menu_mode = true;
+	
 }
 void tempo::menu_leave(){
 	_in_menu_mode = false;
@@ -100,10 +111,10 @@ int tempo::menu_on_push(uint8_t func_id, uint8_t opt_id){
 		_play = !_play;
 		_seq->set_track_start(_play);
 		if(_play){
-			get_menu_lm()->led_ovw(LED_B_IDX, opt_id);
+			get_menu_lm()->led_ovw(PLAY_BTN_COLOR, opt_id);
 		}
 		else {
-			get_menu_lm()->led_ovw(LED_R_IDX, opt_id);
+			get_menu_lm()->led_ovw(PAUSE_BTN_COLOR, opt_id);
 		}
 	}
 	else if(opt_id == RESET_BTN_ID){

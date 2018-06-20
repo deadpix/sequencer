@@ -6,7 +6,7 @@ sequencer::sequencer(){
 		fct_arr[i] = NULL;
 	}
 	_ls_ui.step_id = -1;
-	set_track_start(true);
+//	set_track_start(true);
 }
 
 sequencer::~sequencer(){
@@ -39,11 +39,16 @@ fct_clbk* sequencer::get_fct(uint8_t idx){
 }
 
 void sequencer::check_clks(uint32_t mst_ms, uint16_t mst_step){
+	uint32_t res;
 	track* t;
+//	led_matrix *lm = current->get_led_matrix();
 	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
 		t = &track_arr[i];
-		t->check_event(mst_ms, mst_step);
+		res = t->check_event(mst_ms, mst_step);
 	}
+//	if(res){
+//		current->_step_animation.init_animation_n_save();
+//	}
 }
 void sequencer::set_track_start(bool play){
 	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
