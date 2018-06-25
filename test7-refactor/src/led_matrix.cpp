@@ -127,7 +127,8 @@ int led_matrix::save_n_set(uint8_t color, uint16_t nr, uint8_t ground){
 	}
 	else if(BIT::is_bit_set(_led_status_arr[nr].bmp, ground)){
 		ret = -1;
-	} else {
+	} 
+	else {
 		uint8_t level_hi = BIT::get_highest_bit_set(_led_status_arr[nr].bmp);
 		_led_status_arr[nr].bmp |= (1 << ground);
 		_led_status_arr[nr].color[ground] = color;
@@ -136,9 +137,37 @@ int led_matrix::save_n_set(uint8_t color, uint16_t nr, uint8_t ground){
 			led_ovw(color, nr);
 		}
 	}
-	return ret;
-	
+	return ret;	
 }
+
+int led_matrix::save_n_ovw(uint8_t color, uint16_t nr, uint8_t ground){
+	bool flg = false; 
+	bool first = false;
+	int ret = 0;
+		
+	if(_led_status_arr[nr].bmp == 0){
+		_led_status_arr[nr].bmp = (1 << ground);
+		_led_status_arr[nr].color[ground] = color;
+		set_led_x(color, nr);
+	}
+	else if(BIT::is_bit_set(_led_status_arr[nr].bmp, ground)){
+		_led_status_arr[nr].color[ground] = color;
+		led_ovw(color, nr);
+	} 
+	else {
+		uint8_t level_hi = BIT::get_highest_bit_set(_led_status_arr[nr].bmp);
+		_led_status_arr[nr].bmp |= (1 << ground);
+		_led_status_arr[nr].color[ground] = color;
+
+		if(level_hi < ground){
+			led_ovw(color, nr);
+		}
+	}
+
+	return ret;	
+}
+
+
 int led_matrix::save_n_toogle(uint8_t color, uint16_t nr, uint8_t ground){
 	bool flg = false; 
 	bool first = false;

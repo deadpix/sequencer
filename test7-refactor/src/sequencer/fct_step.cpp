@@ -30,8 +30,8 @@ static bool btn_was_long_pushed(uint8_t btn_id, uint8_t lp_cnt, const struct led
 }
 
 static bool link_steps(sequencer *s, uint8_t first, uint8_t second){
-	track* t = s->get_current_track();
-	uint8_t step_cnt = first;
+//	track* t = s->get_current_track();
+//	uint8_t step_cnt = first;
 	bool res = false;
 /*
 	// check first if previous step already linked
@@ -262,7 +262,7 @@ void fct_step::on_long_release(uint8_t btn_id){
 
 void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
 
-	dbg::printf("update_ui mst_step=%d\n",mst_step);
+//	dbg::printf("update_ui mst_step=%d\n",mst_step);
 	track* t = _seq->get_current_track();
 	for(uint8_t i = 0; i<_lp_cnt; i++){
 		if(_lp_ui[i]._ms >= LONG_PRESS_MS){
