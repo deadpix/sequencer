@@ -20,9 +20,10 @@ void test_proj_two::menu_update(){
 }
 
 void test_proj_two::on_push(uint8_t btn_id){
+	UNUSED(btn_id);
 }
 void test_proj_two::on_release(uint8_t btn_id){
-	_lm.toogle_led_x(LED_B_IDX, btn_id);
+	_lm.save_n_toogle(LED_B_IDX, btn_id, BACKGROUND);
 }
 
 int test_proj_two::menu_on_push(uint8_t func_id, uint8_t opt_id){	
@@ -34,10 +35,10 @@ int test_proj_two::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	int ret = 1;
 	for(int i=0; i<MATRIX_NR_COL; i++){
 		if(i == opt_id){
-			get_menu_lm()->set_led_x(LED_B_IDX, func_id * MATRIX_NR_ROW + i);
+			get_menu_lm()->save_n_set(LED_B_IDX, func_id * MATRIX_NR_ROW + i, BACKGROUND);
 		}
 		else {
-			get_menu_lm()->clr_led_x(LED_B_IDX, func_id * MATRIX_NR_ROW + i);
+			get_menu_lm()->clr_n_restore(func_id * MATRIX_NR_ROW + i, BACKGROUND);
 		}
 	}	
 	return ret;

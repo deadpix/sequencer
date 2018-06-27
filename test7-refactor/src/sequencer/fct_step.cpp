@@ -144,7 +144,8 @@ void fct_step::on_push(uint8_t btn_id){
 
 	if(t->_mtx_btn_to_step[id]){
 		if(!t->_mtx_btn_to_step[id]->is_step_active()){
-			t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[id]->get_step_color(), btn_id);
+//			t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[id]->get_step_color(), btn_id);
+			t->get_led_matrix()->save_n_toogle(t->_mtx_btn_to_step[id]->get_step_color(), btn_id, BACKGROUND);
 		}
 	} 
 	// else do nothing
@@ -175,7 +176,8 @@ void fct_step::on_release(uint8_t btn_id){
 		
 		// clear ui
 		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
-		t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[id]->get_step_color(), btn_id);
+//		t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[id]->get_step_color(), btn_id);
+		t->get_led_matrix()->save_n_toogle(t->_mtx_btn_to_step[id]->get_step_color(), btn_id, BACKGROUND);
 	
 		if(from > to){
 //			Serial.println("unable to insert sub-track");
@@ -258,15 +260,20 @@ void fct_step::on_long_push(uint8_t btn_id){
 }
 void fct_step::on_long_release(uint8_t btn_id){
 //	Serial.println("on long release");
+	UNUSED(btn_id);
 }
 
 void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
+
+	UNUSED(mst_ms);
+	UNUSED(mst_step);
 
 //	dbg::printf("update_ui mst_step=%d\n",mst_step);
 	track* t = _seq->get_current_track();
 	for(uint8_t i = 0; i<_lp_cnt; i++){
 		if(_lp_ui[i]._ms >= LONG_PRESS_MS){
-			t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[_lp_ui[i]._id]->get_step_color(), _lp_ui[i]._id);
+//			t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[_lp_ui[i]._id]->get_step_color(), _lp_ui[i]._id);
+			t->get_led_matrix()->save_n_toogle(t->_mtx_btn_to_step[_lp_ui[i]._id]->get_step_color(), _lp_ui[i]._id, BACKGROUND);
 			_lp_ui[i]._ms = 0;
 		}
 	}

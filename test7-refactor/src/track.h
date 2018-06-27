@@ -86,9 +86,9 @@ class track {
 
 		void init_menu();
 		void on_push(uint8_t btn_id);
-		void on_long_push(uint8_t btn_id){};
+		void on_long_push(uint8_t btn_id){ UNUSED(btn_id); };
 		void on_release(uint8_t btn_id);
-		void on_long_release(uint8_t btn_id){};
+		void on_long_release(uint8_t btn_id){ UNUSED(btn_id); };
 
 		void mute();
 		void unmute();

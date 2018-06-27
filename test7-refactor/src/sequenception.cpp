@@ -71,15 +71,18 @@ void sequenception::init_all_prog(gui *g){
 	nr_prog++;
 	
 	init_prog((prog *) &p1, nr_prog, "MIDIctl");
-	menu_lmtx->set_led_x(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0);
+//	menu_lmtx->set_led_x(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0);
+	menu_lmtx->save_n_set(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0, 0);
 	nr_prog++;
 
 	init_prog((prog *) &p2, nr_prog, "Prog 2");
-	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
+//	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
+	menu_lmtx->save_n_set(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0, 0);
 	nr_prog++;
 
 	init_prog((prog *) &midi_seq, nr_prog, "MIDIseq");
-	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
+//	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
+	menu_lmtx->save_n_set(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0, 0);
 	nr_prog++;
 		
 	// menu_ctrl MUST BE last

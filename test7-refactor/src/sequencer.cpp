@@ -39,12 +39,12 @@ fct_clbk* sequencer::get_fct(uint8_t idx){
 }
 
 void sequencer::check_clks(uint32_t mst_ms, uint16_t mst_step){
-	uint32_t res;
+//	uint32_t res;
 	track* t;
 //	led_matrix *lm = current->get_led_matrix();
 	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
 		t = &track_arr[i];
-		res = t->check_event(mst_ms, mst_step);
+		/*res = */t->check_event(mst_ms, mst_step);
 	}
 //	if(res){
 //		current->_step_animation.init_animation_n_save();
@@ -71,6 +71,8 @@ void sequencer::menu_update(){
 
 int sequencer::menu_on_push(uint8_t func_id, uint8_t opt_id){	
 	int ret = 1;
+	UNUSED(func_id);
+	UNUSED(opt_id);
 	prog::display_title();
 	return ret;
 }
@@ -78,11 +80,11 @@ int sequencer::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	int ret = 1;
 	for(int i=0; i<MATRIX_NR_COL; i++){
 		if(i == opt_id){
-			get_menu_lm()->set_led_x(LED_B_IDX, func_id * MATRIX_NR_ROW + i);
+			get_menu_lm()->save_n_set(LED_B_IDX, func_id * MATRIX_NR_ROW + i, BACKGROUND);
 			current = get_track(i);
 		}
 		else {
-			get_menu_lm()->clr_led_x(LED_B_IDX, func_id * MATRIX_NR_ROW + i);
+			get_menu_lm()->clr_n_restore(func_id * MATRIX_NR_ROW + i, BACKGROUND);
 		}
 	}	
 	return ret;

@@ -25,6 +25,8 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
+#define UNUSED(x) (void)(x)
+
 #define MATRIX_NR_ROW			8
 #define MATRIX_NR_COL			8
 #define LED_MATRIX_NR_COLORS	3

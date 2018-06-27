@@ -116,8 +116,6 @@ led_t led_matrix::get_led(uint8_t x){
 
 
 int led_matrix::save_n_set(uint8_t color, uint16_t nr, uint8_t ground){
-	bool flg = false; 
-	bool first = false;
 	int ret = 0;
 		
 	if(_led_status_arr[nr].bmp == 0){
@@ -141,8 +139,6 @@ int led_matrix::save_n_set(uint8_t color, uint16_t nr, uint8_t ground){
 }
 
 int led_matrix::save_n_ovw(uint8_t color, uint16_t nr, uint8_t ground){
-	bool flg = false; 
-	bool first = false;
 	int ret = 0;
 		
 	if(_led_status_arr[nr].bmp == 0){
@@ -169,8 +165,6 @@ int led_matrix::save_n_ovw(uint8_t color, uint16_t nr, uint8_t ground){
 
 
 int led_matrix::save_n_toogle(uint8_t color, uint16_t nr, uint8_t ground){
-	bool flg = false; 
-	bool first = false;
 	int ret = 0;
 		
 	if(ground > 0){

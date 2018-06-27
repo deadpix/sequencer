@@ -17,17 +17,19 @@ class led_toogle {
 		bool _state;
 		uint16_t _led_id;
 		uint8_t _color;
+		uint8_t _ground;
 		uint32_t _animation_time;
 //		boolean _animation_mode;
+
 		
 		
 	public:
 		led_toogle();
-		led_toogle(led_matrix* lm, uint16_t led_id, uint8_t color);
+		led_toogle(led_matrix* lm, uint16_t led_id, uint8_t color, uint8_t ground);
 		~led_toogle();
 		
-		void turn_on_led(void);
-		void turn_off_led(void);
+//		void turn_on_led(void);
+//		void turn_off_led(void);
 		void turn_on_n_save_led(void);
 		void turn_off_n_restore_led(void);
 //		void menu_update(void);

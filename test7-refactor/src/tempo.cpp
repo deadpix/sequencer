@@ -32,12 +32,15 @@ void tempo::init(void (*fct)(uint32_t), sequencer* seq, bool play){
 	on_tempo_change = fct;
 	_seq = seq;
 	if(_play){	
-		lm->set_led_x(PLAY_BTN_COLOR, START_BTN_ID);
+//		lm->set_led_x(PLAY_BTN_COLOR, START_BTN_ID);
+		lm->save_n_set(PLAY_BTN_COLOR, START_BTN_ID, BACKGROUND);
 	} else {
-		lm->set_led_x(PAUSE_BTN_COLOR, START_BTN_ID);
+//		lm->set_led_x(PAUSE_BTN_COLOR, START_BTN_ID);
+		lm->save_n_set(PAUSE_BTN_COLOR, START_BTN_ID, BACKGROUND);
 	}
 	_seq->set_track_start(_play);
-	lm->set_led_x(LED_R_IDX, RESET_BTN_ID);
+//	lm->set_led_x(LED_R_IDX, RESET_BTN_ID);
+	lm->save_n_set(LED_R_IDX, RESET_BTN_ID, BACKGROUND);
 	
 }
 
@@ -80,7 +83,7 @@ clk* tempo::get_mst_clk(){
 uint32_t tempo::check_mst_clk(){
 	uint32_t ret = _mst.clk_elapsed();
 	if(ret && _in_menu_mode){
-		_clk_animation.turn_on_led();
+		_clk_animation.turn_on_n_save_led();
 		_clk_animation.start_animation(LED_ANIMATION_MS);
 	}
 	return ret;
@@ -96,8 +99,10 @@ void tempo::menu_leave(){
 
 void tempo::menu_update(){
 //	check_mst_clk();
-	_tap_animation.update_animation();
-	_clk_animation.update_animation();
+//	_tap_animation.update_animation();
+//	_clk_animation.update_animation();
+	_tap_animation.end_animation_n_restore();
+	_clk_animation.end_animation_n_restore();
 }
 
 
@@ -111,15 +116,15 @@ int tempo::menu_on_push(uint8_t func_id, uint8_t opt_id){
 		_play = !_play;
 		_seq->set_track_start(_play);
 		if(_play){
-			get_menu_lm()->led_ovw(PLAY_BTN_COLOR, opt_id);
+			get_menu_lm()->save_n_ovw(PLAY_BTN_COLOR, opt_id, BACKGROUND);
 		}
 		else {
-			get_menu_lm()->led_ovw(PAUSE_BTN_COLOR, opt_id);
+			get_menu_lm()->save_n_ovw(PAUSE_BTN_COLOR, opt_id, BACKGROUND);
 		}
 	}
 	else if(opt_id == RESET_BTN_ID){
 		_seq->reset_all();
-		get_menu_lm()->led_ovw(LED_G_IDX, opt_id);
+		get_menu_lm()->save_n_ovw(LED_G_IDX, opt_id, BACKGROUND);
 		
 	}
 	return ret;
@@ -128,10 +133,10 @@ int tempo::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	int ret = 0;
 	if(opt_id == TAP_BTN_ID){
 		tap();
-		_tap_animation.turn_on_led();
+		_tap_animation.turn_on_n_save_led();
 	} 
 	else if(opt_id == RESET_BTN_ID){
-		get_menu_lm()->led_ovw(LED_R_IDX, opt_id);	
+		get_menu_lm()->save_n_ovw(LED_R_IDX, opt_id, BACKGROUND);	
 	}
 
 	return ret;

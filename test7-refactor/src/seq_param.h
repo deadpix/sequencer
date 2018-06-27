@@ -27,7 +27,7 @@ class seq_param: public param {
 		void init(sequencer* const s, clk* const c);
 		
 		void on_push(uint8_t btn_id);
-		void on_long_push(uint8_t btn_id){};
+		void on_long_push(uint8_t btn_id){ UNUSED(btn_id); };
 		void on_release(uint8_t btn_id);
 		void on_long_release(uint8_t btn_id);
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
