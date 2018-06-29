@@ -95,10 +95,14 @@ class led_matrix {
 		int  save_n_ovw(uint8_t, uint16_t, uint8_t);
 		void clr_n_restore(uint16_t, uint8_t);
 
+		uint8_t get_ground_color(uint16_t, uint8_t);
+
 		void led_off(uint16_t);
 		void led_ovw(uint8_t, uint16_t);
 
 		void dump_led_matrix(void);
+		
+		static int get_next_color(uint8_t);
 };
 
 #endif

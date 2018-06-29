@@ -26,6 +26,7 @@
 #include "led_matrix.h"
 #include "bit.h"
 
+const uint8_t color_tree[] = {LED_R_IDX, LED_B_IDX, LED_G_IDX, LED_RB_IDX, LED_RG_IDX, LED_GB_IDX, LED_GBR_IDX};
 
 led_matrix::led_matrix(){
 	for(int i=0;i<LED_MATRIX_NR_GROUND;i++){
@@ -46,6 +47,16 @@ led_matrix::~led_matrix(){
 
 led_t* led_matrix::get_led_arr(){
 	return led_arr;
+}
+
+int led_matrix::get_next_color(uint8_t color){	
+	int size = (sizeof(color_tree)/sizeof(color_tree[0])) - 1;
+	for(int i=0; i<(sizeof(color_tree)/sizeof(color_tree[0])); i++){
+		if(color == color_tree[i]){
+			 return color_tree[i+1];
+		}
+	}
+	return -1;
 }
 
 //uint8_t led_matrix::get_led_x_state(uint8_t color, uint16_t x, uint16_t y){
@@ -189,6 +200,11 @@ void led_matrix::clr_n_restore(uint16_t nr, uint8_t ground){
 		set_led_x(_led_status_arr[nr].color[level_hi], nr);
 	}
 }
+
+uint8_t led_matrix::get_ground_color(uint16_t nr, uint8_t ground){
+	return _led_status_arr[nr].color[ground];
+}
+
 void led_matrix::led_off(uint16_t nr){
 	for(int i=0;i<LED_MATRIX_NR_COLORS;i++){
 		clr_led_x((1<<i), nr);

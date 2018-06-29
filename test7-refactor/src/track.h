@@ -16,6 +16,14 @@
 #include "step.h"
 #include "clk.h"
 
+struct signature_change {
+	uint8_t num;
+	uint8_t denom;
+	step* s;
+	uint8_t color;
+	led_toogle* signature_ui;
+};
+
 class track {
 	private:
 		uint16_t curr_step_id;
@@ -40,6 +48,8 @@ class track {
 //		step arr_step[NR_STEP];
 		LinkedList<step *> _step_list;
 		LinkedList<step *> _sub_step_list;
+		LinkedList<struct signature_change*> _signature_change_list;
+		
 		led_toogle _step_animation;
 
 		step* _mtx_btn_to_step[NR_STEP];
@@ -48,6 +58,9 @@ class track {
 
 		static bool delete_step(LinkedList<step *> *l, step* s);
 
+		int  add_signature_change(step* s, uint8_t num, uint8_t denom, uint8_t color);
+		int  del_signature_change(step* s);
+		void show_signature_change(uint32_t);
 
 		track();
 //		track(uint8_t);

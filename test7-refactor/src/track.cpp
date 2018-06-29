@@ -8,6 +8,9 @@ static void (*_hw_fct)(uint16_t, uint8_t, uint8_t);
 
 static void _dummy_fct(uint16_t arg1, uint8_t arg2, uint8_t arg3){
 //	Serial.println("track dummy callback function");
+	UNUSED(arg1);
+	UNUSED(arg2);
+	UNUSED(arg3);
 }
 
 bool track::delete_step(LinkedList<step *> *l, step* s){
@@ -102,6 +105,65 @@ track::~track(){
 	for(int i=0;i<_step_list.size();i++){
 		step* s = _step_list.remove(i);
 		delete s;
+	}
+}
+
+int track::add_signature_change(step* s, uint8_t num, uint8_t denom, uint8_t color){
+	struct signature_change* sc;
+
+	// sanity check
+	for(int i = 0; i<_signature_change_list.size();i++){
+		step* tmp = _signature_change_list.get(i)->s;
+		if(s == tmp){
+			return -1;
+		}
+	}
+	
+	
+	new(sc) signature_change;
+	sc->s = s;
+	sc->num = num;
+	sc->denom = denom;
+	sc->color = color;
+	sc->signature_ui = new led_toogle();
+	sc->signature_ui->init_animation(&_lm, s->_step_ui_id, color, FOREGROUND1);
+	
+	_signature_change_list.add(sc);	
+	return 0;
+	
+}
+
+int track::del_signature_change(step* s){
+	int error = -1;
+	for(int i = 0; i<_signature_change_list.size();i++){
+		struct signature_change* sc = _signature_change_list.get(i);
+		if(sc->s == s){
+			_signature_change_list.remove(i);
+			delete sc->signature_ui;
+			delete sc;
+			error = 0;
+			break;
+		}
+	}
+	return error;
+}
+
+static void update_signature_animation(struct signature_change* sc, uint32_t ms){
+	if( sc->signature_ui->end_animation_n_restore() ){
+		led_matrix* lm = sc->signature_ui->get_led_matrix();
+		uint8_t new_color = lm->get_ground_color(sc->s->_step_ui_id, BACKGROUND);
+		
+		sc->signature_ui->start_animation( (ms * sc->num / sc->denom) * 0.2 );
+	}
+}
+
+void track::show_signature_change(uint32_t ms){
+	struct signature_change* sc;
+	for(int i = 0; i<_signature_change_list.size();i++){
+		sc = _signature_change_list.get(i);
+		if(_mtx_btn_to_step[sc->s->_step_ui_id]){
+			update_signature_animation(sc,ms);
+		}
 	}
 }
 
@@ -230,6 +292,7 @@ void track::set_play(bool play){
 }
 
 uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
+	UNUSED(mst_step_cnt);
 //	uint32_t res = _c.master_sync(ms, mst_step_cnt);
 	uint32_t res = _c.master_sync_ratio(ms, /*mst_step_cnt*/&_mst_clk_cnt);	
 //	if(ms > 0) _mst_clk_cnt++;
@@ -246,7 +309,7 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 		}
 		// step animation only for the current track
 		_step_animation.init_animation_n_save(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
-//		_step_animation.start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
+//		_step_animation.start_animation((_c.clk_get_ms()/* * CLK_LEN_PER / 100.*/));
 		_step_animation.start_animation(20);
 
 	} else {
@@ -260,9 +323,13 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 }
 
 void track::on_push(uint8_t btn_id){
+	UNUSED(btn_id);
 }
 void track::on_release(uint8_t btn_id){
+	UNUSED(btn_id);
 }
 
 void track::update_ui(uint32_t mst_ms, uint16_t mst_step){
+	UNUSED(mst_ms);
+	UNUSED(mst_step);
 }

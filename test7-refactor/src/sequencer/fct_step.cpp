@@ -173,7 +173,8 @@ void fct_step::on_release(uint8_t btn_id){
 		uint8_t from = errata_btn[_lp_ui[0]._id];
 		uint8_t to = errata_btn[_lp_ui[1]._id];
 		uint8_t nr_new_step = id + 1;
-		
+		int new_color = led_matrix::get_next_color(t->_mtx_btn_to_step[from]->get_step_color());
+	
 		// clear ui
 		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
 //		t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[id]->get_step_color(), btn_id);
@@ -181,6 +182,9 @@ void fct_step::on_release(uint8_t btn_id){
 	
 		if(from > to){
 //			Serial.println("unable to insert sub-track");
+		}
+		else if(new_color == -1){
+			dbg::println("Cannot get new color...");
 		} 
 		else {
 			// clear step from:to-1
@@ -201,7 +205,9 @@ void fct_step::on_release(uint8_t btn_id){
 			s = t->_mtx_btn_to_step[from];
 			s->_clk_def.numerator = (to-from);
 			s->_clk_def.denominator = nr_new_step;
-			s->set_step_color(LED_B_IDX);
+			s->set_step_color(new_color);
+			t->add_signature_change(s,(to-from),nr_new_step,new_color);
+
 			/* create new step */
 			for(int i=1;i<(nr_new_step);i++){
 				step* tmp = new step;
@@ -265,7 +271,7 @@ void fct_step::on_long_release(uint8_t btn_id){
 
 void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
 
-	UNUSED(mst_ms);
+//	UNUSED(mst_ms);
 	UNUSED(mst_step);
 
 //	dbg::printf("update_ui mst_step=%d\n",mst_step);
@@ -277,6 +283,8 @@ void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
 			_lp_ui[i]._ms = 0;
 		}
 	}
+
+	t->show_signature_change(mst_ms);
 
 }
 
