@@ -128,6 +128,7 @@ int track::add_signature_change(step* s, uint8_t num, uint8_t denom, uint8_t col
 	sc->signature_ui = new led_toogle();
 	sc->signature_ui->init_animation(&_lm, s->_step_ui_id, color, FOREGROUND1);
 	
+	
 	_signature_change_list.add(sc);	
 	return 0;
 	
@@ -308,9 +309,10 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 			}
 		}
 		// step animation only for the current track
-		_step_animation.init_animation_n_save(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
+//		_step_animation.init_animation_n_save(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
+		_step_animation.init_clk_animation(&_lm, errata_step[curr_step_id], LED_R_IDX);
 //		_step_animation.start_animation((_c.clk_get_ms()/* * CLK_LEN_PER / 100.*/));
-		_step_animation.start_animation(20);
+		_step_animation.start_animation(200);
 
 	} else {
 //		if(arr_step[curr_step_id].upd_gate()){

@@ -38,6 +38,7 @@ class led_toogle {
 		int update_animation(/*boolean hold*/);
 		int stop_animation();
 		void init_animation_n_save(led_matrix* lm, uint16_t led_id, uint8_t color);
+		void init_clk_animation(led_matrix* lm, uint16_t led_id, uint8_t color);
 		int end_animation_n_restore();
 };
 

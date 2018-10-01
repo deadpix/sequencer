@@ -62,6 +62,14 @@ void led_toogle::init_animation_n_save(led_matrix* lm, uint16_t led_id, uint8_t 
 	turn_on_n_save_led();
 }
 
+void led_toogle::init_clk_animation(led_matrix* lm, uint16_t led_id, uint8_t color){
+	_lm = lm;
+	_led_id = led_id;
+	_color = color;
+	_state = STOPPED;
+	_lm->save_n_set_dfl(_color, _led_id, _ground);
+}
+
 int led_toogle::end_animation_n_restore(){
 	int ret = 0;
 	

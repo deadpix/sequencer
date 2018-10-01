@@ -13,10 +13,13 @@ void fct_step::init(sequencer* seq, char* name){
 
 static void clear_all_long_pushed_ui(track* t, uint8_t* lp_cnt, struct led_blink_t* lp_ui){
 //	track* t = _seq->get_current_track();
+	int ret = 0;
 	for(uint8_t i=0; i<*lp_cnt; i++){
-		t->get_led_matrix()->clr_n_restore(lp_ui[i]._id, FOREGROUND1);
+		ret = t->get_led_matrix()->clr_n_restore(lp_ui[i]._id, FOREGROUND1);
+		dbg::printf("clear %d ret=%d \n",lp_ui[i]._id,ret);
 	}
 	*lp_cnt = 0;
+
 }
 
 static bool btn_was_long_pushed(uint8_t btn_id, uint8_t lp_cnt, const struct led_blink_t* lp_ui){
@@ -145,7 +148,8 @@ void fct_step::on_push(uint8_t btn_id){
 	if(t->_mtx_btn_to_step[id]){
 		if(!t->_mtx_btn_to_step[id]->is_step_active()){
 //			t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[id]->get_step_color(), btn_id);
-			t->get_led_matrix()->save_n_toogle(t->_mtx_btn_to_step[id]->get_step_color(), btn_id, BACKGROUND);
+//			t->get_led_matrix()->save_n_toogle(t->_mtx_btn_to_step[id]->get_step_color(), btn_id, BACKGROUND);
+			t->get_led_matrix()->save_n_toogle(t->_mtx_btn_to_step[id]->get_step_color(), btn_id, FOREGROUND1);
 		}
 	} 
 	// else do nothing
@@ -154,6 +158,7 @@ void fct_step::on_release(uint8_t btn_id){
 	uint8_t id = errata_btn[btn_id];
 	track* t = _seq->get_current_track();
 
+	t->get_led_matrix()->clr_n_restore(btn_id, FOREGROUND1);
 	// check if the pushed button was long pushed button
 	if(_lp_cnt == 1){
 		// linked step
@@ -168,18 +173,23 @@ void fct_step::on_release(uint8_t btn_id){
 		}
 		*/
 		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
+		
+//		int ret = t->get_led_matrix()->clr_n_restore(btn_id, BACKGROUND);
 	} 
 	else if(_lp_cnt == 2){
+/*
 		uint8_t from = errata_btn[_lp_ui[0]._id];
 		uint8_t to = errata_btn[_lp_ui[1]._id];
 		uint8_t nr_new_step = id + 1;
 		int new_color = led_matrix::get_next_color(t->_mtx_btn_to_step[from]->get_step_color());
-	
+*/	
 		// clear ui
 		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
 //		t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[id]->get_step_color(), btn_id);
-		t->get_led_matrix()->save_n_toogle(t->_mtx_btn_to_step[id]->get_step_color(), btn_id, BACKGROUND);
-	
+//		t->get_led_matrix()->save_n_toogle(t->_mtx_btn_to_step[id]->get_step_color(), btn_id, BACKGROUND);
+//		t->get_led_matrix()->clr_n_restore(btn_id, BACKGROUND);
+
+/*	
 		if(from > to){
 //			Serial.println("unable to insert sub-track");
 		}
@@ -206,9 +216,8 @@ void fct_step::on_release(uint8_t btn_id){
 			s->_clk_def.numerator = (to-from);
 			s->_clk_def.denominator = nr_new_step;
 			s->set_step_color(new_color);
-			t->add_signature_change(s,(to-from),nr_new_step,new_color);
+//			t->add_signature_change(s,(to-from),nr_new_step,new_color);
 
-			/* create new step */
 			for(int i=1;i<(nr_new_step);i++){
 				step* tmp = new step;
 				tmp->_step_ui_id = from + i;
@@ -226,7 +235,7 @@ void fct_step::on_release(uint8_t btn_id){
 			s->set_next_step(step_to);	
 
 		}
-
+*/
 	} 
 	else {
 		if(t->_mtx_btn_to_step[id]){
@@ -250,27 +259,27 @@ void fct_step::on_release(uint8_t btn_id){
 void fct_step::on_long_push(uint8_t btn_id){
 	uint8_t id = errata_btn[btn_id];
 	track* t = _seq->get_current_track();
+	int ret;
 	
 	if(_lp_cnt < BTN_MAX_LONG_PUSH_STATE){
 		_lp_ui[_lp_cnt]._ms = 0;
 		_lp_ui[_lp_cnt]._id = btn_id;
-		t->get_led_matrix()->save_n_set(t->_mtx_btn_to_step[id]->get_step_color(), btn_id, FOREGROUND1);
+		ret = t->get_led_matrix()->save_n_set(t->_mtx_btn_to_step[id]->get_step_color(), btn_id, FOREGROUND1);
+		dbg::printf("btn_id=%d on long push ret=%x\n",btn_id,ret);
 		++_lp_cnt;
 	}
 	else {
-		t->get_led_matrix()->save_n_set(t->_mtx_btn_to_step[id]->get_step_color(), btn_id, FOREGROUND1);
+//		t->get_led_matrix()->save_n_set(t->_mtx_btn_to_step[id]->get_step_color(), btn_id, FOREGROUND1);
 		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui); 
 		t->get_led_matrix()->clr_n_restore(btn_id, FOREGROUND1);
 	}
 	
 }
 void fct_step::on_long_release(uint8_t btn_id){
-//	Serial.println("on long release");
 	UNUSED(btn_id);
 }
 
 void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
-
 //	UNUSED(mst_ms);
 	UNUSED(mst_step);
 
@@ -279,12 +288,13 @@ void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
 	for(uint8_t i = 0; i<_lp_cnt; i++){
 		if(_lp_ui[i]._ms >= LONG_PRESS_MS){
 //			t->get_led_matrix()->toogle_led_x(t->_mtx_btn_to_step[_lp_ui[i]._id]->get_step_color(), _lp_ui[i]._id);
-			t->get_led_matrix()->save_n_toogle(t->_mtx_btn_to_step[_lp_ui[i]._id]->get_step_color(), _lp_ui[i]._id, BACKGROUND);
+//			t->get_led_matrix()->save_n_toogle(t->_mtx_btn_to_step[_lp_ui[i]._id]->get_step_color(), _lp_ui[i]._id, BACKGROUND);
+			t->get_led_matrix()->save_n_toogle(t->_mtx_btn_to_step[_lp_ui[i]._id]->get_step_color(), _lp_ui[i]._id, FOREGROUND1);
 			_lp_ui[i]._ms = 0;
 		}
 	}
 
-	t->show_signature_change(mst_ms);
+//	t->show_signature_change(mst_ms);
 
 }
 

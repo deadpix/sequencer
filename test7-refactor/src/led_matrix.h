@@ -73,7 +73,6 @@ class led_matrix {
 		int toogle_led_x_coor(uint8_t, uint16_t, uint16_t);
 		int set_led_x(uint8_t, uint16_t);
 		int clr_led_x(uint8_t, uint16_t);
-		int toogle_led_x(uint8_t, uint16_t);
 
 	public:
 		led_matrix();
@@ -89,11 +88,13 @@ class led_matrix {
 
 //		void save_n_set(uint8_t, uint16_t);
 //		void clr_n_restore(uint16_t);
+		int toogle_led_x(uint8_t, uint16_t);
 
 		int  save_n_set(uint8_t, uint16_t, uint8_t);
 		int  save_n_toogle(uint8_t, uint16_t, uint8_t);
 		int  save_n_ovw(uint8_t, uint16_t, uint8_t);
-		void clr_n_restore(uint16_t, uint8_t);
+		int  save_n_set_dfl(uint8_t, uint16_t, uint8_t);
+		int  clr_n_restore(uint16_t, uint8_t);
 
 		uint8_t get_ground_color(uint16_t, uint8_t);
 
