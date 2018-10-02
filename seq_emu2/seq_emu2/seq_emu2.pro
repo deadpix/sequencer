@@ -34,6 +34,7 @@ SOURCES += main.cpp \
 	../../test7-refactor/src/prog.cpp \
 	../../test7-refactor/src/step.cpp \
 	../../test7-refactor/src/track.cpp \
+	../../test7-refactor/src/node.cpp \
 	../../test7-refactor/src/sequencer/fct_loop_setting.cpp \
 	../../test7-refactor/src/sequencer/fct_step.cpp 
 
@@ -58,6 +59,7 @@ HEADERS  += mainwindow.h \
 	../../test7-refactor/src/prog.h \
 	../../test7-refactor/src/step.h \
 	../../test7-refactor/src/track.h \
+	../../test7-refactor/src/node.h \
 	../../test7-refactor/src/sequencer/fct_loop_setting.h \
 	../../test7-refactor/src/sequencer/fct_step.h 
 FORMS    += mainwindow.ui

@@ -15,6 +15,7 @@
 #include "led_toogle.h"
 #include "step.h"
 #include "clk.h"
+#include "node.h"
 
 struct signature_change {
 	uint8_t num;
@@ -37,12 +38,13 @@ class track {
 		
 		uint16_t _mst_clk_cnt;
 
-		uint8_t track_len;
+//		uint8_t track_len;
 		clk _c;
-		elapsedMillis elapsed_ms;
+//		elapsedMillis elapsed_ms;
 		led_matrix _lm;
 		bool mute_flg;
 //		LinkedList<track *> sub_track_list;
+		node head;
 
 	public:
 //		step arr_step[NR_STEP];
@@ -53,6 +55,8 @@ class track {
 		led_toogle _step_animation;
 
 		step* _mtx_btn_to_step[NR_STEP];
+		node* _mtx_to_nodep[NR_STEP];
+
 //		step* arr_step;
 		struct clk_def _clk_def;
 
