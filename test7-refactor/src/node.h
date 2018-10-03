@@ -4,13 +4,16 @@
 #include <stdint.h>
 #include <LinkedList.h>
 #include "types.h"
+
+class node;
+
 #include "step.h"
 
 class node {
 	public:
 		LinkedList<node *>* _children;
 		node* _parent;
-		step* _s;
+		step* _step;
 		uint8_t	_node_lvl;
 		uint8_t _mtx_id;
 

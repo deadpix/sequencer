@@ -56,11 +56,11 @@ static void create_tree(node* parent){
 		n->_step = s;
 		s->_node = n;
 
-		ll->add(s);
+		ll->add(n);
 	}
 }
 
-static void set_mtx_to_node(node** arr, node* n, step* s){
+static void set_mtx_to_node(node** arr, node* n, step* s, uint8_t id){
 	n->_mtx_id = id;
 	s->_step_ui_id = id;
 	arr[id] = n;
@@ -69,7 +69,7 @@ static void set_mtx_to_node(node** arr, node* n, step* s){
 static void reset_mtx_to_node(node** arr, node* parent){
 	for(int i=0; i<parent->_children->size(); i++){
 		node* n = parent->_children->get(i);
-		step* s = parent->_children->get(i)->_s;
+		step* s = parent->_children->get(i)->_step;
 		
 		set_mtx_to_node(arr, n, s, i);	
 	}
@@ -87,10 +87,10 @@ track::track(){
 
 	create_tree(&head);
 	reset_mtx_to_node(_mtx_to_nodep, &head);
-	_cur_step = ;
-	_first_step = ;
-	_last_step = ;
-	chain_step(head.children, _first_step, _last_step);
+//	_cur_step = ;
+//	_first_step = ;
+//	_last_step = ;
+//	chain_step(head.children, _first_step, _last_step);
 /*
 	LinkedList<node *> *ll = new LinkedList<node *>; 
 	for(int i=0; i<8; i++){

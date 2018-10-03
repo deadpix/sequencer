@@ -10,6 +10,9 @@
 
 #include "types.h"
 #include "clk.h"
+
+class step;
+
 #include "node.h"
 
 #define GATE_UP			(1<<0)
