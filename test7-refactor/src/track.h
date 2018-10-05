@@ -54,8 +54,9 @@ class track {
 		
 		led_toogle _step_animation;
 
-		step* _mtx_btn_to_step[NR_STEP];
+//		step* _mtx_btn_to_step[NR_STEP];
 		node* _mtx_to_node[NR_STEP];
+		node* get_node_from_matrix(uint8_t);
 
 //		step* arr_step;
 		struct clk_def _clk_def;

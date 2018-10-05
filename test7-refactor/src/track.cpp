@@ -26,6 +26,7 @@ bool track::delete_step(LinkedList<step *> *l, step* s){
 	return ret;
 }
 
+/*
 static void chain_step(LinkedList<step *> *list, step* start, step* end){
 	bool flg_chain = false;
 
@@ -44,6 +45,7 @@ static void chain_step(LinkedList<step *> *list, step* start, step* end){
 		}
 	}
 }
+*/
 static void chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end){
 	bool flg_chain = false;
 
@@ -112,9 +114,6 @@ track::track(){
 	_clk_def.denominator = 1;	
 	_mst_clk_cnt = 1;
 
-	dbg::print("test1");
-
-	
 	create_tree(&head);
 	reset_mtx_to_node(_mtx_to_node, &head);
 
@@ -141,7 +140,6 @@ track::track(){
 
 //	_cur_step = &arr_step[0];
 
-	dbg::print("test2");
 }
 /*
 track::track(uint8_t nr_step){
@@ -222,24 +220,25 @@ int track::del_signature_change(step* s){
 	return error;
 }
 
-static void update_signature_animation(struct signature_change* sc, uint32_t ms){
-	if( sc->signature_ui->end_animation_n_restore() ){
-//		led_matrix* lm = sc->signature_ui->get_led_matrix();
-//		uint8_t new_color = lm->get_ground_color(sc->s->_step_ui_id, BACKGROUND);
-		
-		sc->signature_ui->start_animation( (ms * sc->num / sc->denom) * 0.2 );
-	}
-}
+//static void update_signature_animation(struct signature_change* sc, uint32_t ms){
+//	if( sc->signature_ui->end_animation_n_restore() ){
+////		led_matrix* lm = sc->signature_ui->get_led_matrix();
+////		uint8_t new_color = lm->get_ground_color(sc->s->_step_ui_id, BACKGROUND);
+//		
+//		sc->signature_ui->start_animation( (ms * sc->num / sc->denom) * 0.2 );
+//	}
+//}
 
 void track::show_signature_change(uint32_t ms){
-	struct signature_change* sc;
-	for(int i = 0; i<_signature_change_list.size();i++){
-		sc = _signature_change_list.get(i);
-		// TODO
-		if(_mtx_btn_to_step[sc->s->_step_ui_id]){
-			update_signature_animation(sc,ms);
-		}
-	}
+	UNUSED(ms);
+//	struct signature_change* sc;
+//	for(int i = 0; i<_signature_change_list.size();i++){
+//		sc = _signature_change_list.get(i);
+//		// TODO
+//		if(_mtx_btn_to_step[sc->s->_step_ui_id]){
+//			update_signature_animation(sc,ms);
+//		}
+//	}
 }
 
 void track::init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t)){
@@ -289,6 +288,10 @@ void track::set_all_step_note(uint16_t note){
 //	}
 //}
 
+node* track::get_node_from_matrix(uint8_t id){
+	return _mtx_to_node[id];
+}
+
 uint8_t track::get_max_step(){
 	return _last_step->_step_ui_id + 1;
 }
@@ -297,11 +300,11 @@ void track::set_max_step(uint8_t max){
 	//TODO
 
 
-	step* end;
-	if( (end = _mtx_btn_to_step[max-1]) ){
-		_last_step = end;
-		chain_step(&_step_list, _first_step, _last_step);
-	}
+//	step* end;
+//	if( (end = _mtx_btn_to_step[max-1]) ){
+//		_last_step = end;
+//		chain_step(&_step_list, _first_step, _last_step);
+//	}
 
 
 
