@@ -17,13 +17,13 @@ class dbg {
 			qDebug("%s",s.c_str());
 		};
 		static void print(long n){
-			qDebug("%l",n);
+			qDebug("%ld",n);
 		};
 		static void println(const std::string &s){
 			qDebug("%s",s.c_str());
 		};
 		static void println(long n){
-			qDebug("%l",n);
+			qDebug("%ld",n);
 		};
 		static void printf(const char *format, ...){
 			va_list argptr;

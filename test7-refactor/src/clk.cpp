@@ -90,6 +90,7 @@ void clk::clk_set_max_step(uint8_t max_step){
 int clk::clk_bpms_to_bpm(uint32_t bpms){
 	uint16_t bpm = bpms_to_bpm(bpms);
 	clk_set_bpm(bpm);
+	return 0;
 }
 
 int clk::clk_set_ms(uint32_t new_ms){
@@ -194,7 +195,9 @@ uint32_t clk::clk_sync(uint32_t ms, uint16_t step){
 }
 
 uint32_t clk::clk_sync_ratio(uint32_t ms, uint16_t step){
+	UNUSED(step);
 	uint32_t ret = 0;
+	
 
 	_ms = ms * _numerator / _denominator;
 	_bpm = ms_to_bpm(_ms);

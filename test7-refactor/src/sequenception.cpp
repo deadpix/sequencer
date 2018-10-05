@@ -1,3 +1,4 @@
+#include <hw_debug.h>
 #include "sequenception.h"
 
 static const uint8_t MIDI_DRUM_GM[8] = {37, 36, 42, 82, 40, 38, 46, 44};
@@ -21,9 +22,13 @@ void (*sequenception::fct_tempo_change)(uint32_t);
 
 
 static void dummy_fct_midi(uint16_t arg1, uint8_t arg2, uint8_t arg3){
+	UNUSED(arg1);
+	UNUSED(arg2);
+	UNUSED(arg3);
 //	Serial.println("dummy midi function");
 }
 static void dummy_fct_tempo_change(uint32_t arg1){
+	UNUSED(arg1);
 //	Serial.println("dummy tempo change function");
 }
 sequenception::sequenception(){
@@ -120,7 +125,6 @@ void sequenception::loop(uint32_t ms){
 		current_prog->update_ui(ms, mst_clk->clk_get_step_cnt());
 	}
 	midi_seq.check_clks(ms, mst_clk->clk_get_step_cnt());
-
 }
 void sequenception::init_midi_seq(){
 	track* t;

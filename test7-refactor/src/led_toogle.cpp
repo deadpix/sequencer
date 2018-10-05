@@ -87,4 +87,5 @@ int led_toogle::end_animation_n_restore(){
 
 int led_toogle::stop_animation(){
 	_state = STOPPED;
+	return _state;
 }

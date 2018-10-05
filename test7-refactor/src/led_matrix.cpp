@@ -50,8 +50,8 @@ led_t* led_matrix::get_led_arr(){
 }
 
 int led_matrix::get_next_color(uint8_t color){	
-	int size = (sizeof(color_tree)/sizeof(color_tree[0])) - 1;
-	for(int i=0; i<(sizeof(color_tree)/sizeof(color_tree[0])); i++){
+//	int size = (sizeof(color_tree)/sizeof(color_tree[0])) - 1;
+	for(uint8_t i=0; i<(sizeof(color_tree)/sizeof(color_tree[0])); i++){
 		if(color == color_tree[i]){
 			 return color_tree[i+1];
 		}

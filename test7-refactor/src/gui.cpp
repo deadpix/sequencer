@@ -1,8 +1,13 @@
+#include <stdint.h>
+
+#include "types.h"
 #include "gui.h"
+
 
 static void (*refresh_fct)(char**);
 
 static void dummy_fct(char** str){
+	UNUSED(str);
 //	Serial.println(str[0]);
 //	Serial.println(str[1]);
 //	Serial.println(str[2]);

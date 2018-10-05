@@ -45,6 +45,7 @@ void sequencer::check_clks(uint32_t mst_ms, uint16_t mst_step){
 	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
 		t = &track_arr[i];
 		/*res = */t->check_event(mst_ms, mst_step);
+		
 	}
 //	if(res){
 //		current->_step_animation.init_animation_n_save();
@@ -118,5 +119,5 @@ void sequencer::update_ui(uint32_t mst_ms, uint16_t mst_step){
 	}
 }
 led_matrix* sequencer::get_led_matrix(){
-	current->get_led_matrix();
+	return current->get_led_matrix();
 }

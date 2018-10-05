@@ -11,7 +11,9 @@
 
 
 static void upd_display(sequencer* seq, uint8_t val){
-	char str[7];
+	UNUSED(seq);
+	UNUSED(val);
+//	char str[7];
 //	seq->prog::display_str(itoa(val,str,BASE10), 2);
 }
 
@@ -55,11 +57,15 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 */
 }
 void fct_loop_setting::on_release(uint8_t btn_id){
+	UNUSED(btn_id);
 }
 void fct_loop_setting::on_long_release(uint8_t btn_id){
+	UNUSED(btn_id);
 }
 
 void fct_loop_setting::update_ui(uint32_t mst_ms, uint16_t mst_step){
+	UNUSED(mst_ms);
+	UNUSED(mst_step);
 
 }
 void fct_loop_setting::on_start(){

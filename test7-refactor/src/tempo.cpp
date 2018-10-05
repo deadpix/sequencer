@@ -71,8 +71,10 @@ void tempo::tap(){
 }
 
 void tempo::on_push(uint8_t btn_id){
+	UNUSED(btn_id);
 }
 void tempo::on_release(uint8_t btn_id){
+	UNUSED(btn_id);
 }
 
 clk* tempo::get_mst_clk(){
@@ -107,6 +109,7 @@ void tempo::menu_update(){
 
 
 int tempo::menu_on_push(uint8_t func_id, uint8_t opt_id){
+	UNUSED(func_id);
 	int ret = 0;
 	prog::display_title();
 	if(opt_id == TAP_BTN_ID){
@@ -130,6 +133,7 @@ int tempo::menu_on_push(uint8_t func_id, uint8_t opt_id){
 	return ret;
 }
 int tempo::menu_on_release(uint8_t func_id, uint8_t opt_id){
+	UNUSED(func_id);
 	int ret = 0;
 	if(opt_id == TAP_BTN_ID){
 		tap();
@@ -143,4 +147,6 @@ int tempo::menu_on_release(uint8_t func_id, uint8_t opt_id){
 }
 
 void tempo::update_ui(uint32_t mst_ms, uint16_t mst_step){
+	UNUSED(mst_ms);
+	UNUSED(mst_step);
 }

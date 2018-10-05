@@ -5,6 +5,7 @@ node::node(){
 	_step = NULL;
 	_node_lvl = 0;
 	_mtx_id = 0;
+	_children = NULL;
 }
 node::~node(){
 	for(int i=0; i<_children->size();i++){

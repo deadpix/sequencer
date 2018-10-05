@@ -1,6 +1,8 @@
 #include "menu.h"
 
 static led_matrix* default_clbk_func(/*void* ptr, */uint8_t id1, uint8_t id2/*, led_matrix* lm*/){
+	UNUSED(id1);
+	UNUSED(id2);
 //	Serial.print("program ");
 //	Serial.print(id1);
 //	Serial.println(" has no menu function");
@@ -66,8 +68,10 @@ void menu::menu_update(){
 
 // DUMMY FUNCTIONS
 int menu::menu_on_push(uint8_t, uint8_t){
+	return 0;
 }
 int menu::menu_on_release(uint8_t, uint8_t){
+	return 0;
 }
 
 void menu::on_push(uint8_t btn_id){
@@ -81,7 +85,7 @@ void menu::on_push(uint8_t btn_id){
 void menu::on_release(uint8_t btn_id){
 	uint8_t prog_id = btn_id / MATRIX_NR_ROW;
 	uint8_t opt_id = btn_id % MATRIX_NR_COL;
-	int ret;
+	int ret = 0;
 	
 	prog* p = prog_arr[prog_id];
 
@@ -97,4 +101,6 @@ led_matrix* menu::get_led_matrix(void){
 	return &menu_interface;
 }
 void menu::update_ui(uint32_t mst_ms, uint16_t mst_step){
+	UNUSED(mst_ms);
+	UNUSED(mst_step);
 }

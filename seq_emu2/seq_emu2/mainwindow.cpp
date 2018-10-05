@@ -44,9 +44,9 @@ static void refresh_oled(char** line_arr){
 #define BTN_LONG_PUSHED	2
 #define LONG_PRESS_TIME_MS	1000
 
-static void init_menu_btn(prog* p){
-	sequenception.menu_ctrl.set_next_prog(p);
-}
+//static void init_menu_btn(prog* p){
+//	sequenception.menu_ctrl.set_next_prog(p);
+//}
 
 void MainWindow::setup(){
 	oled_gui.init_gui(refresh_oled);
@@ -69,6 +69,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	for(int i=0;i<MATRIX_NR_BTN;i++){
 		str = QString("pushButton_%1").arg(i);
+		btnMatrixStatus[i] = BTN_RELEASED;
 		btnMatrix[i] = this->findChild<QPushButton *>(str);
 		if(!btnMatrix[i]){
 			qDebug("unable to find btn %s...",str.toUtf8().constData());

@@ -49,13 +49,13 @@ class track {
 	public:
 //		step arr_step[NR_STEP];
 		LinkedList<step *> _step_list;
-		LinkedList<step *> _sub_step_list;
+//		LinkedList<step *> _sub_step_list;
 		LinkedList<struct signature_change*> _signature_change_list;
 		
 		led_toogle _step_animation;
 
 		step* _mtx_btn_to_step[NR_STEP];
-		node* _mtx_to_nodep[NR_STEP];
+		node* _mtx_to_node[NR_STEP];
 
 //		step* arr_step;
 		struct clk_def _clk_def;

@@ -44,7 +44,25 @@ static void chain_step(LinkedList<step *> *list, step* start, step* end){
 		}
 	}
 }
+static void chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end){
+	bool flg_chain = false;
 
+	for(int i = 0; i<list->size();i++){
+		dbg::printf("step %d\n",list->get(i)->_step->_step_ui_id);
+		if(list->get(i)->_step == start){
+			flg_chain = true;
+		}
+		if(list->get(i)->_step == end){
+			flg_chain = false;
+		}
+		if(flg_chain){
+			list->get(i)->_step->set_next_step(list->get(i+1)->_step);
+		}
+		else {
+			list->get(i)->_step->set_next_step(start);
+		}
+	}
+}
 static void create_tree(node* parent){
 	LinkedList<node *> *ll = new LinkedList<node *>; 
 	for(int i=0; i<8; i++){
@@ -58,22 +76,32 @@ static void create_tree(node* parent){
 
 		ll->add(n);
 	}
+	parent->_children = ll;
 }
 
 static void set_mtx_to_node(node** arr, node* n, step* s, uint8_t id){
 	n->_mtx_id = id;
 	s->_step_ui_id = id;
+//	s->set_step_id(id);
+ 
 	arr[id] = n;
 }
 
-static void reset_mtx_to_node(node** arr, node* parent){
+static void reset_mtx_to_node(node* arr[], node* parent){
 	for(int i=0; i<parent->_children->size(); i++){
 		node* n = parent->_children->get(i);
 		step* s = parent->_children->get(i)->_step;
-		
 		set_mtx_to_node(arr, n, s, i);	
 	}
 }
+
+//static void dump_step(step* first){
+//	step* tmp = first;
+//	for(int i=0; i<9; i++){
+//		dbg::printf("child%d ui_id=%d\n",i,tmp->_step_ui_id);
+//		tmp = tmp->get_next_step();
+//	}
+//}
 
 track::track(){
 	curr_step_id = 0;
@@ -84,37 +112,22 @@ track::track(){
 	_clk_def.denominator = 1;	
 	_mst_clk_cnt = 1;
 
+	dbg::print("test1");
 
+	
 	create_tree(&head);
-	reset_mtx_to_node(_mtx_to_nodep, &head);
-//	_cur_step = ;
-//	_first_step = ;
-//	_last_step = ;
-//	chain_step(head.children, _first_step, _last_step);
+	reset_mtx_to_node(_mtx_to_node, &head);
+
+	_cur_step = head._children->get(0)->_step;
+	_first_step = _cur_step;
+	_last_step = head._children->get(head._children->size() - 1)->_step;
+	chain_step_from_node_list(head._children, _first_step, _last_step);
+//
+//	dump_step(_first_step);
+	
 /*
-	LinkedList<node *> *ll = new LinkedList<node *>; 
-	for(int i=0; i<8; i++){
-		node* n = new node;
-		step* s = new step;
-		
-		n->node_lvl = 1;
-		n->parent = &head;
-		n->s = s;
-
-		s->_step_ui_id = i;		
-		ll->add(s);
-
-		_mtx_to_node[i] = n;
-	}
-*/
-
-		
-
-//	arr_step = new step[NR_STEP];	
 	for(int i=0;i<NR_STEP;i++){
 		step *s = new step;
-//		s.set_next_step(&(arr_step[(i+1)%NR_STEP]));
-//		s.set_clk(&_c);
 		s->_step_ui_id = i;
 		_mtx_btn_to_step[i] = s;
 		_step_list.add(s);
@@ -124,7 +137,11 @@ track::track(){
 	_first_step = _step_list.get(0);
        	_last_step = _step_list.get(_step_list.size() - 1);	
 	chain_step(&_step_list, _first_step, _last_step);
+*/
+
 //	_cur_step = &arr_step[0];
+
+	dbg::print("test2");
 }
 /*
 track::track(uint8_t nr_step){
@@ -154,10 +171,14 @@ track::track(uint8_t nr_step){
 }
 */
 track::~track(){
-	for(int i=0;i<_step_list.size();i++){
-		step* s = _step_list.remove(i);
-		delete s;
-	}
+
+	// need to do clean delete of track
+
+
+//	for(int i=0;i<_step_list.size();i++){
+//		step* s = _step_list.remove(i);
+//		delete s;
+//	}
 }
 
 int track::add_signature_change(step* s, uint8_t num, uint8_t denom, uint8_t color){
@@ -171,8 +192,8 @@ int track::add_signature_change(step* s, uint8_t num, uint8_t denom, uint8_t col
 		}
 	}
 	
-	
-	new(sc) signature_change;
+	sc = new signature_change();	
+//	new(sc) signature_change;
 	sc->s = s;
 	sc->num = num;
 	sc->denom = denom;
@@ -203,8 +224,8 @@ int track::del_signature_change(step* s){
 
 static void update_signature_animation(struct signature_change* sc, uint32_t ms){
 	if( sc->signature_ui->end_animation_n_restore() ){
-		led_matrix* lm = sc->signature_ui->get_led_matrix();
-		uint8_t new_color = lm->get_ground_color(sc->s->_step_ui_id, BACKGROUND);
+//		led_matrix* lm = sc->signature_ui->get_led_matrix();
+//		uint8_t new_color = lm->get_ground_color(sc->s->_step_ui_id, BACKGROUND);
 		
 		sc->signature_ui->start_animation( (ms * sc->num / sc->denom) * 0.2 );
 	}
@@ -214,6 +235,7 @@ void track::show_signature_change(uint32_t ms){
 	struct signature_change* sc;
 	for(int i = 0; i<_signature_change_list.size();i++){
 		sc = _signature_change_list.get(i);
+		// TODO
 		if(_mtx_btn_to_step[sc->s->_step_ui_id]){
 			update_signature_animation(sc,ms);
 		}
@@ -242,8 +264,19 @@ void track::set_out_id(uint8_t id){
 	_out_id = id;
 }
 void track::set_all_step_note(uint16_t note){
+
+//	for(int i=0;i<head._children->size();i++){
+//		step* s = head._children->get(i)->_step;
+//		if(s){
+//			s->step_set_note(127, note);	
+//		} 
+//		else {
+//			dbg::printf("empty step %d\n",i);
+//		}
+//	}
+	
+
 	for(int i=0;i<_step_list.size();i++){
-//		arr_step[i].step_set_note(127, note);				
 		_step_list.get(i)->step_set_note(127, note);
 	}
 }
@@ -260,11 +293,18 @@ uint8_t track::get_max_step(){
 	return _last_step->_step_ui_id + 1;
 }
 void track::set_max_step(uint8_t max){
+
+	//TODO
+
+
 	step* end;
 	if( (end = _mtx_btn_to_step[max-1]) ){
 		_last_step = end;
 		chain_step(&_step_list, _first_step, _last_step);
 	}
+
+
+
 /*	
 	if(_max_step < max){
 		for(int i=_max_step;i<max;i++){
@@ -364,7 +404,7 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 //		_step_animation.init_animation_n_save(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
 		_step_animation.init_clk_animation(&_lm, errata_step[curr_step_id], LED_R_IDX);
 //		_step_animation.start_animation((_c.clk_get_ms()/* * CLK_LEN_PER / 100.*/));
-		_step_animation.start_animation(200);
+		_step_animation.start_animation(20);
 
 	} else {
 //		if(arr_step[curr_step_id].upd_gate()){

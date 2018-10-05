@@ -14,7 +14,8 @@ class tempo : public prog {
 		led_matrix _lm;
 		elapsedMillis _ellapsed_tap;
 		clk _mst;
-		uint32_t _tap_timestamp[NR_TAP-1];
+//		uint32_t _tap_timestamp[NR_TAP-1];
+		uint32_t _tap_timestamp[NR_TAP];
 		uint8_t _tap_cnt;
 		led_toogle _tap_animation;
 		led_toogle _clk_animation;
