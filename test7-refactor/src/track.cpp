@@ -46,7 +46,7 @@ static void chain_step(LinkedList<step *> *list, step* start, step* end){
 	}
 }
 */
-static void chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end){
+void track::chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end){
 	bool flg_chain = false;
 
 	for(int i = 0; i<list->size();i++){
@@ -65,9 +65,9 @@ static void chain_step_from_node_list(LinkedList<node *> *list, step* start, ste
 		}
 	}
 }
-static void create_tree(node* parent){
+static void create_tree(node* parent, uint8_t max_steps){
 	LinkedList<node *> *ll = new LinkedList<node *>; 
-	for(int i=0; i<8; i++){
+	for(int i=0; i<max_steps; i++){
 		node* n = new node;
 		step* s = new step;
 		
@@ -108,13 +108,13 @@ static void reset_mtx_to_node(node* arr[], node* parent){
 track::track(){
 	curr_step_id = 0;
 	_hw_fct = _dummy_fct;
-	_max_step = NR_STEP;
+	_max_step = DEFAULT_STEP_PER_SEQ;
 	_play = false;
 	_clk_def.numerator = 1;
-	_clk_def.denominator = 1;	
+	_clk_def.denominator = 1;
 	_mst_clk_cnt = 1;
 
-	create_tree(&head);
+	create_tree(&head, _max_step);
 	reset_mtx_to_node(_mtx_to_node, &head);
 
 	_cur_step = head._children->get(0)->_step;
@@ -293,10 +293,11 @@ node* track::get_node_from_matrix(uint8_t id){
 }
 
 uint8_t track::get_max_step(){
-	return _last_step->_step_ui_id + 1;
+	return _max_step;
+//	return _last_step->_step_ui_id + 1;
 }
 void track::set_max_step(uint8_t max){
-
+	_max_step = max;
 	//TODO
 
 

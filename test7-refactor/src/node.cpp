@@ -22,8 +22,8 @@ node::~node(){
 }
 
 node* node::get_node_lvl(uint8_t lvl){
-	node* tmp = _parent;
-	while(_parent->_node_lvl < lvl){
+	node* tmp = this;
+	while(tmp->_node_lvl < lvl){
 		tmp = tmp->_parent;
 	}
 	return tmp;

@@ -57,6 +57,7 @@ class track {
 //		step* _mtx_btn_to_step[NR_STEP];
 		node* _mtx_to_node[NR_STEP];
 		node* get_node_from_matrix(uint8_t);
+		static void chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end);
 
 //		step* arr_step;
 		struct clk_def _clk_def;
@@ -89,7 +90,9 @@ class track {
 		step* get_last_step(){
 			return _last_step;
 		}
-
+		void  set_last_step(step * s){
+			_last_step = s;
+		}
 		void set_all_step_note(uint16_t);
 //		void set_step_note(uint16_t, uint8_t );
 		

@@ -2,6 +2,7 @@
 #include "../errata.h"
 
 #include <cstdlib>
+#include <hw_debug.h>
 
 #define BASE10	10
 
@@ -26,9 +27,31 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 	uint8_t id = errata_btn[btn_id];
 	track* t = _seq->get_current_track();
 	uint8_t nr_step = t->get_max_step();
+	node* n = t->get_node_from_matrix(id);
+	step* s = t->get_last_step();
+	node* looping_node;
 
 	upd_display(_seq, id);
 
+	// last step is the looping point
+	// if push a button whose id is different from last step id
+
+	if(n && (n->_node_lvl == 1) && (n != (looping_node = s->_node->get_node_lvl(1)))){
+		// step after looping step will points to first step
+
+		// do step chaining
+		
+		// do step clearing?
+		
+		dbg::printf("looping_node->_mtx_id=%d btn_id=%d\n",looping_node->_mtx_id,btn_id);
+
+		t->get_led_matrix()->clr_n_restore(errata_step[looping_node->_mtx_id],FOREGROUND1);	
+		t->get_led_matrix()->save_n_set(LED_G_IDX, btn_id, FOREGROUND1);
+		t->set_last_step(n->_step);
+
+	}
+
+/*	
 	if((id+1) != nr_step){
 	
 //		t->get_led_matrix()->clr_led_x(LED_G_IDX,errata_step[nr_step-1]);	
@@ -45,7 +68,7 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 		t->get_led_matrix()->save_n_set(LED_G_IDX, btn_id, FOREGROUND1);
 		t->set_max_step(id+1);
 	}
-
+*/
 /*
 	if(nr_step == btn_id){
 		t->get_led_matrix()->clr_n_restore(btn_id);	
