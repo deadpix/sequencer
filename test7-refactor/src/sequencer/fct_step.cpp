@@ -193,7 +193,12 @@ void fct_step::on_release(uint8_t btn_id){
 			clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
 	
 			// TODO create substep
-		
+//			s->_clk_def.numerator = (to-from);
+//			s->_clk_def.denominator = nr_new_step;	
+			uint8_t len = (id % t->get_max_step());
+					
+
+	
 		} 
 		else {			
 			step* s = t->_mtx_to_node[id]->_step;
@@ -218,12 +223,30 @@ void fct_step::on_long_push(uint8_t btn_id){
 		if(n->_step){
 	
 			if(_lp_cnt < BTN_MAX_LONG_PUSH_STATE){
-				_lp_ui[_lp_cnt]._ms = 0;
-				_lp_ui[_lp_cnt]._id = btn_id;
-				ret = t->get_led_matrix()->save_n_set(n->_step->get_step_color(), btn_id, FOREGROUND1);
+
+				// verify that long push is on the same level as the previous
+				bool flg_lvl = true;
+				for(int i=0; i<_lp_cnt; i++){
+					node *tmp = t->get_node_from_matrix(errata_btn[_lp_ui[i]._id]);
+					if( (tmp->_node_lvl != n->_node_lvl) || (tmp == n) ){
+						flg_lvl = false;
+						break;
+					}
+				}
+
+				if(flg_lvl){
+					_lp_ui[_lp_cnt]._ms = 0;
+					_lp_ui[_lp_cnt]._id = btn_id;
+					ret = t->get_led_matrix()->save_n_set(n->_step->get_step_color(), btn_id, FOREGROUND1);
 		
-				dbg::printf("btn_id=%d on long push ret=%x\n",btn_id,ret);
-				++_lp_cnt;
+					dbg::printf("btn_id=%d on long push ret=%x\n",btn_id,ret);
+					++_lp_cnt;
+				}
+				else {
+					t->get_led_matrix()->save_n_set(n->_step->get_step_color(), btn_id, FOREGROUND1);
+					clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui); 
+					t->get_led_matrix()->clr_n_restore(btn_id, FOREGROUND1);
+				}
 			}
 			else {
 				t->get_led_matrix()->save_n_set(n->_step->get_step_color(), btn_id, FOREGROUND1);
