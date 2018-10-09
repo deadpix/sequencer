@@ -16,6 +16,7 @@ class node {
 		step* _step;
 		uint8_t	_node_lvl;
 		uint8_t _mtx_id;
+		uint8_t _node_id;
 
 		node();
 		~node();		

@@ -65,7 +65,8 @@ void track::chain_step_from_node_list(LinkedList<node *> *list, step* start, ste
 		}
 	}
 }
-static void create_tree(node* parent, uint8_t max_steps){
+void track::create_tree(node* parent, uint8_t max_steps, uint8_t num, 
+			uint8_t denom, uint8_t mtx_off){
 	LinkedList<node *> *ll = new LinkedList<node *>; 
 	for(int i=0; i<max_steps; i++){
 		node* n = new node;
@@ -74,7 +75,14 @@ static void create_tree(node* parent, uint8_t max_steps){
 		n->_node_lvl = parent->_node_lvl + 1;
 		n->_parent = parent;
 		n->_step = s;
+		n->_node_id = i;
 		s->_node = n;
+		s->_clk_def.numerator = num;
+		s->_clk_def.denominator = denom;
+
+		n->_mtx_id = mtx_off + i;
+		s->_step_ui_id = mtx_off + i;
+		_mtx_to_node[mtx_off + i] = n;
 
 		ll->add(n);
 	}
@@ -114,7 +122,7 @@ track::track(){
 	_clk_def.denominator = 1;
 	_mst_clk_cnt = 1;
 
-	create_tree(&head, _max_step);
+	create_tree(&head, _max_step, 1, 1, 0);
 	reset_mtx_to_node(_mtx_to_node, &head);
 
 	_cur_step = head._children->get(0)->_step;
@@ -290,6 +298,9 @@ void track::set_all_step_note(uint16_t note){
 
 node* track::get_node_from_matrix(uint8_t id){
 	return _mtx_to_node[id];
+}
+void  track::set_node_in_matrix(uint8_t id, node* n){
+	_mtx_to_node[id] = n;
 }
 
 uint8_t track::get_max_step(){

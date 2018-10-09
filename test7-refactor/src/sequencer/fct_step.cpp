@@ -189,15 +189,44 @@ void fct_step::on_release(uint8_t btn_id){
 			clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
 		} 
 		else if(_lp_cnt == 2){
-			// clear ui
-			clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
-	
 			// TODO create substep
 //			s->_clk_def.numerator = (to-from);
 //			s->_clk_def.denominator = nr_new_step;	
-			uint8_t len = (id % t->get_max_step());
-					
+			uint8_t len = (id % t->get_max_step()) + 1;
+			dbg::printf("create sub seq of length=%d\n",len);
+			
+			// TODO: first_step might be deleted
+			node* tmp = t->get_first_step()->_node;
+			node* start = t->get_node_from_matrix(errata_btn[_lp_ui[0]._id]);
+			node* end = t->get_node_from_matrix(errata_btn[_lp_ui[1]._id]);
+			node* parent = start->_parent;
 
+			// delete node between start and end
+			for(uint8_t i=(start->_node_id+1);i<end->_node_id;i++){
+				node* tmp = parent->_children->remove(i);
+				t->set_node_in_matrix(tmp->_mtx_id, NULL);
+				// should we delete node???
+				delete tmp;
+			}
+			// delete step of start node
+			delete start->_step;
+
+			// create x nodes and steps
+			t->create_tree(start, len, (end->_node_id - start->_node_id), 
+					len, (start->_node_lvl - 1) * DEFAULT_STEP_PER_SEQ);
+			// chain steps
+			track::chain_step_from_node_list(start->_children,
+						  start->_children->get(0)->_step,
+						  start->_children->get(len-1)->_step);
+
+
+			// create tree
+	
+	
+			// clear ui
+			clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
+	
+		
 	
 		} 
 		else {			
