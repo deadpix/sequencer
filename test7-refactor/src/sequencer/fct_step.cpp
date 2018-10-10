@@ -193,7 +193,6 @@ void fct_step::on_release(uint8_t btn_id){
 //			s->_clk_def.numerator = (to-from);
 //			s->_clk_def.denominator = nr_new_step;	
 			uint8_t len = (id % t->get_max_step()) + 1;
-			dbg::printf("create sub seq of length=%d\n",len);
 			
 			// TODO: first_step might be deleted
 			node* tmp = t->get_first_step()->_node;
@@ -213,13 +212,17 @@ void fct_step::on_release(uint8_t btn_id){
 
 			// create x nodes and steps
 			t->create_tree(start, len, (end->_node_id - start->_node_id), 
-					len, (start->_node_lvl - 1) * DEFAULT_STEP_PER_SEQ);
+					len, start->_node_lvl * DEFAULT_STEP_PER_SEQ);
 			// chain steps
 			track::chain_step_from_node_list(start->_children,
 						  start->_children->get(0)->_step,
 						  start->_children->get(len-1)->_step);
 
+			// FIXME: end might not have a step => should find the first step
+			start->_children->get(len-1)->_step->set_next_step(end->get_first_step(NR_STEP/DEFAULT_STEP_PER_SEQ));
 
+
+			dbg::printf("new steps / nodes have been created\n");
 			// create tree
 	
 	

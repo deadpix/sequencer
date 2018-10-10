@@ -22,6 +22,7 @@ class node {
 		~node();		
 
 		node* get_node_lvl(uint8_t lvl);
+		step* get_first_step(uint8_t max_lvl);
 		static node* get_common_parent(node*, node*);	
 };
 

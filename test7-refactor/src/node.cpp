@@ -1,4 +1,5 @@
 #include "node.h"
+#include <hw_debug.h>
 
 node::node(){
 	_parent = NULL;
@@ -8,9 +9,12 @@ node::node(){
 	_children = NULL;
 }
 node::~node(){
-	for(int i=0; i<_children->size();i++){
-		node* n = _children->remove(i);
-		delete n;
+
+	if(_children){
+		for(int i=0; i<_children->size();i++){
+			node* n = _children->remove(i);
+			delete n;
+		}
 	}
 	// delete step* ?
 	if(_step){
@@ -27,6 +31,26 @@ node* node::get_node_lvl(uint8_t lvl){
 		tmp = tmp->_parent;
 	}
 	return tmp;
+}
+
+step* node::get_first_step(uint8_t max_lvl){
+	node* tmp = this;
+	step* ret = NULL;
+	for(uint8_t i=0; i<max_lvl; i++){	
+		if(tmp->_step){
+			ret = tmp->_step;
+			return ret;
+		}
+		else {
+			tmp = tmp->_children->get(0);
+			if(!tmp){
+				dbg::println("problem in node::get_first_step function");
+				break;
+			}
+		}
+	}
+	dbg::println("unrecoverable error in node::get_first_step");
+	return ret;
 }
 
 node* node::get_common_parent(node* n1, node* n2){
