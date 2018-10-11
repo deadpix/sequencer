@@ -345,9 +345,7 @@ bool track::next_step(uint32_t mst_ms){
 //	Serial.print("numerator ");
 //	Serial.print(_clk_def.numerator * _cur_step->_clk_def.numerator);
 //	Serial.print(" denominator ");
-//	Serial.println(_clk_def.denominator * _cur_step->_clk_def.denominator);
-
-	
+//	Serial.println(_clk_def.denominator * _cur_step->_clk_def.denominator);	
 
 	_c.clk_set_ratio(mst_ms
 	, _clk_def.numerator * _cur_step->_clk_def.numerator
@@ -415,18 +413,29 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 				}
 			}
 		}
+		node* tmp = _cur_step->_node;
 		// step animation only for the current track
-//		_step_animation.init_animation_n_save(&_lm, errata_step[curr_step_id], LED_GBR_IDX);
-		_step_animation.init_clk_animation(&_lm, errata_step[curr_step_id], LED_R_IDX);
-//		_step_animation.start_animation((_c.clk_get_ms()/* * CLK_LEN_PER / 100.*/));
-		_step_animation.start_animation(20);
+		while(tmp != &head){
+			_step_animation[(tmp->_node_lvl-1)].init_clk_animation(&_lm, errata_step[tmp->_mtx_id], LED_R_IDX);
+//			_step_animation.start_animation((_c.clk_get_ms()/* * CLK_LEN_PER / 100.*/));
+			_step_animation[(tmp->_node_lvl-1)].start_animation(20);
+			tmp = tmp->_parent;
+		}
+//		_step_animation.init_clk_animation(&_lm, errata_step[curr_step_id], LED_R_IDX);
+//		_step_animation.start_animation(20);
 
 	} else {
 //		if(arr_step[curr_step_id].upd_gate()){
 		if(_cur_step->upd_gate()){
 			_hw_fct(_cur_step->_note.pitch, 0, _out_id);
 		}
-		_step_animation.end_animation_n_restore();
+		node* tmp = _cur_step->_node;
+		while(tmp != &head){
+			_step_animation[(tmp->_node_lvl-1)].end_animation_n_restore();
+			tmp = tmp->_parent;		
+		}
+
+//		_step_animation.end_animation_n_restore();
 	}
 	return res;
 }

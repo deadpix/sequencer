@@ -52,7 +52,8 @@ class track {
 //		LinkedList<step *> _sub_step_list;
 		LinkedList<struct signature_change*> _signature_change_list;
 		
-		led_toogle _step_animation;
+		led_toogle _step_animation[DEFAULT_STEP_PER_SEQ];
+//		led_toogle _step_animation;
 
 //		step* _mtx_btn_to_step[NR_STEP];
 		node* _mtx_to_node[NR_STEP];
