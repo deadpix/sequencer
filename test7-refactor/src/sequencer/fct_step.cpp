@@ -159,7 +159,10 @@ void fct_step::on_push(uint8_t btn_id){
 		}
 		// node case 
 		else {
-
+			dbg::printf("show children nodes\n");
+			if(!t->is_playing()){
+				t->show_children_node(n);
+			}
 		}
 	}
 	// else do nothing
@@ -209,6 +212,8 @@ void fct_step::on_release(uint8_t btn_id){
 			}
 			// delete step of start node
 			delete start->_step;
+			dbg::printf("start->_step id=%d\n",start->_step->_step_ui_id);
+			start->_step = NULL;
 
 			// create x nodes and steps
 			t->create_tree(start, len, (end->_node_id - start->_node_id), 

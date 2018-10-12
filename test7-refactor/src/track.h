@@ -70,6 +70,9 @@ class track {
 		int  del_signature_change(step* s);
 		void show_signature_change(uint32_t);
 
+		void show_children_node(node*);
+		void show_parent_nodes(node*, node*);
+
 		track();
 //		track(uint8_t);
 		~track();
@@ -118,6 +121,7 @@ class track {
 		void toogle_mute();
 		void toogle_play();	
 		void set_play(bool);
+		bool is_playing();
 	
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 };

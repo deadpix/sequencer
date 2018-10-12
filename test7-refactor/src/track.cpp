@@ -187,6 +187,41 @@ track::~track(){
 //	}
 }
 
+void track::show_children_node(node* parent){
+	if(parent->_children){
+		for(int i=0;i<parent->_children->size();i++){
+			node* tmp = parent->_children->get(i);
+			if(tmp->_step){
+				get_led_matrix()->clr_n_restore(errata_btn[tmp->_mtx_id], BACKGROUND);
+				if(tmp->_step->is_step_active()){
+					_mtx_to_node[tmp->_mtx_id] = tmp;
+					get_led_matrix()->save_n_set(tmp->_step->get_step_color(), errata_btn[tmp->_mtx_id], BACKGROUND);
+				}
+			}
+		}
+	} 
+	else {
+		dbg::printf("parent node without children...\n");
+	}
+}
+
+void track::show_parent_nodes(node* child, node* parent){
+	node* tmp = child;
+	
+	// redraw is not needed if the case of direct parent 
+	if(tmp->_parent != parent){	
+		for(int i=0; i<(child->_node_lvl - parent->_node_lvl); i++){
+			show_children_node(tmp);
+			tmp = tmp->_parent;
+		}
+	}
+	else {
+		dbg::printf("Don't redraw, direct parent\n");
+	}
+}
+
+
+
 int track::add_signature_change(step* s, uint8_t num, uint8_t denom, uint8_t color){
 	struct signature_change* sc;
 
@@ -339,6 +374,7 @@ void track::set_max_step(uint8_t max){
 */
 }
 bool track::next_step(uint32_t mst_ms){
+	step* prev = _cur_step;
 	_cur_step = _cur_step->get_next_step();
 	curr_step_id = _cur_step->_step_ui_id;
 
@@ -356,6 +392,19 @@ bool track::next_step(uint32_t mst_ms){
 	//	  changed or at init time
 //	_cur_step->upd_step_gate_len(_cur_step->get_clk()->clk_get_ms());
 	_cur_step->upd_step_gate_len(_c.clk_get_ms());	
+
+	
+//	node* tmp;
+	// GUI is updated in function of the previous step
+//	if(prev->_node->_node_lvl > _cur_step->_node->_node_lvl){
+//		tmp = prev->_node->get_node_lvl(_cur_step->_node->_node_lvl);
+//	}
+//	else if(prev->_node->_node_lvl < _cur_step->_node->_node_lvl){
+//		tmp = _cur_step->_node->get_node_lvl(prev->_node->_node_lvl);
+//	}
+	
+	node* common_parent = node::get_common_parent(_cur_step->_node, prev->_node); 
+	show_parent_nodes(_cur_step->_node, common_parent);
 
 	return ( _cur_step->is_step_active() );
 }
@@ -395,6 +444,9 @@ void track::toogle_play(){
 }
 void track::set_play(bool play){
 	_play = play;
+}
+bool track::is_playing(){
+	return _play;
 }
 
 uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){

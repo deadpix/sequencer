@@ -56,6 +56,13 @@ step* node::get_first_step(uint8_t max_lvl){
 node* node::get_common_parent(node* n1, node* n2){
 	node* tmp1 = n1;
 	node* tmp2 = n2;
+
+	if(tmp1->_node_lvl > tmp2->_node_lvl){
+		tmp1 = tmp1->get_node_lvl(tmp2->_node_lvl);
+	}
+	else if(tmp1->_node_lvl < tmp2->_node_lvl){
+		tmp2 = tmp2->get_node_lvl(tmp1->_node_lvl);
+	}
 	
 	while(tmp1->_parent != tmp2->_parent){
 		tmp1 = tmp1->_parent;
