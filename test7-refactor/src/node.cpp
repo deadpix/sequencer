@@ -27,7 +27,7 @@ node::~node(){
 
 node* node::get_node_lvl(uint8_t lvl){
 	node* tmp = this;
-	while(tmp->_node_lvl < lvl){
+	while(tmp->_node_lvl > lvl){
 		tmp = tmp->_parent;
 	}
 	return tmp;
@@ -56,6 +56,8 @@ step* node::get_first_step(uint8_t max_lvl){
 node* node::get_common_parent(node* n1, node* n2){
 	node* tmp1 = n1;
 	node* tmp2 = n2;
+
+//	dbg::printf("tmp1->_node_lvl = %d tmp2->_node_lvl = %d \n",tmp1->_node_lvl,tmp2->_node_lvl);
 
 	if(tmp1->_node_lvl > tmp2->_node_lvl){
 		tmp1 = tmp1->get_node_lvl(tmp2->_node_lvl);

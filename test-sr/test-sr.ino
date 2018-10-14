@@ -36,10 +36,13 @@ IntervalTimer ui_timer;
 
 volatile char check_ui;
 
+byte red[8];
 int row_counter;
 void led_next_row(){
 //	uint32_t data = 0xFF000000 | (1 << (16+row_counter));
-	uint32_t data = 0x000000ff | (1 << (24+row_counter));
+//	uint32_t data = 0x000000ff | (1 << (24+row_counter));
+	uint32_t data = 0xffFF0000 | (1 << row_counter);
+	data |= ~red[row_counter] << 8;
 //	uint32_t data = 0xF0F0 | (1 << (8+row_counter));
 //	digitalWrite(latchPin, LOW);
 //	shiftOut(dataPin, clockPin, LSBFIRST, data);
@@ -47,10 +50,10 @@ void led_next_row(){
 //	digitalWrite(latchPin, HIGH);
 
 	digitalWrite(latchPin, LOW);
-	shiftOut(dataPin, clockPin, LSBFIRST, data);
-	shiftOut(dataPin, clockPin, LSBFIRST, data >> 8);
-	shiftOut(dataPin, clockPin, LSBFIRST, data >> 16);
-	shiftOut(dataPin, clockPin, LSBFIRST, data >> 24);
+	shiftOut(dataPin, clockPin, MSBFIRST, data);
+	shiftOut(dataPin, clockPin, MSBFIRST, data >> 8);
+	shiftOut(dataPin, clockPin, MSBFIRST, data >> 16);
+	shiftOut(dataPin, clockPin, MSBFIRST, data >> 24);
 	digitalWrite(latchPin, HIGH);
 	row_counter = (row_counter + 1) % 8;
 }
@@ -183,7 +186,7 @@ void test3(){
 void all_leds(){
 //	byte dataToSend = (0xf << ((x/NR_ROW)+4)) | (0xf & ~(0xf << (x%NR_ROW)));
 //	byte dataToSend = (0xf << (4));
-	byte dataToSend = 0xff;
+	byte dataToSend = 0xFF;
 	digitalWrite(latchPin, LOW);
 	shiftOut(dataPin, clockPin, LSBFIRST, dataToSend);
 	digitalWrite(latchPin, HIGH);
@@ -236,7 +239,10 @@ void loop() {
 //	set_led_x(x);
 //	x++;
 //	all_leds();
-//erial.println(x);
-	delay(5);
+//	Serial.println("ouaich");
+	for(int i=0;i<64;i++){
+		red[i/8] = (1<<(i%8));
+		delay(100);
+	}
 }
 

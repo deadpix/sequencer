@@ -198,7 +198,7 @@ void fct_step::on_release(uint8_t btn_id){
 			uint8_t len = (id % t->get_max_step()) + 1;
 			
 			// TODO: first_step might be deleted
-			node* tmp = t->get_first_step()->_node;
+//			node* tmp = t->get_first_step()->_node;
 			node* start = t->get_node_from_matrix(errata_btn[_lp_ui[0]._id]);
 			node* end = t->get_node_from_matrix(errata_btn[_lp_ui[1]._id]);
 			node* parent = start->_parent;
@@ -212,7 +212,6 @@ void fct_step::on_release(uint8_t btn_id){
 			}
 			// delete step of start node
 			delete start->_step;
-			dbg::printf("start->_step id=%d\n",start->_step->_step_ui_id);
 			start->_step = NULL;
 
 			// create x nodes and steps
@@ -234,7 +233,8 @@ void fct_step::on_release(uint8_t btn_id){
 			// clear ui
 			clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
 	
-		
+			t->get_led_matrix()->save_n_set(LED_GBR_IDX, errata_btn[start->_mtx_id], BACKGROUND); 
+			t->show_children_node(start);	
 	
 		} 
 		else {			

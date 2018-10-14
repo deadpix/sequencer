@@ -1,5 +1,6 @@
 #include "step.h"
 #include "led_matrix.h"
+#include <hw_debug.h>
 
 step::step(){
 	flag_active = false;
@@ -15,6 +16,7 @@ step::step(){
 }
 
 step::~step(){
+	dbg::printf("delete step\n");
 }
 
 void step::step_set_note(uint8_t vel, uint16_t pitch){

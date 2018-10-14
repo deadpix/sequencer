@@ -26,26 +26,6 @@ bool track::delete_step(LinkedList<step *> *l, step* s){
 	return ret;
 }
 
-/*
-static void chain_step(LinkedList<step *> *list, step* start, step* end){
-	bool flg_chain = false;
-
-	for(int i = 0; i<list->size();i++){
-		if(list->get(i) == start){
-			flg_chain = true;
-		}
-		if(list->get(i) == end){
-			flg_chain = false;
-		}
-		if(flg_chain){
-			list->get(i)->set_next_step(list->get(i+1));
-		}
-		else {
-			list->get(i)->set_next_step(start);
-		}
-	}
-}
-*/
 void track::chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end){
 	bool flg_chain = false;
 
@@ -132,50 +112,7 @@ track::track(){
 //
 //	dump_step(_first_step);
 	
-/*
-	for(int i=0;i<NR_STEP;i++){
-		step *s = new step;
-		s->_step_ui_id = i;
-		_mtx_btn_to_step[i] = s;
-		_step_list.add(s);
-		s->set_step_id(_step_list.size() - 1);
-	}
-	_cur_step = _step_list.get(0);
-	_first_step = _step_list.get(0);
-       	_last_step = _step_list.get(_step_list.size() - 1);	
-	chain_step(&_step_list, _first_step, _last_step);
-*/
-
-//	_cur_step = &arr_step[0];
-
 }
-/*
-track::track(uint8_t nr_step){
-	curr_step_id = 0;
-	track_len = 16;
-	elapsed_ms = 0;
-	_hw_fct = _dummy_fct;
-	_max_step = nr_step;
-	_play = false;
-	_clk_def.numerator = 1;
-	_clk_def.denominator = 1;
-
-
-//	arr_step = new step[nr_step];	
-	for(int i=0;i<nr_step;i++){
-//		arr_step[i].set_step_id(i);
-//		arr_step[i].set_next_step(&(arr_step[(i+1)%nr_step]));
-//		arr_step[i].set_clk(&_c);
-
-//		arr_step[i]._step_ui_id = i;
-//		_mtx_btn_to_step[i] = &arr_step[i];
-	}
-//	for(int i=nr_step;i<NR_STEP;i++){
-//		_mtx_btn_to_step[i] = NULL;
-//	}
-//	_cur_step = &arr_step[0];
-}
-*/
 track::~track(){
 
 	// need to do clean delete of track
@@ -189,15 +126,21 @@ track::~track(){
 
 void track::show_children_node(node* parent){
 	if(parent->_children){
-		for(int i=0;i<parent->_children->size();i++){
+		int i;
+		for(i=0;i<parent->_children->size();i++){
 			node* tmp = parent->_children->get(i);
 			if(tmp->_step){
 				get_led_matrix()->clr_n_restore(errata_btn[tmp->_mtx_id], BACKGROUND);
+				_mtx_to_node[tmp->_mtx_id] = tmp;
 				if(tmp->_step->is_step_active()){
-					_mtx_to_node[tmp->_mtx_id] = tmp;
 					get_led_matrix()->save_n_set(tmp->_step->get_step_color(), errata_btn[tmp->_mtx_id], BACKGROUND);
 				}
 			}
+		}
+		for(i;i<DEFAULT_STEP_PER_SEQ;i++){
+			uint8_t idx =  errata_btn[parent->_node_lvl * DEFAULT_STEP_PER_SEQ + i];
+			_mtx_to_node[idx] = NULL;
+			get_led_matrix()->clr_n_restore(idx, BACKGROUND);
 		}
 	} 
 	else {
@@ -215,9 +158,9 @@ void track::show_parent_nodes(node* child, node* parent){
 			tmp = tmp->_parent;
 		}
 	}
-	else {
-		dbg::printf("Don't redraw, direct parent\n");
-	}
+//	else {
+//		dbg::printf("Don't redraw, direct parent\n");
+//	}
 }
 
 
@@ -402,7 +345,6 @@ bool track::next_step(uint32_t mst_ms){
 //	else if(prev->_node->_node_lvl < _cur_step->_node->_node_lvl){
 //		tmp = _cur_step->_node->get_node_lvl(prev->_node->_node_lvl);
 //	}
-	
 	node* common_parent = node::get_common_parent(_cur_step->_node, prev->_node); 
 	show_parent_nodes(_cur_step->_node, common_parent);
 
