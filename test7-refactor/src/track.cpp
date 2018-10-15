@@ -144,15 +144,17 @@ void track::show_children_node(node* parent){
 		}
 	} 
 	else {
-		dbg::printf("parent node without children...\n");
+		dbg::printf("parent node: _mtx_id=%d _node_id=%d without children...\n",parent->_mtx_id,parent->_node_id);
 	}
 }
 
 void track::show_parent_nodes(node* child, node* parent){
+/*
 	node* tmp = child;
 	
 	// redraw is not needed if the case of direct parent 
 	if(tmp->_parent != parent){	
+		dbg::printf("parent level %d child->_node_lvl=%d\n",parent->_node_lvl,child->_node_lvl);
 		for(int i=0; i<(child->_node_lvl - parent->_node_lvl); i++){
 			show_children_node(tmp);
 			tmp = tmp->_parent;
@@ -161,6 +163,19 @@ void track::show_parent_nodes(node* child, node* parent){
 //	else {
 //		dbg::printf("Don't redraw, direct parent\n");
 //	}
+*/
+	node* tmp = child->_parent;
+	
+	// redraw is not needed if the case of direct parent 
+
+	if(tmp != parent){	
+		dbg::printf("parent level %d child->_node_lvl=%d\n",parent->_node_lvl,tmp->_node_lvl);
+		for(int i=0; i<(tmp->_node_lvl - parent->_node_lvl); i++){
+			show_children_node(tmp);
+			tmp = tmp->_parent;
+		}
+	}
+
 }
 
 

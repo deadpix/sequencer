@@ -233,6 +233,7 @@ void fct_step::on_release(uint8_t btn_id){
 			// clear ui
 			clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
 	
+			t->get_led_matrix()->clr_n_restore(errata_btn[start->_mtx_id], BACKGROUND);
 			t->get_led_matrix()->save_n_set(LED_GBR_IDX, errata_btn[start->_mtx_id], BACKGROUND); 
 			t->show_children_node(start);	
 	

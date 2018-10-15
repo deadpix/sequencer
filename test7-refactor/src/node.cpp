@@ -57,7 +57,6 @@ node* node::get_common_parent(node* n1, node* n2){
 	node* tmp1 = n1;
 	node* tmp2 = n2;
 
-//	dbg::printf("tmp1->_node_lvl = %d tmp2->_node_lvl = %d \n",tmp1->_node_lvl,tmp2->_node_lvl);
 
 	if(tmp1->_node_lvl > tmp2->_node_lvl){
 		tmp1 = tmp1->get_node_lvl(tmp2->_node_lvl);
@@ -70,5 +69,6 @@ node* node::get_common_parent(node* n1, node* n2){
 		tmp1 = tmp1->_parent;
 		tmp2 = tmp2->_parent;
 	}
+//	return tmp1->_parent;
 	return tmp1->_parent;
 }
