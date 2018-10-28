@@ -49,12 +49,9 @@ class clk {
 		uint16_t _bpm;
 		uint32_t _ms; 
 		elapsedMillis _elapsed_ms;
-		// diff from 0 and less than -1: divider
-		// diff from 0 and sup than 1: multiplier
-		int _operation; 
-		bool _resync;
 		uint8_t _numerator;
 		uint8_t _denominator;
+		uint32_t _ms_ref;
 	
 	public:
 		clk();
@@ -65,25 +62,14 @@ class clk {
 		uint32_t clk_get_elapsed_ms();
 		uint16_t clk_get_bpm();
 		
-		int clk_set_ms(uint32_t);
 		int clk_set_bpm(uint16_t);	
 		int clk_bpms_to_bpm(uint32_t);
-		int clk_get_operator();
 
 		void clk_set_max_step(uint8_t);
 		
-		bool clk_set_operation(int, uint32_t);
 		bool clk_set_ratio(uint32_t, uint8_t, uint8_t);
-		void clk_sync_intern(uint32_t);
-		uint32_t clk_reset();
-
 		uint32_t clk_elapsed();
-		uint32_t clk_sync_divider(uint32_t, uint16_t);
-		uint32_t clk_sync_multiplier(uint32_t);
-		uint32_t clk_sync(uint32_t, uint16_t);
 		uint32_t clk_sync_ratio(uint32_t, uint16_t);
-		
-		uint32_t master_sync(uint32_t, uint16_t);
 		uint32_t master_sync_ratio(uint32_t, uint16_t*);
 };
 

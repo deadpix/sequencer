@@ -70,6 +70,7 @@ class track {
 		int  del_signature_change(step* s);
 		void show_signature_change(uint32_t);
 
+		void mask_npo_nodes(uint8_t npo);
 		void show_children_node(node*);
 		void show_parent_nodes(node*, node*);
 

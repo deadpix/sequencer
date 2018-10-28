@@ -48,6 +48,9 @@ void track::chain_step_from_node_list(LinkedList<node *> *list, step* start, ste
 void track::create_tree(node* parent, uint8_t max_steps, uint8_t num, 
 			uint8_t denom, uint8_t mtx_off){
 	LinkedList<node *> *ll = new LinkedList<node *>; 
+
+	dbg::printf("max_steps=%d num=%d denom=%d mtx_off=%d\n",max_steps,num,denom,mtx_off);
+
 	for(int i=0; i<max_steps; i++){
 		node* n = new node;
 		step* s = new step;
@@ -124,6 +127,15 @@ track::~track(){
 //	}
 }
 
+void track::mask_npo_nodes(uint8_t node_lvl){
+	// npo: n plus one
+	// first level start at one
+	// clear the GUI with all nodes starting from npo
+	for(uint8_t i=(node_lvl * DEFAULT_STEP_PER_SEQ);i<NR_STEP;i++){
+		get_led_matrix()->clr_n_restore(errata_btn[i], BACKGROUND);
+	}
+}
+
 void track::show_children_node(node* parent){
 	if(parent->_children){
 		int i;
@@ -135,6 +147,11 @@ void track::show_children_node(node* parent){
 				if(tmp->_step->is_step_active()){
 					get_led_matrix()->save_n_set(tmp->_step->get_step_color(), errata_btn[tmp->_mtx_id], BACKGROUND);
 				}
+			} 
+			else if(!tmp->_step && (tmp->_children->size() > 0)){
+				get_led_matrix()->save_n_set(LED_GBR_IDX, errata_btn[tmp->_mtx_id], BACKGROUND);
+			} else {
+				dbg::printf("empty node %d...\n",i);
 			}
 		}
 		for(i;i<DEFAULT_STEP_PER_SEQ;i++){
@@ -340,12 +357,14 @@ bool track::next_step(uint32_t mst_ms){
 //	Serial.print(_clk_def.numerator * _cur_step->_clk_def.numerator);
 //	Serial.print(" denominator ");
 //	Serial.println(_clk_def.denominator * _cur_step->_clk_def.denominator);	
-
+	
 	_c.clk_set_ratio(mst_ms
 	, _clk_def.numerator * _cur_step->_clk_def.numerator
 	, _clk_def.denominator * _cur_step->_clk_def.denominator );
 //		_mst_clk_cnt = 0;
-	
+
+	dbg::printf("mst_ms=%d _cur_step->_clk_def.numerator=%d _cur_step->_clk_def.denominator=%d step clk %d\n",mst_ms,_cur_step->_clk_def.numerator,_cur_step->_clk_def.denominator,_c.clk_get_ms());
+
 	// FIXME: calculate of gate len only when clock is 
 	//	  changed or at init time
 //	_cur_step->upd_step_gate_len(_cur_step->get_clk()->clk_get_ms());

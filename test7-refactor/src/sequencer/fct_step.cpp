@@ -36,6 +36,8 @@ void fct_step::on_push(uint8_t btn_id){
 			if(n->_step->is_step_active()){
 				t->get_led_matrix()->save_n_toogle(n->_step->get_step_color(), btn_id, FOREGROUND1);
 			}
+			// clear from lvl + 1 interface
+			t->mask_npo_nodes(n->_node_lvl);
 		}
 		// node case 
 		else {
