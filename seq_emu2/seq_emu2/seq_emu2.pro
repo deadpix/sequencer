@@ -15,51 +15,58 @@ DEFINES += IB_USE_STD_STRING
 
 SOURCES += main.cpp \
         mainwindow.cpp \
-	../../test7-refactor/src/bit.cpp \
-	../../test7-refactor/src/led_matrix.cpp \
-	../../test7-refactor/src/fct_clbk.cpp \
-	../../test7-refactor/src/led_toogle.cpp \
-	../../test7-refactor/src/seq_param.cpp \
-	../../test7-refactor/src/tempo.cpp \
-	../../test7-refactor/src/gate.cpp \
-	../../test7-refactor/src/menu.cpp \
-	../../test7-refactor/src/test_proj_one.cpp \
-	../../test7-refactor/src/btn_state.cpp \
-	../../test7-refactor/src/gui.cpp \
-	../../test7-refactor/src/param.cpp \
-	../../test7-refactor/src/sequencer.cpp \
-	../../test7-refactor/src/sequenception.cpp \
-	../../test7-refactor/src/test_proj_two.cpp \
-	../../test7-refactor/src/clk.cpp \
-	../../test7-refactor/src/prog.cpp \
-	../../test7-refactor/src/step.cpp \
-	../../test7-refactor/src/track.cpp \
-	../../test7-refactor/src/node.cpp \
-	../../test7-refactor/src/sequencer/fct_loop_setting.cpp \
-	../../test7-refactor/src/sequencer/fct_step.cpp 
+	hw_nt.cpp \
+	hw_sr.cpp \
+	../../sequencepter/src/bit.cpp \
+	../../sequencepter/src/fct_clbk.cpp \
+	../../sequencepter/src/perf.cpp \
+	../../sequencepter/src/led_toogle.cpp \
+	../../sequencepter/src/seq_param.cpp \
+	../../sequencepter/src/tempo.cpp \
+	../../sequencepter/src/gate.cpp \
+	../../sequencepter/src/menu.cpp \
+	../../sequencepter/src/test_proj_one.cpp \
+	../../sequencepter/src/gui.cpp \
+	../../sequencepter/src/param.cpp \
+	../../sequencepter/src/sequencer.cpp \
+	../../sequencepter/src/sequenception.cpp \
+	../../sequencepter/src/test_proj_two.cpp \
+	../../sequencepter/src/clk.cpp \
+	../../sequencepter/src/prog.cpp \
+	../../sequencepter/src/step.cpp \
+	../../sequencepter/src/track.cpp \
+	../../sequencepter/src/node.cpp \
+	../../sequencepter/src/led_matrix.cpp \
+	../../sequencepter/src/sequencer/fct_loop_setting.cpp \
+	../../sequencepter/src/sequencer/fct_step.cpp 
 
 HEADERS  += mainwindow.h \
-	../../test7-refactor/src/led_matrix.h \
-	../../test7-refactor/src/bit.h \
-	../../test7-refactor/src/types.h \
-	../../test7-refactor/src/fct_clbk.h \
-	../../test7-refactor/src/led_toogle.h \
-	../../test7-refactor/src/seq_param.h \
-	../../test7-refactor/src/tempo.h \
-	../../test7-refactor/src/gate.h \
-	../../test7-refactor/src/menu.h \
-	../../test7-refactor/src/test_proj_one.h \
-	../../test7-refactor/src/btn_state.h \
-	../../test7-refactor/src/gui.h \
-	../../test7-refactor/src/param.h \
-	../../test7-refactor/src/sequencer.h \
-	../../test7-refactor/src/sequenception.h \
-	../../test7-refactor/src/test_proj_two.h \
-	../../test7-refactor/src/clk.h \
-	../../test7-refactor/src/prog.h \
-	../../test7-refactor/src/step.h \
-	../../test7-refactor/src/track.h \
-	../../test7-refactor/src/node.h \
-	../../test7-refactor/src/sequencer/fct_loop_setting.h \
-	../../test7-refactor/src/sequencer/fct_step.h 
+	configuration.h \
+	../../sequencepter/src/hw.h \ 
+	../../sequencepter/src/perf.h \
+	../../sequencepter/src/led_matrix.h \
+	../../sequencepter/src/bit.h \
+	../../sequencepter/src/types.h \
+	../../sequencepter/src/fct_clbk.h \
+	../../sequencepter/src/led_toogle.h \
+	../../sequencepter/src/seq_param.h \
+	../../sequencepter/src/tempo.h \
+	../../sequencepter/src/gate.h \
+	../../sequencepter/src/menu.h \
+	../../sequencepter/src/test_proj_one.h \
+	../../sequencepter/src/gui.h \
+	../../sequencepter/src/param.h \
+	../../sequencepter/src/sequencer.h \
+	../../sequencepter/src/sequenception.h \
+	../../sequencepter/src/test_proj_two.h \
+	../../sequencepter/src/clk.h \
+	../../sequencepter/src/prog.h \
+	../../sequencepter/src/step.h \
+	../../sequencepter/src/track.h \
+	../../sequencepter/src/node.h \
+	../../sequencepter/src/led_matrix.h \
+	../../sequencepter/src/sequencer/fct_loop_setting.h \
+	../../sequencepter/src/sequencer/fct_step.h \
+	hw_nt.h \ 
+	hw_sr.h 
 FORMS    += mainwindow.ui

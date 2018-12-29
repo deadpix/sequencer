@@ -1,9 +1,34 @@
+/*
+ *      Copyright (c) 2017 Vincent "deadpix" Dupre
+ *
+ *      Author: Vincent Dupre (vdupre@gmail.com)
+ *  
+ *  Permission is hereby granted, free of charge, to any person obtaining a copy
+ *  of this software and associated documentation files (the "Software"), to deal
+ *  in the Software without restriction, including without limitation the rights
+ *  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ *  copies of the Software, and to permit persons to whom the Software is
+ *  furnished to do so, subject to the following conditions:
+ *
+ *  The above copyright notice and this permission notice shall be included in all
+ *  copies or substantial portions of the Software.
+ *
+ *  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ *  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ *  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ *  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ *  SOFTWARE.
+ */
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "../../test7-refactor/src/bit.h"
-#include "../../test7-refactor/src/types.h"
-#include "../../test7-refactor/src/sequenception.h"
-#include "../../test7-refactor/src/gui.h"
+#include "../../sequencepter/src/bit.h"
+#include "../../sequencepter/src/types.h"
+#include "../../sequencepter/src/sequenception.h"
+#include "../../sequencepter/src/gui.h"
+#include "../../sequencepter/src/perf.h"
 
 #include <hw_debug.h>
 
@@ -16,11 +41,24 @@ const char* cyan    = "background-color: cyan";
 const char* white   = "background-color: white";
 const char* gray    = "background-color: gray";
 
+
+const char* color_arr[] = {
+		"background-color: gray", 	// no color: 0
+		"background-color: red",	// red: 1
+		"background-color: green",	// green: 2
+		"background-color: yellow",	// yellow: 3
+		"background-color: blue",	// blue: 4
+		"background-color: magenta",	// magenta: 5
+		"background-color: cyan",	// cyan: 6
+		"background-color: white",	// white: 7
+};
+
 static elapsedMillis ms;
 static gui oled_gui;
 static sequenception sequenception;
 static param* param_ptr;
 static QLabel* oled[OLED_LINE];
+static perf p;
 
 static void tempo_change_handler(uint32_t ms){
 	qDebug("tempo_change_handler ms=%d",ms);
@@ -49,12 +87,17 @@ static void refresh_oled(char** line_arr){
 //}
 
 void MainWindow::setup(){
+	dbg::printf("start setup\n");
+//	led_matrix::set_hw(_hw_emulator);
 	oled_gui.init_gui(refresh_oled);
 	sequenception.fct_midi = midi_note_on;
 	sequenception.fct_tempo_change = tempo_change_handler;
 	sequenception.init(&oled_gui);
 	sequenception.menu_ctrl.set_next_prog(sequenception.current_prog);
+//	_hw_emulator->set_lm(sequenception.current_prog->get_led_matrix());
+	_hw_emulator->switch_matrix(sequenception.current_prog->get_led_matrix(), sequenception.current_prog->get_led_matrix());
 	param_ptr = NULL;
+	dbg::printf("end setup\n");
 }
 
 
@@ -66,6 +109,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	ui->setupUi(this);
 	QString str = "";
 	bool fail = false;
+
 
 	for(int i=0;i<MATRIX_NR_BTN;i++){
 		str = QString("pushButton_%1").arg(i);
@@ -90,7 +134,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	
 	uiTimer = new QTimer(this);
 	connect(uiTimer, SIGNAL(timeout()), this, SLOT(handleTimerUI()));
-	uiTimer->start(10);
+	uiTimer->start(2);
 
 	for(int i=0;i<OLED_LINE;i++){
 		str = QString("oled_%1").arg(i);
@@ -121,6 +165,11 @@ MainWindow::MainWindow(QWidget *parent) :
 	
 	btnMenuStatus = BTN_RELEASED;
 	btnParamStatus = BTN_RELEASED;
+#if HW_ADAFRUIT_NEOTRELLIS == 1
+	_hw_emulator = new hw_nt(btnMatrix);
+#elif HW_SHIFT_REGISTER == 1
+	_hw_emulator = new hw_sr();
+#endif
 	setup();
 
 }
@@ -173,8 +222,11 @@ static void rstBtnColorRow(const char* color, int row_id, QPushButton *matrix_bt
 		matrix_btn[row_id * 8 + i]->setStyleSheet(color);
 	}	
 }
-static void updBtnColor(led_matrix* lm, QPushButton* matrix_btn[MATRIX_NR_BTN]){
-	led_t* leds = lm->get_led_arr();
+
+#if HW_SHIFT_REGISTER == 1
+static void updBtnColor(hw_sr* hw, QPushButton* matrix_btn[MATRIX_NR_BTN]){
+	led_t* leds = hw->get_led_arr();
+	
 	uint16_t tmp = 0x0;
 	uint16_t set_led_bmp = 0x0;
 	for(int i=0;i<LED_MATRIX_NR_GROUND;i++){
@@ -212,11 +264,12 @@ static void updBtnColor(led_matrix* lm, QPushButton* matrix_btn[MATRIX_NR_BTN]){
 		updBtnColorRow(&set_led_bmp, tmp, blue, i, matrix_btn);
 	}
 }
-
+#endif
 
 
 void MainWindow::handleTimerUI(){
 //	qDebug("timer expired");
+	p.start_ms_counter();
 	uint32_t clk_res = sequenception.eval_mst_clk();
 
 	if(sequenception.current_prog == sequenception.prog_arr[sequenception.nr_prog]){
@@ -227,10 +280,19 @@ void MainWindow::handleTimerUI(){
 	}
 	sequenception.loop(clk_res);
 
-	updBtnColor(sequenception.lm_ptr, btnMatrix);
+#if HW_SHIFT_REGISTER == 1
+//	updBtnColor(sequenception.lm_ptr, btnMatrix);
+	updBtnColor(_hw_emulator, btnMatrix);
+#endif
 	checkBtnMatrix();
+	p.stop_ms_counter();
+	if(p.get_perf_cnt() >= 1000){
+		p.print_perf();
+		p.reset_ms_counter();
+	}
 }
 void MainWindow::handleParamBtn(){
+	led_matrix* prev = sequenception.current_prog->get_led_matrix();
 	if(!btnParamStatus){
 		btnParam->setStyleSheet(red);
 		btnParamStatus = BTN_PUSHED;
@@ -242,6 +304,7 @@ void MainWindow::handleParamBtn(){
 		if(param_ptr){
 			sequenception.lm_ptr = param_ptr->get_led_matrix();
 			sequenception.current_prog = param_ptr;
+			_hw_emulator->switch_matrix(sequenception.lm_ptr, prev);
 			param_ptr->param_on_enter();
 		}
 
@@ -255,6 +318,7 @@ void MainWindow::handleParamBtn(){
 		if(param_ptr){
 			sequenception.current_prog = param_ptr->get_prog();
 			sequenception.lm_ptr = sequenception.current_prog->get_led_matrix();
+			_hw_emulator->switch_matrix(sequenception.lm_ptr, prev);
 			param_ptr->param_on_leave();
 		}
 
@@ -262,23 +326,28 @@ void MainWindow::handleParamBtn(){
 }
 
 void MainWindow::handleMenuBtn(){
+	led_matrix* prev = sequenception.current_prog->get_led_matrix();
 	if(!btnMenuStatus){
 		btnMenu->setStyleSheet(red);
 		btnMenuStatus = BTN_PUSHED;
 		btnParam->setEnabled(false);
 		qDebug ("handle menu button");
-		sequenception.menu_ctrl.menu_enter();
+
 		sequenception.lm_ptr = sequenception.menu_ctrl.get_menu_led_matrix();
 		sequenception.current_prog = sequenception.prog_arr[sequenception.nr_prog];
+		_hw_emulator->switch_matrix(sequenception.lm_ptr, prev);
+		sequenception.menu_ctrl.menu_enter();
 
 	} else {
 		btnMenu->setStyleSheet(white);
 		btnMenuStatus = BTN_RELEASED;
 		btnParam->setEnabled(true);
 		qDebug ("release menu button");
+
 		sequenception.current_prog = sequenception.menu_ctrl.get_next_prog();
 		sequenception.current_prog->display_title();
 		sequenception.lm_ptr = sequenception.current_prog->get_led_matrix();
+		_hw_emulator->switch_matrix(sequenception.lm_ptr, prev);
 		sequenception.menu_ctrl.menu_leave();
 	}
 

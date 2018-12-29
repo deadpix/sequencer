@@ -2,7 +2,7 @@
 #define MAINWINDOW_H
 
 #include <elapsedMillis.h>
-#include "../../test7-refactor/src/led_matrix.h"
+#include "../../sequencepter/src/led_matrix.h"
 
 #include <QMainWindow>
 #include <QPushButton>
@@ -11,14 +11,17 @@
 #include <QLabel>
 #include <QtDebug>
 
-#define MATRIX_NR_COL	8
-#define MATRIX_NR_ROW	8
-#define MATRIX_NR_BTN	(MATRIX_NR_COL * MATRIX_NR_ROW)
-#define OLED_LINE	3
+#include "configuration.h"
 
 namespace Ui {
 class MainWindow;
 }
+
+#if HW_ADAFRUIT_NEOTRELLIS == 1
+#include "hw_nt.h"
+#elif HW_SHIFT_REGISTER == 1
+#include "hw_sr.h"
+#endif
 
 class MainWindow : public QMainWindow
 {
@@ -52,8 +55,15 @@ private:
 	elapsedMillis btnMatrixMs[MATRIX_NR_BTN];
 	uint8_t btnMenuStatus;
 	uint8_t btnParamStatus;
+#if HW_ADAFRUIT_NEOTRELLIS == 1
+	hw_nt* _hw_emulator;
+#elif HW_SHIFT_REGISTER == 1
+	hw_sr* _hw_emulator;
+#endif
+
 	void checkBtnMatrix();
 	void setup();
+	
 
 };
 
