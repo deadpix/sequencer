@@ -12,11 +12,13 @@ class node;
 class node {
 	public:
 		LinkedList<node *>* _children;
+		LinkedList<node *>* _zombies;
 		node* _parent;
 		step* _step;
 		uint8_t	_node_lvl;
 		uint8_t _mtx_id;
 		uint8_t _node_id;
+		bool _node_is_step;
 
 		node();
 		~node();		

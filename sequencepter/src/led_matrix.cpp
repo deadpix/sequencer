@@ -147,7 +147,7 @@ int led_matrix::save_n_toogle(uint8_t color, uint16_t nr, uint8_t ground){
 		_led_status_arr[nr].bmp |= (1 << ground);
 		_led_status_arr[nr].color[ground] ^= color;
 //		toogle_led_x(color, nr);
-		dbg::printf("save and toogle %d\n", _led_status_arr[nr].color[ground]);
+//		dbg::printf("save and toogle %d\n", _led_status_arr[nr].color[ground]);
 //		if(_hw) _hw->refresh_matrix(nr);
 		if(_hw) _hw->upd_pxl(nr, _led_status_arr[nr].color[ground], ground);
 //	}

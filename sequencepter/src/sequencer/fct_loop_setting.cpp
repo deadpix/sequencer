@@ -32,7 +32,6 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 	step* first = t->get_first_step();
 	node* looping_node;
 	
-
 	upd_display(_seq, id);
 
 	// last step is the looping point
@@ -47,8 +46,10 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 			if(tmp_list->get(i) == n) break;
 		}
 		for(i; i<tmp_list->size(); i++){
-			if(tmp_list->get(i)->_step != NULL){
+//			if(tmp_list->get(i)->_step != NULL){
+			if(tmp_list->get(i)->_node_is_step){
 				tmp_list->get(i)->_step->set_next_step(first);
+				tmp_list->get(i)->_step->set_prev_step(s);
 			}
 			else {
 				dbg::printf("setting loop on subseq not implemented yet\n");

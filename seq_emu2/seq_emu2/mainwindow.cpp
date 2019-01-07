@@ -32,6 +32,8 @@
 
 #include <hw_debug.h>
 
+#define TRACE_PERF	0
+
 const char* red     = "background-color: red";
 const char* green   = "background-color: green";
 const char* blue    = "background-color: blue";
@@ -58,8 +60,9 @@ static gui oled_gui;
 static sequenception sequenception;
 static param* param_ptr;
 static QLabel* oled[OLED_LINE];
+#if TRACE_PERF == 1
 static perf p;
-
+#endif
 static void tempo_change_handler(uint32_t ms){
 	qDebug("tempo_change_handler ms=%d",ms);
 }
@@ -269,7 +272,9 @@ static void updBtnColor(hw_sr* hw, QPushButton* matrix_btn[MATRIX_NR_BTN]){
 
 void MainWindow::handleTimerUI(){
 //	qDebug("timer expired");
+#if TRACE_PERF == 1
 	p.start_ms_counter();
+#endif
 	uint32_t clk_res = sequenception.eval_mst_clk();
 
 	if(sequenception.current_prog == sequenception.prog_arr[sequenception.nr_prog]){
@@ -285,11 +290,13 @@ void MainWindow::handleTimerUI(){
 	updBtnColor(_hw_emulator, btnMatrix);
 #endif
 	checkBtnMatrix();
+#if TRACE_PERF == 1
 	p.stop_ms_counter();
 	if(p.get_perf_cnt() >= 1000){
 		p.print_perf();
 		p.reset_ms_counter();
 	}
+#endif
 }
 void MainWindow::handleParamBtn(){
 	led_matrix* prev = sequenception.current_prog->get_led_matrix();

@@ -32,7 +32,8 @@ void fct_step::on_push(uint8_t btn_id){
 
 	if(n){
 		// step case
-		if(n->_step){
+//		if(n->_step){
+		if(n->_node_is_step){
 			if(n->_step->is_step_active()){
 				t->get_led_matrix()->save_n_toogle(n->_step->get_step_color(), btn_id, FOREGROUND1);
 			}
@@ -49,6 +50,27 @@ void fct_step::on_push(uint8_t btn_id){
 	}
 	// else do nothing
 }
+
+static void delete_children_nodes(LinkedList<node *>* children){
+	for(int i=0;i<children->size();i++){
+		node* tmp = children->remove(i);
+		delete tmp;
+	}
+}
+
+static void clear_mtx_to_node_from_level(track *t, uint8_t level){
+	uint8_t start = level * DEFAULT_STEP_PER_SEQ;
+	dbg::printf("start at leebel %d level %d\n",start,level);
+	for(int i=start; i<NR_STEP; i++){
+		t->set_node_in_matrix(i, NULL);
+	}  
+}
+
+static step* create_step(node *n, uint8_t mtx_id){
+	step* s = new step;
+	
+}
+
 void fct_step::on_release(uint8_t btn_id){
 	uint8_t id = errata_btn[btn_id];
 	track* t = _seq->get_current_track();
@@ -59,19 +81,75 @@ void fct_step::on_release(uint8_t btn_id){
 
 	// check if the pushed button was long pushed button
 	if(_lp_cnt == 1){
-		// linked step
-		/* Temporarily disabled */
-	   	/*	
-		if(!btn_was_long_pushed(btn_id, _lp_cnt, _lp_ui)){
-			if(link_steps(_seq, errata_btn[_lp_ui[_lp_cnt-1]._id], errata_btn[btn_id])){
-				_seq->_ls_ui.ms_cnt = 0;
-				_seq->_ls_ui.step_id = _lp_ui[_lp_cnt-1]._id;
-			}
+
+		// check if we want to delete a subsequence
+		if(btn_id == _lp_ui[0]._id && !t->is_playing() && !t->get_node_from_matrix(errata_btn[_lp_ui[0]._id])->_node_is_step){
+			node* start = t->get_node_from_matrix(errata_btn[_lp_ui[0]._id]);
+			node* p = start->_parent;
+			step* tmp_next = (start->_children->get(start->_children->size()-1))->_step->get_next_step();
+			step* tmp_prev = (start->_children->get(0))->_step->get_prev_step();
+
+
+			// delete "start node" children
+			delete_children_nodes(start->_children);
+			// Fix GUI
+			clear_mtx_to_node_from_level(t, start->_node_lvl);
+			// create _step at "start node"
+			start->_node_is_step = true;
+			// restore zombies if exists in "start node" parent
+			if(start->_zombies){
+				// get index of start in parent list
+				int start_idx;
+				for(int i=0;i<p->_children->size();i++){
+					if(p->_children->get(i) == start){
+						start_idx = i;
+						break;
+					}
 				}
-		*/
-		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
+				
+				step* prev = start->_step;
+				node* tmp = NULL;
+				for(int i=0;i<start->_zombies->size();i++){
+					tmp = start->_zombies->remove(i);
+					// restore the zombie node in the node list after
+					p->_children->add(start_idx+i+1,tmp);
+					prev->set_next_step(tmp->_step);
+					tmp->_step->set_prev_step(prev);
+					prev = tmp->_step;
+				}
+				tmp->_step->set_next_step(tmp_next);
+				tmp_next->set_prev_step(tmp->_step);
+			} 
+			else {
+				start->_step->set_next_step(tmp_next);
+				tmp_next->set_prev_step(start->_step);
+			}
+			
+			start->_step->set_prev_step(tmp_prev);
+			tmp_prev->set_next_step(start->_step);
+
+
+			t->mask_npo_nodes(start->_node_lvl);
+			clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
+//			t->get_led_matrix()->clr_n_restore(errata_btn[start->_mtx_id], BACKGROUND);
+			if(start->_step->is_step_active()){
+				t->get_led_matrix()->save_n_ovw(start->_step->get_step_color(), errata_btn[start->_mtx_id], BACKGROUND);
+			}
+			else {
+				t->get_led_matrix()->clr_n_restore(errata_btn[start->_mtx_id], BACKGROUND);	
+			}
+
+		}
+		else {
+			clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
+
+		}
 	} 
 	else if(_lp_cnt == 2){
+		// FIXME Must be executed when track is paused...
+
+
+
 		// TODO create substep
 //		s->_clk_def.numerator = (to-from);
 //		s->_clk_def.denominator = nr_new_step;	
@@ -82,31 +160,62 @@ void fct_step::on_release(uint8_t btn_id){
 		node* start = t->get_node_from_matrix(errata_btn[_lp_ui[0]._id]);
 		node* end = t->get_node_from_matrix(errata_btn[_lp_ui[1]._id]);
 		node* parent = start->_parent;
-			// delete node between start and end
-		for(uint8_t i=(start->_node_id+1);i<end->_node_id;i++){
-			node* tmp = parent->_children->remove(i);
-			t->set_node_in_matrix(tmp->_mtx_id, NULL);
-			// should we delete node???
-			delete tmp;
-		}
 		uint8_t new_numerator = start->_step->_clk_def.numerator * (end->_node_id - start->_node_id); 
 		uint8_t new_denominator = start->_step->_clk_def.denominator * len; 
+
+		// limit substep to freq less than 20Hz???	
+
+		// delete node between start and end
+//		for(uint8_t i=(start->_node_id+1);i<end->_node_id;i++){
+//			node* tmp = parent->_children->remove(i);
+//			t->set_node_in_matrix(tmp->_mtx_id, NULL);
+//			// should we delete node???
+//			delete tmp;
+//		}
+		
+		// put nodes between "start node" and "end node" in "start node" zombies list
+		
+		
+		if((start->_node_id+1) < end->_node_id){
+			LinkedList<node *> *ll = new LinkedList<node *>;
+			
+			for(uint8_t i=(start->_node_id+1);i<end->_node_id;i++){
+				node* tmp = parent->_children->remove(i);
+				ll->add(tmp);
+				// must be sure that nodes are visible!!!
+				t->set_node_in_matrix(tmp->_mtx_id, NULL);
+			}
+			start->_zombies = ll;
+		}
+
 		// delete step of start node
-		delete start->_step;
-		start->_step = NULL;
+//		delete start->_step;
+//		start->_step = NULL;
+		start->_node_is_step = false;
 
 		// create x nodes and steps
 		t->create_tree(start, len, new_numerator, 
 			new_denominator, start->_node_lvl * DEFAULT_STEP_PER_SEQ);
 		// chain steps
-		track::chain_step_from_node_list(start->_children,
-				  start->_children->get(0)->_step,
-				  start->_children->get(len-1)->_step);
+//		track::chain_step_from_node_list(start->_children,
+//				  start->_children->get(0)->_step,
+//				  start->_children->get(len-1)->_step);
+		step* tmp_prev = start->_step->get_prev_step();
+		step* tmp_next = start->_children->get(0)->_step;
+		tmp_prev->set_next_step(tmp_next);
+		tmp_next->set_prev_step(tmp_prev);
 
-		// FIXME: end might not have a step => should find the first step
-		start->_children->get(len-1)->_step->set_next_step(end->get_first_step(NR_STEP/DEFAULT_STEP_PER_SEQ));
+		tmp_next = end->get_first_step(NR_STEP/DEFAULT_STEP_PER_SEQ);
+		tmp_prev = start->_children->get(len-1)->_step;
+		tmp_prev->set_next_step(tmp_next);
+		tmp_next->set_prev_step(tmp_prev);
+		
 
-		dbg::printf("new steps / nodes have been created\n");
+		// FIXME: end might not have a step => should find the first step 
+//		start->_children->get(len-1)->_step->set_next_step(end->get_first_step(NR_STEP/DEFAULT_STEP_PER_SEQ));
+//		start->_children->get(len-1)->_step->set_prev_step(end->get_first_step(NR_STEP/DEFAULT_STEP_PER_SEQ));
+
+		dbg::printf("new steps / nodes have been created: num=%d denom=%d\n",new_numerator,new_denominator);
 		// create tree
 	
 
@@ -119,7 +228,8 @@ void fct_step::on_release(uint8_t btn_id){
 	
 	} 
 	else {			
-		if(n && n->_step){
+//		if(n && n->_step){
+		if(n && n->_node_is_step){
 			step* s = t->_mtx_to_node[id]->_step;
 			if(s->is_step_active()){
 			s->clr_step_active();
@@ -139,7 +249,8 @@ void fct_step::on_long_push(uint8_t btn_id){
 	
 	if(n){	
 		// step case
-		if(n->_step){
+//		if(n->_step){
+		if(n->_node_is_step){
 	
 			if(_lp_cnt < BTN_MAX_LONG_PUSH_STATE){
 
@@ -175,7 +286,21 @@ void fct_step::on_long_push(uint8_t btn_id){
 		}
 		// node case
 		else {
+			if(_lp_cnt > 0){
 
+				clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui); 
+				t->get_led_matrix()->clr_n_restore(btn_id, FOREGROUND1);
+
+			}
+			else {
+				dbg::print("long pushed node\n");	
+				_lp_ui[_lp_cnt]._ms = 0;
+				_lp_ui[_lp_cnt]._id = btn_id;
+				ret = t->get_led_matrix()->save_n_set(LED_GBR_IDX, btn_id, FOREGROUND1);
+				++_lp_cnt;
+			
+
+			}
 		}
 	} 
 	// do nothing
@@ -195,8 +320,14 @@ void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
 	for(uint8_t i = 0; i<_lp_cnt; i++){
 		if(_lp_ui[i]._ms >= LONG_PRESS_MS){
 			node* n = t->get_node_from_matrix(_lp_ui[i]._id);
-			if(n && n->_step){
-				t->get_led_matrix()->save_n_toogle(n->_step->get_step_color(), _lp_ui[i]._id, FOREGROUND1);
+//			if(n && n->_step){
+			if(n){
+				if(n->_node_is_step){
+					t->get_led_matrix()->save_n_toogle(n->_step->get_step_color(), _lp_ui[i]._id, FOREGROUND1);
+				}
+				else {
+					t->get_led_matrix()->save_n_toogle(LED_GBR_IDX, _lp_ui[i]._id, FOREGROUND1);
+				}
 			}
 			else {
 				dbg::printf("node error matrix id%d\n", _lp_ui[i]._id);

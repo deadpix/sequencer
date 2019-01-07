@@ -80,6 +80,12 @@ void step::set_next_step(step* s){
 step* step::get_next_step(){
 	return _next;
 }
+void step::set_prev_step(step* s){
+	_prev = s;
+}
+step* step::get_prev_step(){
+	return _prev;
+}
 
 void step::set_step_color(uint8_t color){
 	_color = color;

@@ -60,6 +60,7 @@ class track {
 		node* get_node_from_matrix(uint8_t);
 		void  set_node_in_matrix(uint8_t, node*);
 		static void chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end);
+		static void set_loop(step* first, step* last);
 		void create_tree(node*, uint8_t, uint8_t, uint8_t, uint8_t);
 //		step* arr_step;
 		struct clk_def _clk_def;

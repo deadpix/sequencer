@@ -7,6 +7,8 @@ node::node(){
 	_node_lvl = 0;
 	_mtx_id = 0;
 	_children = NULL;
+	_zombies = NULL;
+	_node_is_step = false;
 }
 node::~node(){
 
@@ -16,6 +18,13 @@ node::~node(){
 			delete n;
 		}
 	}
+	if(_zombies){
+		for(int i=0; i<_zombies->size();i++){
+			node* n = _zombies->remove(i);
+			delete n;
+		}
+	}
+
 	// delete step* ?
 	if(_step){
 		delete _step;
@@ -37,7 +46,8 @@ step* node::get_first_step(uint8_t max_lvl){
 	node* tmp = this;
 	step* ret = NULL;
 	for(uint8_t i=0; i<max_lvl; i++){	
-		if(tmp->_step){
+//		if(tmp->_step){
+		if(tmp->_node_is_step){
 			ret = tmp->_step;
 			return ret;
 		}

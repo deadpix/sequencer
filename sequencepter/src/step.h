@@ -37,6 +37,7 @@ class step {
 		elapsedMillis gate_elapsed;
 		
 		step* _next;
+		step* _prev;
 		clk* _c;
 	
 		uint8_t _color;
@@ -67,6 +68,9 @@ class step {
 		
 		void set_next_step(step*);
 		step* get_next_step();
+		void set_prev_step(step*);
+		step* get_prev_step();
+
 
 		void set_step_color(uint8_t);
 		uint8_t get_step_color();

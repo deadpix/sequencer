@@ -28,22 +28,60 @@ bool track::delete_step(LinkedList<step *> *l, step* s){
 
 void track::chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end){
 	bool flg_chain = false;
-
+/*
 	for(int i = 0; i<list->size();i++){
 		dbg::printf("step %d\n",list->get(i)->_step->_step_ui_id);
-		if(list->get(i)->_step == start){
-			flg_chain = true;
-		}
-		if(list->get(i)->_step == end){
-			flg_chain = false;
-		}
-		if(flg_chain){
-			list->get(i)->_step->set_next_step(list->get(i+1)->_step);
-		}
-		else {
-			list->get(i)->_step->set_next_step(start);
+
+		if(list->get(i)->_node_is_step){
+			if(list->get(i)->_step == start){
+				flg_chain = true;
+			}
+			if(list->get(i)->_step == end){
+				flg_chain = false;
+			}
+			if(flg_chain){
+				list->get(i)->_step->set_next_step(list->get(i+1)->_step);
+			
+			}
+			else {
+				list->get(i)->_step->set_next_step(start);
+			}
 		}
 	}
+*/
+	step* tmp = NULL, *prev = NULL;
+	for(int i = 0; i<list->size();i++){
+		dbg::printf("step %d\n",list->get(i)->_step->_step_ui_id);
+		if(list->get(i)->_node_is_step){
+			tmp = list->get(i)->_step;
+			if(tmp == start){
+//				flg_chain = true;
+//				tmp->set_prev_step(end);
+			}
+			else if(tmp == end){
+//				tmp->set_next_step(start);
+				tmp->set_prev_step(prev);
+			}
+			else {
+				prev->set_next_step(tmp);
+				tmp->set_prev_step(prev);
+			}
+			prev = tmp;
+			
+
+//			if(list->get(i)->_step == end){
+//				flg_chain = false;
+//			}
+//			if(flg_chain){
+//				list->get(i)->_step->set_next_step(list->get(i+1)->_step);
+//			
+//			}
+//			else {
+//				list->get(i)->_step->set_next_step(start);
+//			}
+		}
+	}
+
 }
 void track::create_tree(node* parent, uint8_t max_steps, uint8_t num, 
 			uint8_t denom, uint8_t mtx_off){
@@ -51,9 +89,12 @@ void track::create_tree(node* parent, uint8_t max_steps, uint8_t num,
 
 	dbg::printf("max_steps=%d num=%d denom=%d mtx_off=%d\n",max_steps,num,denom,mtx_off);
 
+	node* n;
+	step* s, * prev = NULL;
+
 	for(int i=0; i<max_steps; i++){
-		node* n = new node;
-		step* s = new step;
+		n = new node;
+		s = new step;
 		
 		n->_node_lvl = parent->_node_lvl + 1;
 		n->_parent = parent;
@@ -66,8 +107,14 @@ void track::create_tree(node* parent, uint8_t max_steps, uint8_t num,
 		n->_mtx_id = mtx_off + i;
 		s->_step_ui_id = mtx_off + i;
 		_mtx_to_node[mtx_off + i] = n;
+		n->_node_is_step = true;
 
+		if(prev){
+			prev->set_next_step(s);
+			s->set_prev_step(prev);
+		}
 		ll->add(n);
+		prev = s;
 	}
 	parent->_children = ll;
 }
@@ -86,6 +133,11 @@ static void reset_mtx_to_node(node* arr[], node* parent){
 		step* s = parent->_children->get(i)->_step;
 		set_mtx_to_node(arr, n, s, i);	
 	}
+}
+
+void track::set_loop(step* first, step* last){
+	first->set_prev_step(last);
+	last->set_next_step(first);
 }
 
 //static void dump_step(step* first){
@@ -111,7 +163,8 @@ track::track(){
 	_cur_step = head._children->get(0)->_step;
 	_first_step = _cur_step;
 	_last_step = head._children->get(head._children->size() - 1)->_step;
-	chain_step_from_node_list(head._children, _first_step, _last_step);
+//	chain_step_from_node_list(head._children, _first_step, _last_step);
+	set_loop(_first_step, _last_step);
 //
 //	dump_step(_first_step);
 	
@@ -141,14 +194,16 @@ void track::show_children_node(node* parent){
 		int i;
 		for(i=0;i<parent->_children->size();i++){
 			node* tmp = parent->_children->get(i);
-			if(tmp->_step){
+//			if(tmp->_step){
+			if(tmp->_node_is_step){
 				get_led_matrix()->clr_n_restore(errata_btn[tmp->_mtx_id], BACKGROUND);
 				_mtx_to_node[tmp->_mtx_id] = tmp;
 				if(tmp->_step->is_step_active()){
 					get_led_matrix()->save_n_set(tmp->_step->get_step_color(), errata_btn[tmp->_mtx_id], BACKGROUND);
 				}
 			} 
-			else if(!tmp->_step && (tmp->_children->size() > 0)){
+//			else if(!tmp->_step && (tmp->_children->size() > 0)){
+			else if(!tmp->_node_is_step && (tmp->_children->size() > 0)){
 				get_led_matrix()->save_n_set(LED_GBR_IDX, errata_btn[tmp->_mtx_id], BACKGROUND);
 			} else {
 				dbg::printf("empty node %d...\n",i);
@@ -282,17 +337,6 @@ void track::set_out_id(uint8_t id){
 }
 void track::set_all_step_note(uint16_t note){
 
-//	for(int i=0;i<head._children->size();i++){
-//		step* s = head._children->get(i)->_step;
-//		if(s){
-//			s->step_set_note(127, note);	
-//		} 
-//		else {
-//			dbg::printf("empty step %d\n",i);
-//		}
-//	}
-	
-
 	for(int i=0;i<_step_list.size();i++){
 		_step_list.get(i)->step_set_note(127, note);
 	}
@@ -315,7 +359,6 @@ void  track::set_node_in_matrix(uint8_t id, node* n){
 
 uint8_t track::get_max_step(){
 	return _max_step;
-//	return _last_step->_step_ui_id + 1;
 }
 void track::set_max_step(uint8_t max){
 	_max_step = max;
@@ -357,13 +400,13 @@ bool track::next_step(uint32_t mst_ms){
 //	Serial.print(_clk_def.numerator * _cur_step->_clk_def.numerator);
 //	Serial.print(" denominator ");
 //	Serial.println(_clk_def.denominator * _cur_step->_clk_def.denominator);	
+	dbg::printf("mst_ms=%d _cur_step->_clk_def.numerator=%d _cur_step->_clk_def.denominator=%d step clk %d\n",mst_ms,_cur_step->_clk_def.numerator,_cur_step->_clk_def.denominator,_c.clk_get_ms());
 	
 	_c.clk_set_ratio(mst_ms
 	, _clk_def.numerator * _cur_step->_clk_def.numerator
 	, _clk_def.denominator * _cur_step->_clk_def.denominator );
 //		_mst_clk_cnt = 0;
 
-	dbg::printf("mst_ms=%d _cur_step->_clk_def.numerator=%d _cur_step->_clk_def.denominator=%d step clk %d\n",mst_ms,_cur_step->_clk_def.numerator,_cur_step->_clk_def.denominator,_c.clk_get_ms());
 
 	// FIXME: calculate of gate len only when clock is 
 	//	  changed or at init time
