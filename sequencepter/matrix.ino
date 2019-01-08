@@ -61,6 +61,11 @@ uint8_t mcp_digitalRead(uint8_t pin, uint8_t fct_id){
 	return cbck_fct_rd_arr[fct_id](pin);
 }
 
+
+
+
+
+
 #if HW_SHIFT_REG == 1
 
 #define latchPin 		22
@@ -190,14 +195,91 @@ static void switch_matrix_ui(led_matrix* lm){
 
 #elif HW_ADAFRUIT_NEOTRELLIS == 1
 
+#include "Adafruit_NeoTrellis.h"
+#define NT_INT_PIN	17
+
+//create a matrix of trellis panels
+Adafruit_NeoTrellis t_array[BTN_NUM_ROW/4][BTN_NUM_COL/4] = {
+  
+  { Adafruit_NeoTrellis(0x2E), Adafruit_NeoTrellis(0x2F) },
+  { Adafruit_NeoTrellis(0x2E), Adafruit_NeoTrellis(0x2F) }
+  
+};
+
+Adafruit_MultiTrellis trellis((Adafruit_NeoTrellis *)t_array, BTN_NUM_ROW/4, BTN_NUM_COL/4);
+
+TrellisCallback trellis_btn_clbck(keyEvent evt){
+	Serial.print("Triggered event ");
+	Serial.println(evt.bit.NUM);
+	prog* p = sequenception.current_prog;
+	
+	if(evt.bit.EDGE == SEESAW_KEYPAD_EDGE_RISING){
+		flag_btn_active = true;
+		p->on_push(btn_col_idx*BTN_NUM_COL + i);
+		btn_ms_cnt[btn_col_idx*BTN_NUM_COL + i] = 0;
+		btn_status.pushed_bmp[btn_col_idx] |= (1<<i);	
+	}
+	else if(evt.bit.EDGE == SEESAW_KEYPAD_EDGE_FALLING){
+		flag_btn_active = false;
+		if(btn_status.long_pushed_bmp[btn_col_idx] & (1<<i)){
+			// release
+			p->on_long_release(btn_col_idx*BTN_NUM_COL + i);
+		} 
+		else {
+			p->on_release(btn_col_idx*BTN_NUM_COL + i);
+		}
+		btn_status.pushed_bmp[btn_col_idx] &= ~(1<<i);
+		btn_status.long_pushed_bmp[btn_col_idx] &= ~(1<<i);
+
+	}
+	if( (btn_status.pushed_bmp[btn_col_idx] & (1<<i)) 
+		&& !(btn_status.long_pushed_bmp[btn_col_idx] & (1<<i))){
+		if(btn_ms_cnt[btn_col_idx*BTN_NUM_COL + i] > LONG_PRESS_TIME_MS){
+			btn_status.long_pushed_bmp[btn_col_idx] |= (1<<i);
+			p->on_long_push(btn_col_idx*BTN_NUM_COL + i);
+		}
+	}
+
+	return 0;
+}
+
+
 static void refresh_matrix(uint16_t led_id, uint8_t color){
 	
 }
 
 static void setup_matrix(){
-//	led_matrix::set_refresh_clbck(refresh_matrix);
+	if(!trellis.begin()){
+		Serial.println("failed to begin trellis");
+		while(1);
+	}
+
+	flag_btn_active = false;
+	pinMode(NT_INT_PIN, INPUT);
+
+  	for(int y=0; y<BTN_NUM_ROW; y++){
+		for(int x=0; x<BTN_NUM_COL; x++){
+		// activate rising and falling edges on all keys
+		trellis.activateKey(x, y, SEESAW_KEYPAD_EDGE_RISING, true);
+		trellis.activateKey(x, y, SEESAW_KEYPAD_EDGE_FALLING, true);
+		trellis.registerCallback(x, y, trellis_btn_clbck);
+		trellis.setPixelColor(x, y, 0x000000); //addressed with x,y
+		trellis.show(); //show all LEDs
+
+		btn_status.pushed_bmp[i] = 0x0;
+		btn_status.long_pushed_bmp[i] = 0x0;
+
+		delay(50);
+    	}
+  }
+
+
+
 }
 static void scan(prog* p){
+	if(!digitalRead(NT_INT_PIN)){
+		trellis.read(false);
+	}
 }
 static void upd_shift_reg(led_matrix* lm){
 }
