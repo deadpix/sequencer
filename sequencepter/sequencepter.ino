@@ -24,6 +24,8 @@
 #include <i2c_t3.h>
 #include <Adafruit_MCP23017.h>
 #include <LinkedList.h>
+#include <Adafruit_NeoTrellis.h>
+#include <hw_debug.h>
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include <Arduino.h>
@@ -31,6 +33,7 @@
 	#include <WProgram.h>
 #endif
 
+#include "configuration.h"
 
 #include "src/types.h"
 #include "src/sequenception.h"
@@ -95,11 +98,13 @@ static void check_btn(){
 		btn_flag = true;
 }
 
+#if HW_SHIFT_REG == 1 
 static void upd_gui(){
 	upd_shift_reg(sequenception.lm_ptr);
 	if(!check_clk)
 		check_clk = true;
 }
+#endif
 
 static void tempo_change_handler(uint32_t ms){
 	noInterrupts();
@@ -206,7 +211,9 @@ void setup(){
 	sequenception.fct_tempo_change = tempo_change_handler;
 
 	// timer
+#if HW_SHIFT_REG == 1 
 	ui_timer.begin(upd_gui, 1000);
+#endif
 	btn_timer.begin(check_btn, 1000);
 //	midi_timer.begin(upd_midi, 8000);
 

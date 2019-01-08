@@ -22,8 +22,8 @@
  *  SOFTWARE.
  */
 
-#include <hw_debug.h>
 #include "led_matrix.h"
+#include <hw_debug.h>
 #include "bit.h"
 
 //hw* led_matrix::_hw = NULL;

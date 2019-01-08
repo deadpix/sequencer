@@ -106,7 +106,7 @@ static void scan_param_btn(){
 		if(!flag_btn_active){
 			sequenception.current_prog = param_ptr->get_prog();
 			sequenception.lm_ptr = sequenception.current_prog->get_led_matrix();
-			switch_matrix_ui(&sequenception.lm_ptr);
+			switch_matrix_ui(sequenception.lm_ptr);
 			param_ptr->param_on_leave();
 			param_btn_status = FCT_BTN_IDLE;
 		}	
@@ -115,7 +115,7 @@ static void scan_param_btn(){
 		if(!flag_btn_active){
 			sequenception.current_prog = param_ptr;
 			sequenception.lm_ptr = param_ptr->get_led_matrix();
-			switch_matrix_ui(&sequenception.lm_ptr);
+			switch_matrix_ui(sequenception.lm_ptr);
 			param_ptr->param_on_enter();
 			param_btn_status = FCT_BTN_IDLE;
 		}
