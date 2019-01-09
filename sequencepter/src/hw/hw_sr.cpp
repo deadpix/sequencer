@@ -23,6 +23,7 @@
  */
 
 #include "hw_sr.h"
+#include "../bit.h"
 
 hw_sr::hw_sr(){
 	for(int i=0;i<LED_MATRIX_NR_GROUND;i++){
@@ -35,10 +36,10 @@ hw_sr::hw_sr(){
 hw_sr::~hw_sr(){
 };
 
-led_t* led_matrix::get_led_arr(){
+led_t* hw_sr::get_led_arr(){
 	return led_arr;
 }
-led_t led_matrix::get_led(uint8_t x){
+led_t hw_sr::get_led(uint8_t x){
 	return led_arr[x];
 }
 int hw_sr::set_led_x_coor(uint8_t color, uint16_t x, uint16_t y){
@@ -81,7 +82,7 @@ int hw_sr::clr_led_x(uint8_t color, uint16_t nr){
 	return 1;
 }
 
-static void led_off(uint16_t nr){
+void hw_sr::led_off(uint16_t nr){
 	for(int i=0;i<LED_MATRIX_NR_COLORS;i++){
 		clr_led_x((1<<i), nr);
 	}
@@ -98,10 +99,10 @@ int hw_sr::toogle_led_x(uint8_t color, uint16_t nr){
 	return 1;
 }
 
-int hw_sr::refresh_matrix(uint16_t id){
+void hw_sr::refresh_matrix(uint16_t id){
 	
 }
 void hw_sr::upd_pxl(uint16_t id, uint8_t color, uint8_t brightness){
 	led_off(id);
-	set_led_x(color, nr);
+	set_led_x(color, id);
 }

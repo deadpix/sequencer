@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <elapsedMillis.h>
+#include <limits.h>
 
 #define BUFFER_SIZE	512
 

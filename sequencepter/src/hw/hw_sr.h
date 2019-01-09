@@ -43,6 +43,7 @@ class hw_sr : public hw {
 		int set_led_x(uint8_t, uint16_t);
 		int clr_led_x(uint8_t, uint16_t);
 		int toogle_led_x(uint8_t, uint16_t);
+		void led_off(uint16_t);
 
 	public:
 		hw_sr();
