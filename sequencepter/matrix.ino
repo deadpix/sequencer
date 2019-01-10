@@ -199,6 +199,7 @@ static void switch_matrix_ui(led_matrix* lm){
 #include <Adafruit_NeoTrellis.h>
 #define NT_INT_PIN	17
 
+
 //create a matrix of trellis panels
 Adafruit_NeoTrellis t_array[BTN_NUM_ROW/4][BTN_NUM_COL/4] = {
   
@@ -208,6 +209,8 @@ Adafruit_NeoTrellis t_array[BTN_NUM_ROW/4][BTN_NUM_COL/4] = {
 };
 
 Adafruit_MultiTrellis trellis((Adafruit_NeoTrellis *)t_array, BTN_NUM_ROW/4, BTN_NUM_COL/4);
+
+static hw_nt hw(&trellis);
 
 TrellisCallback trellis_btn_clbck(keyEvent evt){
 	Serial.print("Triggered event ");
@@ -281,7 +284,22 @@ static void scan(prog* p){
 }
 static void upd_shift_reg(led_matrix* lm){
 }
-static void switch_matrix_ui(led_matrix* lm){
+static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
+	prev->set_hw(NULL);
+	next->set_hw(&hw);
+
+	for(int i=0; i<NR_LEDS; i++){
+		struct led_status* tmp = next->get_led_status(i);
+		if(tmp->bmp){
+			uint8_t idx = BIT::get_highest_bit_set(tmp->bmp);
+			hw.upd_pxl(i, tmp->color[idx], 0);
+		}
+		else {
+			hw.upd_pxl(i, 0, 0);
+		}
+		hw.refresh_matrix(0);
+	}
+
 }
 
 #endif

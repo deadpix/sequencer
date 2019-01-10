@@ -24,10 +24,23 @@
 
 #include "hw_nt.h"
 
-hw_nt::hw_nt(){
+// sequenception to neotrellis color
+static uint32_t sqcpt_to_nt_color[8]; 
+
+hw_nt::hw_nt(Adafruit_MultiTrellis* mt){
+	_mt = mt;
+//	for(int i=0;i<;i++){
+//
+//	}
 }
 
 hw_nt::~hw_nt(){
 };
 
+void hw_nt::refresh_matrix(uint16_t id){
+	_mt->show();
+}
 
+void hw_nt::upd_pxl(uint16_t id, uint8_t color, uint8_t brightness){
+	_mt->setPixelColor(id, color);
+}

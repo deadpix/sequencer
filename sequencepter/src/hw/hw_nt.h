@@ -28,12 +28,14 @@
 
 #include "../hw.h"
 #include "../types.h" 
+#include <Adafruit_NeoTrellis.h>
 
 class hw_nt : public hw {
 	private:
+		Adafruit_MultiTrellis* _mt;
 
 	public:
-		hw_nt();
+		hw_nt(Adafruit_MultiTrellis* mt);
 		~hw_nt();
 		void refresh_matrix(uint16_t id);
 		void upd_pxl(uint16_t id, uint8_t color, uint8_t brightness);
