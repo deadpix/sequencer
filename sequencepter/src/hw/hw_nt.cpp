@@ -23,15 +23,40 @@
  */
 
 #include "hw_nt.h"
+#include "../led_matrix.h"
 
+#define NR_COLORS	8
 // sequenception to neotrellis color
-static uint32_t sqcpt_to_nt_color[8]; 
+static uint32_t sqcpt_to_nt_color[NR_LEVELS][NR_COLORS]; 
 
 hw_nt::hw_nt(Adafruit_MultiTrellis* mt){
 	_mt = mt;
-//	for(int i=0;i<;i++){
-//
-//	}
+	sqcpt_to_nt_color[0][0] = seesaw_NeoPixel::Color(0, 0, 0);
+	sqcpt_to_nt_color[0][1] = seesaw_NeoPixel::Color(255, 0, 0);
+	sqcpt_to_nt_color[0][2] = seesaw_NeoPixel::Color(0, 255, 0);
+	sqcpt_to_nt_color[0][3] = seesaw_NeoPixel::Color(255, 255, 0);
+	sqcpt_to_nt_color[0][4] = seesaw_NeoPixel::Color(0, 0, 255);
+	sqcpt_to_nt_color[0][5] = seesaw_NeoPixel::Color(255, 0, 255);
+	sqcpt_to_nt_color[0][6] = seesaw_NeoPixel::Color(0, 255, 255);
+	sqcpt_to_nt_color[0][7] = seesaw_NeoPixel::Color(255, 255, 255);
+
+	sqcpt_to_nt_color[1][0] = seesaw_NeoPixel::Color(0, 0, 0);
+	sqcpt_to_nt_color[1][1] = seesaw_NeoPixel::Color(255, 100, 100);
+	sqcpt_to_nt_color[1][2] = seesaw_NeoPixel::Color(100, 255, 100);
+	sqcpt_to_nt_color[1][3] = seesaw_NeoPixel::Color(255, 255, 100);
+	sqcpt_to_nt_color[1][4] = seesaw_NeoPixel::Color(100, 100, 255);
+	sqcpt_to_nt_color[1][5] = seesaw_NeoPixel::Color(255, 100, 255);
+	sqcpt_to_nt_color[1][6] = seesaw_NeoPixel::Color(100, 255, 255);
+	sqcpt_to_nt_color[1][7] = seesaw_NeoPixel::Color(255, 255, 255);
+
+	sqcpt_to_nt_color[2][0] = seesaw_NeoPixel::Color(0, 0, 0);
+	sqcpt_to_nt_color[2][1] = seesaw_NeoPixel::Color(255, 200, 200);
+	sqcpt_to_nt_color[2][2] = seesaw_NeoPixel::Color(200, 255, 200);
+	sqcpt_to_nt_color[2][3] = seesaw_NeoPixel::Color(255, 255, 200);
+	sqcpt_to_nt_color[2][4] = seesaw_NeoPixel::Color(200, 200, 255);
+	sqcpt_to_nt_color[2][5] = seesaw_NeoPixel::Color(255, 200, 255);
+	sqcpt_to_nt_color[2][6] = seesaw_NeoPixel::Color(200, 255, 255);
+	sqcpt_to_nt_color[2][7] = seesaw_NeoPixel::Color(255, 255, 255);
 }
 
 hw_nt::~hw_nt(){
@@ -42,5 +67,6 @@ void hw_nt::refresh_matrix(uint16_t id){
 }
 
 void hw_nt::upd_pxl(uint16_t id, uint8_t color, uint8_t brightness){
-	_mt->setPixelColor(id, color);
+	
+	_mt->setPixelColor(id, sqcpt_to_nt_color[brightness][color]);
 }

@@ -30,7 +30,6 @@
 #include "src/led_matrix.h"
 #include "Bounce_array.h"
 
-
 #define BTN_NUM_COL		8
 #define BTN_NUM_ROW		8
 #define BOUNCE_TIME		5
@@ -197,6 +196,8 @@ static void switch_matrix_ui(led_matrix* lm){
 #elif HW_ADAFRUIT_NEOTRELLIS == 1
 
 #include <Adafruit_NeoTrellis.h>
+#include "src/hw/hw_nt.h"
+#include "src/bit.h"
 #define NT_INT_PIN	17
 
 
@@ -292,7 +293,7 @@ static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
 		struct led_status* tmp = next->get_led_status(i);
 		if(tmp->bmp){
 			uint8_t idx = BIT::get_highest_bit_set(tmp->bmp);
-			hw.upd_pxl(i, tmp->color[idx], 0);
+			hw.upd_pxl(i, tmp->color[idx], idx);
 		}
 		else {
 			hw.upd_pxl(i, 0, 0);

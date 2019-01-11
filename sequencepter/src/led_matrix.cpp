@@ -60,7 +60,10 @@ int led_matrix::save_n_set(uint8_t color, uint16_t nr, uint8_t ground){
 		_led_status_arr[nr].color[ground] = color;
 		ret = _led_status_arr[nr].bmp;
 //		if(_hw) _hw->refresh_matrix(nr);
-		if(_hw) _hw->upd_pxl(nr, color, ground);
+		if(_hw){
+			_hw->upd_pxl(nr, color, ground);
+			_hw->refresh_matrix(0);
+		}
 	}
 	else if(BIT::is_bit_set(_led_status_arr[nr].bmp, ground)){
 		ret = -1;
@@ -73,7 +76,10 @@ int led_matrix::save_n_set(uint8_t color, uint16_t nr, uint8_t ground){
 	
 		if(level_hi < ground){
 //			led_ovw(color, nr);
-			if(_hw) _hw->upd_pxl(nr, color, ground);
+			if(_hw){
+				_hw->upd_pxl(nr, color, ground);
+				_hw->refresh_matrix(0);
+			}
 		}
 	}
 	return ret;	
@@ -87,11 +93,17 @@ int led_matrix::save_n_ovw(uint8_t color, uint16_t nr, uint8_t ground){
 		_led_status_arr[nr].color[ground] = color;
 //		set_led_x(color, nr);
 //		if(_hw) _hw->refresh_matrix(nr);
-		if(_hw) _hw->upd_pxl(nr, color, ground);
+		if(_hw){
+			_hw->upd_pxl(nr, color, ground);
+			_hw->refresh_matrix(0);
+		}
 	}
 	else if(BIT::is_bit_set(_led_status_arr[nr].bmp, ground)){
 		_led_status_arr[nr].color[ground] = color;
-		if(_hw) _hw->upd_pxl(nr, color, ground);
+		if(_hw){
+	 		_hw->upd_pxl(nr, color, ground);
+			_hw->refresh_matrix(0);
+		}
 //		led_ovw(color, nr);
 	} 
 	else {
@@ -101,7 +113,10 @@ int led_matrix::save_n_ovw(uint8_t color, uint16_t nr, uint8_t ground){
 
 		if(level_hi < ground){
 //			led_ovw(color, nr);
-			if(_hw) _hw->upd_pxl(nr, color, ground);
+			if(_hw){
+				_hw->upd_pxl(nr, color, ground);
+				_hw->refresh_matrix(0);
+			}
 		}
 	}
 
@@ -115,7 +130,10 @@ int led_matrix::save_n_set_dfl(uint8_t color, uint16_t nr, uint8_t ground){
 		_led_status_arr[nr].color[ground] = color;
 //		set_led_x(color, nr);
 //		if(_hw) _hw->refresh_matrix(nr);
-		if(_hw) _hw->upd_pxl(nr, color, ground);
+		if(_hw){
+			_hw->upd_pxl(nr, color, ground);
+			_hw->refresh_matrix(0);
+		}
 	} 
 	else if(BIT::is_bit_set(_led_status_arr[nr].bmp, ground)){
 		ret = -1;
@@ -129,7 +147,10 @@ int led_matrix::save_n_set_dfl(uint8_t color, uint16_t nr, uint8_t ground){
 		if(level_hi < ground){
 //			_led_status_arr[nr].color[ground] = LED_OFF_IDX;
 //			led_off(nr);
-			if(_hw) _hw->upd_pxl(nr, color, ground);
+			if(_hw){
+				_hw->upd_pxl(nr, color, ground);
+				_hw->refresh_matrix(0);
+			}
 		}
 //		if(_hw) _hw->refresh_matrix(nr);
 	}
@@ -149,7 +170,10 @@ int led_matrix::save_n_toogle(uint8_t color, uint16_t nr, uint8_t ground){
 //		toogle_led_x(color, nr);
 //		dbg::printf("save and toogle %d\n", _led_status_arr[nr].color[ground]);
 //		if(_hw) _hw->refresh_matrix(nr);
-		if(_hw) _hw->upd_pxl(nr, _led_status_arr[nr].color[ground], ground);
+		if(_hw){
+			_hw->upd_pxl(nr, _led_status_arr[nr].color[ground], ground);
+			_hw->refresh_matrix(0);
+		}
 //	}
 	return ret;
 	
@@ -163,10 +187,16 @@ int led_matrix::clr_n_restore(uint16_t nr, uint8_t ground){
 	if( (ret = _led_status_arr[nr].bmp) ){
 		uint8_t level_hi = BIT::get_highest_bit_set(_led_status_arr[nr].bmp);
 //		set_led_x(_led_status_arr[nr].color[level_hi], nr);
-		if(_hw) _hw->upd_pxl(nr, _led_status_arr[nr].color[level_hi], level_hi);
+		if(_hw){
+			_hw->upd_pxl(nr, _led_status_arr[nr].color[level_hi], level_hi);
+			_hw->refresh_matrix(0);
+		}
 	} 
 	else {
-		if(_hw) _hw->upd_pxl(nr, 0x0, ground);
+		if(_hw){
+			_hw->upd_pxl(nr, 0x0, ground);
+			_hw->refresh_matrix(0);
+		}
 	}
 //	if(_hw) _hw->refresh_matrix(nr);
 	return  _led_status_arr[nr].bmp;
