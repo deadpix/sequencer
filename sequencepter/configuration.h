@@ -3,6 +3,7 @@
 
 #define HW_SHIFT_REGISTER	0
 #define HW_ADAFRUIT_NEOTRELLIS	1
+#define CMD_BTN_MATRIX  	1
 
 
 

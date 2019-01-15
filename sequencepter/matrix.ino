@@ -39,6 +39,9 @@
 
 
 Adafruit_MCP23017 mcp;
+#if CMD_BTN_MATRIX == 1 
+Adafruit_MCP23017 mcp1;
+#endif
 
 struct _btn_status {
 	byte pushed_bmp[BTN_NUM_COL];
@@ -62,6 +65,22 @@ uint8_t mcp_digitalRead(uint8_t pin, uint8_t fct_id){
 }
 
 
+#if CMD_BTN_MATRIX == 1
+static ArrBounce cmd_btn_row[8];
+
+static uint8_t cmd_btn_matrix_digitalRead(uint8_t pin){
+	return mcp1.digitalRead(pin);
+}
+
+static void setup_cmd_btn_matrix(){
+
+}
+
+static void scan_cmd_btn_matrix(){
+
+}
+
+#endif
 
 
 
@@ -204,8 +223,8 @@ static void switch_matrix_ui(led_matrix* lm){
 //create a matrix of trellis panels
 Adafruit_NeoTrellis t_array[BTN_NUM_ROW/4][BTN_NUM_COL/4] = {
   
-  { Adafruit_NeoTrellis(0x2E), Adafruit_NeoTrellis(0x2F) },
-  { Adafruit_NeoTrellis(0x2E), Adafruit_NeoTrellis(0x2F) }
+  { Adafruit_NeoTrellis(0x2E,&Wire), Adafruit_NeoTrellis(0x2F,&Wire) },
+  { Adafruit_NeoTrellis(0x2E,&Wire), Adafruit_NeoTrellis(0x2F,&Wire) }
   
 };
 
