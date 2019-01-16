@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 
-#include <i2c_t3.h>
+//#include <i2c_t3.h>
 #include <Bounce2.h>
 //#include <Adafruit_MCP23017.h>
 #include "Bounce_array.h"

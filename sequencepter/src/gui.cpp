@@ -2,15 +2,15 @@
 
 #include "types.h"
 #include "gui.h"
-
+#include <hw_debug.h>
 
 static void (*refresh_fct)(char**);
 
 static void dummy_fct(char** str){
 	UNUSED(str);
-//	Serial.println(str[0]);
-//	Serial.println(str[1]);
-//	Serial.println(str[2]);
+	dbg::println(str[0]);
+	dbg::println(str[1]);
+	dbg::println(str[2]);
 }
 
 //gui::gui() : buffer { "a", "b", "c" }{

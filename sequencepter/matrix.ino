@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */
 #include <i2c_t3.h>
-#include <Adafruit_MCP23017.h>
+//#include <Adafruit_MCP23017.h>
 
 #include "configuration.h"
 #include "src/types.h"
@@ -321,12 +321,20 @@ static void switch_matrix_ui(led_matrix* lm){
 #define NT_INT_PIN	17
 
 
+#define NT_ADDR1 0x2F
+#define NT_ADDR2 0x30
+#define NT_ADDR3 0x36
+#define NT_ADDR4 0x3E
+
 //create a matrix of trellis panels
 Adafruit_NeoTrellis t_array[BTN_NUM_ROW/4][BTN_NUM_COL/4] = {
   
-  { Adafruit_NeoTrellis(0x2E,&Wire), Adafruit_NeoTrellis(0x2F,&Wire) },
-  { Adafruit_NeoTrellis(0x2E,&Wire), Adafruit_NeoTrellis(0x2F,&Wire) }
-  
+ // { Adafruit_NeoTrellis(NT_ADDR1, &Wire), Adafruit_NeoTrellis(NT_ADDR2, &Wire) },
+ // { Adafruit_NeoTrellis(NT_ADDR3, &Wire), Adafruit_NeoTrellis(NT_ADDR4, &Wire) }
+   
+  { Adafruit_NeoTrellis(NT_ADDR1, &Wire1), Adafruit_NeoTrellis(NT_ADDR2, &Wire1) },
+  { Adafruit_NeoTrellis(NT_ADDR3, &Wire1), Adafruit_NeoTrellis(NT_ADDR4, &Wire1) }
+
 };
 
 Adafruit_MultiTrellis trellis((Adafruit_NeoTrellis *)t_array, BTN_NUM_ROW/4, BTN_NUM_COL/4);
@@ -382,7 +390,7 @@ static void setup_matrix(){
 	}
 
 	flag_btn_active = false;
-	pinMode(NT_INT_PIN, INPUT);
+//	pinMode(NT_INT_PIN, INPUT);
 
   	for(int y=0; y<BTN_NUM_ROW; y++){
 		for(int x=0; x<BTN_NUM_COL; x++){
@@ -399,9 +407,9 @@ static void setup_matrix(){
 	}
 }
 static void scan(prog* p){
-	if(!digitalRead(NT_INT_PIN)){
+//	if(!digitalRead(NT_INT_PIN)){
 		trellis.read(false);
-	}
+//	}
 }
 static void upd_shift_reg(led_matrix* lm){
 }

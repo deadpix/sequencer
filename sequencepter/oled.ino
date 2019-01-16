@@ -1,4 +1,11 @@
+#include "src/types.h"
+
+gui oled_gui;
+
+
+#if OLED_GUI == 1
 #include "src/gui.h"
+
 #include <SPI.h>  // Include SPI if you're using SPI
 #include <SFE_MicroOLED.h>  // Include the SFE_MicroOLED library
 
@@ -18,7 +25,6 @@
 //////////////////////////////////
 MicroOLED oled(PIN_RESET, PIN_DC, PIN_CS); // SPI declaration
 //MicroOLED oled(PIN_RESET, DC_JUMPER);    // I2C declaration
-gui oled_gui;
 
 static void print_oled(char* line, uint8_t off){
 	oled.setCursor(0, off);
@@ -49,7 +55,11 @@ static void refresh_oled(char** line_arr){
 */
 }
 
+
+#endif
+
 gui* setup_oled(){
+#if OLED_GUI == 1
 	oled_gui.init_gui(refresh_oled);
 	oled.begin();    // Initialize the OLED
 	oled.clear(ALL); // Clear the display's internal memory
@@ -60,5 +70,8 @@ gui* setup_oled(){
 	oled.setCursor(0, 0);
 	oled.print("OLED init done");
 	oled.display();
+#else
 	return &oled_gui;
+#endif
 }
+

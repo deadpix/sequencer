@@ -22,7 +22,8 @@
  *  SOFTWARE.
  */ 
 #include <i2c_t3.h>
-#include <Adafruit_MCP23017.h>
+//#include <Adafruit_MCP23017.h>
+//#include <Wire.h>
 #include <LinkedList.h>
 #include <Adafruit_NeoTrellis.h>
 #include <hw_debug.h>
@@ -220,6 +221,7 @@ void setup(){
 	// data initialization
 //	init_all_prog();
 	sequenception.init(gui_ctrl);
+	switch_matrix_ui(sequenception.lm_ptr, sequenception.lm_ptr);
 	
 	// MUST BE LAST...
 	init_menu_btn(sequenception.current_prog);
@@ -236,8 +238,8 @@ void loop(){
 	}
 	if(btn_flag){
 		scan(sequenception.current_prog);
-		scan_menu_btn();
-		scan_param_btn();
+//		scan_menu_btn();
+//		scan_param_btn();
 	}
 	// if menu prog is running, call menu update function
 	if(sequenception.current_prog == sequenception.prog_arr[sequenception.nr_prog]){

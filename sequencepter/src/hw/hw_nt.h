@@ -29,10 +29,13 @@
 #include "../hw.h"
 #include "../types.h" 
 #include <Adafruit_NeoTrellis.h>
+//#include "../led_matrix.h"
 
+#define NR_COLORS	8
 class hw_nt : public hw {
 	private:
 		Adafruit_MultiTrellis* _mt;
+		uint32_t _sqcpt_to_nt_color[3][NR_COLORS];
 
 	public:
 		hw_nt(Adafruit_MultiTrellis* mt);
