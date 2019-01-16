@@ -66,19 +66,120 @@ uint8_t mcp_digitalRead(uint8_t pin, uint8_t fct_id){
 
 
 #if CMD_BTN_MATRIX == 1
-static ArrBounce cmd_btn_row[8];
+
+#define CMD_BTN_MATRIX_CLBK	1
+#define MCP1_ADDR	0x0
+#define CMD_BTN_MATRIX_NR_ROW	8
+#define CMD_BTN_MATRIX_NR_COL	8
+
+#if CMD_BTN_MATRIX_NR_ROW <= 8
+typedef uint8_t cmd_btn_status_bmp_t;
+#elif CMD_BTN_MATRIX_NR_ROW <= 16
+typedef uint16_t cmd_btn_status_bmp_t;
+#elif CMD_BTN_MATRIX_NR_ROW <= 32
+typedef uint32_t cmd_btn_status_bmp_t;
+#endif
+#define CMD_BTN_IS_PUSHED	1
+#define CMD_BTN_IS_RELEASED	0
+cmd_btn_status_bmp_t cmd_btn_action_bmp[CMD_BTN_MATRIX_NR_COL];
+cmd_btn_status_bmp_t cmd_btn_status_bmp[CMD_BTN_MATRIX_NR_COL];
+
+
+static uint8_t cmd_btn_matrix_select_pins[CMD_BTN_MATRIX_NR_COL] = {3,2,1,0,12,13,14,15}; // ground switch
+static uint8_t cmd_btn_matrix_read_pins[CMD_BTN_MATRIX_NR_ROW] = {7,8,6,9,5,10,4,11};
+
+static ArrBounce cmd_btn_matrix_status[CMD_BTN_MATRIX_NR_ROW];
+static uint8_t cmd_btn_matrix_col_cnt;
 
 static uint8_t cmd_btn_matrix_digitalRead(uint8_t pin){
 	return mcp1.digitalRead(pin);
 }
 
 static void setup_cmd_btn_matrix(){
+	int i = 0;
+	cmd_btn_matrix_col_cnt = 0;
+
+	mcp1.begin(MCP1_ADDR);
+	Wire.setClock(1000000);
+
+	if(init_rd_cbck(&cmd_btn_matrix_digitalRead, CMD_BTN_MATRIX_CLBK)){
+		Serial.println("Could not init MCP23017 callback function array...");
+	}
+
+	for (i=0;i<CMD_BTN_MATRIX_NR_COL;i++){
+		cmd_btn_action_bmp[i] = 0x0;
+		cmd_btn_status_bmp[i] = 0x0;
+                cmd_btn_matrix_status[i].init_ArrBounce(cmd_btn_matrix_read_pins, BOUNCE_TIME, CMD_BTN_MATRIX_NR_ROW, &mcp_digitalRead, CMD_BTN_MATRIX_CLBK);
+		mcp1.pinMode(cmd_btn_matrix_select_pins[i], OUTPUT);
+		mcp1.digitalWrite(cmd_btn_matrix_select_pins[i], HIGH);
+	}
+
+	// button row input lines
+	for (i=0;i<CMD_BTN_MATRIX_NR_ROW;i++){
+		mcp1.pinMode(cmd_btn_matrix_read_pins[i], INPUT);
+		mcp1.pullUp(cmd_btn_matrix_read_pins[i], HIGH);
+	}
+
+}
+static void cmd_btn_matrix_do_something(uint8_t cmd_btn, bool is_pushed){
+	switch(cmd_btn){
+		default:
+			Serial.print("btn ");
+			Serial.print(cmd_btn);
+			if(is_pushed){
+				Serial.println(" has no pushed cmd");
+			} 
+			else {
+				Serial.println(" has no released cmd");
+			}	
+			break;
+	}
+
+}
+
+static void cmd_btn_matrix_action(){
+	int i = 0;
+	uint16_t idx;
+	for(int i; i<CMD_BTN_MATRIX_NR_COL; i++){
+		if(cmd_btn_action_bmp[i]){
+			for_eachset_bit(idx, &cmd_btn_action_bmp[i], CMD_BTN_MATRIX_NR_ROW){
+				cmd_btn_matrix_do_something(i*CMD_BTN_MATRIX_NR_COL+idx, BIT::is_bit_set(&cmd_btn_status_bmp[i], idx));
+				BIT::clear_bits(&cmd_btn_action_bmp[i], idx, 1);
+			}
+		}
+
+	}
+
+
 
 }
 
 static void scan_cmd_btn_matrix(){
+	int i = 0;
+	mcp1.digitalWrite(cmd_btn_matrix_select_pins[cmd_btn_matrix_col_cnt], LOW);
+	
+	for (i=0; i<CMD_BTN_MATRIX_NR_COL; i++){
+		if(cmd_btn_matrix_status[cmd_btn_matrix_col_cnt].update(i)){
+			BIT::set_bits(&cmd_btn_action_bmp[cmd_btn_matrix_col_cnt], i, 1);
+			if(cmd_btn_matrix_status[cmd_btn_matrix_col_cnt].read(i) == HIGH){
+				// released		
+//				cmd_btn_matrix_action(cmd_btn_matrix_col_cnt*CMD_BTN_MATRIX_NR_COL + i, false);
+				BIT::clear_bits(&cmd_btn_status_bmp[cmd_btn_matrix_col_cnt], i, 1);
+			} else {
+				// pushed
+//				cmd_btn_matrix_action(cmd_btn_matrix_col_cnt*CMD_BTN_MATRIX_NR_COL + i, true);
+				BIT::set_bits(&cmd_btn_status_bmp[cmd_btn_matrix_col_cnt], i, 1);
+				
+			}
+		}
+	}
+	
+	mcp1.digitalWrite(cmd_btn_matrix_select_pins[cmd_btn_matrix_col_cnt], HIGH);	
+	cmd_btn_matrix_col_cnt = (cmd_btn_matrix_col_cnt+1) % CMD_BTN_MATRIX_NR_COL;
 
 }
+
+
 
 #endif
 
