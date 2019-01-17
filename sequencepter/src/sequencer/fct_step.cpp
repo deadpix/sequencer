@@ -12,7 +12,6 @@ void fct_step::init(sequencer* seq, char* name){
 }
 
 static void clear_all_long_pushed_ui(track* t, uint8_t* lp_cnt, struct led_blink_t* lp_ui){
-//	track* t = _seq->get_current_track();
 	int ret = 0;
 	for(uint8_t i=0; i<*lp_cnt; i++){
 		ret = t->get_led_matrix()->clr_n_restore(lp_ui[i]._id, FOREGROUND1);
@@ -32,9 +31,10 @@ void fct_step::on_push(uint8_t btn_id){
 
 	if(n){
 		// step case
-//		if(n->_step){
 		if(n->_node_is_step){
 			if(n->_step->is_step_active()){
+				dbg::print("n->_step->get_step_color() = ");
+				dbg::println(n->_step->get_step_color());
 				t->get_led_matrix()->save_n_toogle(n->_step->get_step_color(), btn_id, FOREGROUND1);
 			}
 			// clear from lvl + 1 interface
@@ -64,11 +64,6 @@ static void clear_mtx_to_node_from_level(track *t, uint8_t level){
 	for(int i=start; i<NR_STEP; i++){
 		t->set_node_in_matrix(i, NULL);
 	}  
-}
-
-static step* create_step(node *n, uint8_t mtx_id){
-	step* s = new step;
-	
 }
 
 void fct_step::on_release(uint8_t btn_id){
@@ -228,7 +223,6 @@ void fct_step::on_release(uint8_t btn_id){
 	
 	} 
 	else {			
-//		if(n && n->_step){
 		if(n && n->_node_is_step){
 			step* s = t->_mtx_to_node[id]->_step;
 			if(s->is_step_active()){
