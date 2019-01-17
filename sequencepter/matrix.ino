@@ -28,6 +28,7 @@
 #include "src/types.h"
 #include "src/hw.h"
 #include "src/led_matrix.h"
+#include "src/bit.h"
 #include "Bounce_array.h"
 
 #define BTN_NUM_COL		8
@@ -72,13 +73,13 @@ uint8_t mcp_digitalRead(uint8_t pin, uint8_t fct_id){
 #define CMD_BTN_MATRIX_NR_ROW	8
 #define CMD_BTN_MATRIX_NR_COL	8
 
-#if CMD_BTN_MATRIX_NR_ROW <= 8
+//#if CMD_BTN_MATRIX_NR_ROW <= 8
 typedef uint8_t cmd_btn_status_bmp_t;
-#elif CMD_BTN_MATRIX_NR_ROW <= 16
-typedef uint16_t cmd_btn_status_bmp_t;
-#elif CMD_BTN_MATRIX_NR_ROW <= 32
-typedef uint32_t cmd_btn_status_bmp_t;
-#endif
+//#elif CMD_BTN_MATRIX_NR_ROW <= 16
+//typedef uint16_t cmd_btn_status_bmp_t;
+//#elif CMD_BTN_MATRIX_NR_ROW <= 32
+//typedef uint32_t cmd_btn_status_bmp_t;
+//#endif
 #define CMD_BTN_IS_PUSHED	1
 #define CMD_BTN_IS_RELEASED	0
 cmd_btn_status_bmp_t cmd_btn_action_bmp[CMD_BTN_MATRIX_NR_COL];
@@ -121,8 +122,29 @@ static void setup_cmd_btn_matrix(){
 	}
 
 }
-static void cmd_btn_matrix_do_something(uint8_t cmd_btn, bool is_pushed){
+static int cmd_btn_matrix_do_something(uint8_t cmd_btn, bool is_pushed){
+	int ret = 0;
 	switch(cmd_btn){
+		case 0:
+			if(is_pushed){
+				ret = menu_on_push();	
+			} else {
+				ret = menu_on_release();
+			}
+			break;
+
+		case 1:
+			if(sequenception.current_prog->get_param()){
+				if(is_pushed){
+					ret = param_on_push();	
+				} else {
+					ret = param_on_release();
+				}
+			} else {
+				ret = 1;
+			}
+			break;
+
 		default:
 			Serial.print("btn ");
 			Serial.print(cmd_btn);
@@ -131,27 +153,28 @@ static void cmd_btn_matrix_do_something(uint8_t cmd_btn, bool is_pushed){
 			} 
 			else {
 				Serial.println(" has no released cmd");
-			}	
+			}
+			ret = 1;
 			break;
 	}
-
+	return ret;
 }
 
-static void cmd_btn_matrix_action(){
-	int i = 0;
-	uint16_t idx;
-	for(int i; i<CMD_BTN_MATRIX_NR_COL; i++){
-		if(cmd_btn_action_bmp[i]){
-			for_eachset_bit(idx, &cmd_btn_action_bmp[i], CMD_BTN_MATRIX_NR_ROW){
-				cmd_btn_matrix_do_something(i*CMD_BTN_MATRIX_NR_COL+idx, BIT::is_bit_set(&cmd_btn_status_bmp[i], idx));
-				BIT::clear_bits(&cmd_btn_action_bmp[i], idx, 1);
+static void cmd_btn_matrix_action(uint8_t col_cnt){
+	int idx;
+	uint16_t *action_bmp = (uint16_t *) &cmd_btn_action_bmp[col_cnt];
+	uint16_t *status_bmp = (uint16_t *) &cmd_btn_status_bmp[col_cnt];
+	if(action_bmp){
+//		uint16_t bmp = (uint16_t) cmd_btn_action_bmp[col_cnt];
+		for_eachset_bit(idx, action_bmp, CMD_BTN_MATRIX_NR_ROW){
+			if(cmd_btn_matrix_do_something(
+				col_cnt*CMD_BTN_MATRIX_NR_COL+idx, 
+				BIT::is_bit_set(*status_bmp, idx))
+			){
+				BIT::clear_bits(action_bmp, idx, 1);
 			}
 		}
-
 	}
-
-
-
 }
 
 static void scan_cmd_btn_matrix(){
@@ -160,15 +183,15 @@ static void scan_cmd_btn_matrix(){
 	
 	for (i=0; i<CMD_BTN_MATRIX_NR_COL; i++){
 		if(cmd_btn_matrix_status[cmd_btn_matrix_col_cnt].update(i)){
-			BIT::set_bits(&cmd_btn_action_bmp[cmd_btn_matrix_col_cnt], i, 1);
+			BIT::set_bits((uint16_t *) &cmd_btn_action_bmp[cmd_btn_matrix_col_cnt], i, 1);
 			if(cmd_btn_matrix_status[cmd_btn_matrix_col_cnt].read(i) == HIGH){
 				// released		
 //				cmd_btn_matrix_action(cmd_btn_matrix_col_cnt*CMD_BTN_MATRIX_NR_COL + i, false);
-				BIT::clear_bits(&cmd_btn_status_bmp[cmd_btn_matrix_col_cnt], i, 1);
+				BIT::clear_bits((uint16_t *) &cmd_btn_status_bmp[cmd_btn_matrix_col_cnt], i, 1);
 			} else {
 				// pushed
 //				cmd_btn_matrix_action(cmd_btn_matrix_col_cnt*CMD_BTN_MATRIX_NR_COL + i, true);
-				BIT::set_bits(&cmd_btn_status_bmp[cmd_btn_matrix_col_cnt], i, 1);
+				BIT::set_bits((uint16_t *) &cmd_btn_status_bmp[cmd_btn_matrix_col_cnt], i, 1);
 				
 			}
 		}
@@ -177,6 +200,7 @@ static void scan_cmd_btn_matrix(){
 	mcp1.digitalWrite(cmd_btn_matrix_select_pins[cmd_btn_matrix_col_cnt], HIGH);	
 	cmd_btn_matrix_col_cnt = (cmd_btn_matrix_col_cnt+1) % CMD_BTN_MATRIX_NR_COL;
 
+	cmd_btn_matrix_action(cmd_btn_matrix_col_cnt);
 }
 
 

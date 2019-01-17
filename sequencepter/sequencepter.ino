@@ -22,7 +22,7 @@
  *  SOFTWARE.
  */ 
 #include <i2c_t3.h>
-//#include <Adafruit_MCP23017.h>
+#include <Adafruit_MCP23017.h>
 //#include <Wire.h>
 #include <LinkedList.h>
 #include <Adafruit_NeoTrellis.h>
@@ -60,24 +60,6 @@
 static sequenception sequenception;
 
 gui	 *gui_ctrl;
-//menu  menu_ctrl;
-//prog *prog_arr[MATRIX_NR_COL];
-//prog *current_prog;
-//int nr_prog;
-
-//static tempo tempo_setting;
-//static sequencer midi_seq;
-//static seq_param seq_param_ui;
-//static fct_step seq_option1;
-//static fct_loop_setting seq_option2;
-
-//static test_proj_one p1;
-//static test_proj_two p2;
-
-//led_matrix* lm_ptr;
-
-
-//clk* mst_clk;
 volatile bool check_clk;
 
 uint8_t btn_col_idx;
@@ -99,107 +81,20 @@ static void check_btn(){
 		btn_flag = true;
 }
 
-#if HW_SHIFT_REG == 1 
 static void upd_gui(){
+#if HW_SHIFT_REG == 1 
 	upd_shift_reg(sequenception.lm_ptr);
+#endif
 	if(!check_clk)
 		check_clk = true;
 }
-#endif
 
 static void tempo_change_handler(uint32_t ms){
 	noInterrupts();
 	uint32_t tmp = ((ms*1000)/MIDI_SYNC_PPN);
-//	Serial.println(tmp);
 	midi_timer.begin(upd_midi, tmp);
 	interrupts();
 }
-/*
-void init_clk(clk* c){
-	slv_clks.add(c);
-}
-
-static void sync_slv_clks(clk* mst){
-	uint8_t nr_clk = slv_clks.size();
-	uint32_t ms = mst->clk_get_ms();
-	for(int i=0;i<nr_clk;i++){
-		clk* tmp = slv_clks.get(i);
-		tmp->clk_sync_intern(ms);
-	}
-}
-*/
-
-
-//static void init_sequencer(){
-//	seq_option1.init(&midi_seq, "step");
-//	seq_option2.init(&midi_seq, "looplen");
-//	
-//	midi_seq.add_fct(&seq_option1, 0);
-//	midi_seq.add_fct(&seq_option2, 1);
-//
-//	midi_seq.set_current_param(0);
-//	midi_seq.prog::display_str("step", 1);
-//	midi_seq.prog::set_param(&seq_param_ui);
-//
-//	/* MUST BE called after sequencer initialization 	*/
-//	/* as parameters depends on sequencer options/fct 	*/
-//	/* initialization 									*/
-//	seq_param_ui.init(&midi_seq, mst_clk);
-//	seq_param_ui.param::set_prog(&midi_seq);
-//
-//}
-/*
-static void init_one_prog(prog* p, int prog_id, char *str){
-	prog_arr[prog_id] = p;
-	p->set_prog_id(prog_id);
-	p->set_title(str);
-	set_prog_menu_entry(prog_id, p);	
-}
-*/
-/*
-static void init_all_prog(){
-	nr_prog = 0;
-	led_matrix* menu_lmtx = menu_ctrl.get_menu_led_matrix();
-	
-	init_one_prog((prog *) &tempo_setting, nr_prog, "Setting");
-	nr_prog++;
-	
-	init_one_prog((prog *) &p1, nr_prog, "MIDIctl");
-	menu_lmtx->set_led_x(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0);
-	nr_prog++;
-
-	init_one_prog((prog *) &p2, nr_prog, "Prog 2");
-	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
-	nr_prog++;
-
-	init_one_prog((prog *) &midi_seq, nr_prog, "MIDIseq");
-	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
-	nr_prog++;
-		
-	// menu_ctrl MUST BE last
-	prog_arr[nr_prog] = &menu_ctrl;
-
-	for(int i=0;i<nr_prog;i++){
-		prog_arr[i]->set_menu_lm(menu_lmtx);
-		prog_arr[i]->set_gui(gui_ctrl);
-	}
-	
-	lm_ptr = p1.get_led_matrix();
-	current_prog = prog_arr[1];
-	current_prog->display_title();
-
-	
-	tempo_setting.init(tempo_change_handler, &midi_seq);
-	mst_clk = tempo_setting.get_mst_clk();
-	mst_clk->clk_set_max_step(NR_STEP);
-	tempo_change_handler(mst_clk->clk_get_ms());
-
-	init_midi_seq(&midi_seq);
-	init_midi_controller(&p1);
-	init_sequencer();
-//	sync_slv_clks(mst_clk);
-}
-*/
 
 void setup(){
 	// Hardware init procedure
@@ -212,9 +107,7 @@ void setup(){
 	sequenception.fct_tempo_change = tempo_change_handler;
 
 	// timer
-#if HW_SHIFT_REG == 1 
 	ui_timer.begin(upd_gui, 1000);
-#endif
 	btn_timer.begin(check_btn, 1000);
 //	midi_timer.begin(upd_midi, 8000);
 
@@ -238,8 +131,10 @@ void loop(){
 	}
 	if(btn_flag){
 		scan(sequenception.current_prog);
-//		scan_menu_btn();
-//		scan_param_btn();
+#if CMD_BTN_MATRIX == 0
+		scan_menu_btn();
+		scan_param_btn();
+#endif
 	}
 	// if menu prog is running, call menu update function
 	if(sequenception.current_prog == sequenception.prog_arr[sequenception.nr_prog]){
