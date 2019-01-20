@@ -29,12 +29,11 @@ void fct_step::on_push(uint8_t btn_id){
 
 //	_seq->prog::display_str(itoa(btn_id,str,BASE10), 2);
 
+
 	if(n){
 		// step case
 		if(n->_node_is_step){
 			if(n->_step->is_step_active()){
-				dbg::print("n->_step->get_step_color() = ");
-				dbg::println(n->_step->get_step_color());
 				t->get_led_matrix()->save_n_toogle(n->_step->get_step_color(), btn_id, FOREGROUND1);
 			}
 			// clear from lvl + 1 interface

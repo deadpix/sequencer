@@ -69,7 +69,7 @@ uint8_t mcp_digitalRead(uint8_t pin, uint8_t fct_id){
 #if CMD_BTN_MATRIX == 1
 
 #define CMD_BTN_MATRIX_CLBK	1
-#define MCP1_ADDR	0x0
+#define MCP1_ADDR		0x0
 #define CMD_BTN_MATRIX_NR_ROW	8
 #define CMD_BTN_MATRIX_NR_COL	8
 
@@ -86,8 +86,8 @@ cmd_btn_status_bmp_t cmd_btn_action_bmp[CMD_BTN_MATRIX_NR_COL];
 cmd_btn_status_bmp_t cmd_btn_status_bmp[CMD_BTN_MATRIX_NR_COL];
 
 
-static uint8_t cmd_btn_matrix_select_pins[CMD_BTN_MATRIX_NR_COL] = {3,2,1,0,12,13,14,15}; // ground switch
-static uint8_t cmd_btn_matrix_read_pins[CMD_BTN_MATRIX_NR_ROW] = {7,8,6,9,5,10,4,11};
+static uint8_t cmd_btn_matrix_select_pins[CMD_BTN_MATRIX_NR_COL] = {0,1,2,3,4,5,6,7}; // ground switch
+static uint8_t cmd_btn_matrix_read_pins[CMD_BTN_MATRIX_NR_ROW] = {8,9,10,11,12,13,14,15};
 
 static ArrBounce cmd_btn_matrix_status[CMD_BTN_MATRIX_NR_ROW];
 static uint8_t cmd_btn_matrix_col_cnt;
@@ -101,7 +101,7 @@ static void setup_cmd_btn_matrix(){
 	cmd_btn_matrix_col_cnt = 0;
 
 	mcp1.begin(MCP1_ADDR);
-	Wire.setClock(1000000);
+//	Wire.setClock(1000000);
 
 	if(init_rd_cbck(&cmd_btn_matrix_digitalRead, CMD_BTN_MATRIX_CLBK)){
 		Serial.println("Could not init MCP23017 callback function array...");
@@ -179,6 +179,8 @@ static void cmd_btn_matrix_action(uint8_t col_cnt){
 
 static void scan_cmd_btn_matrix(){
 	int i = 0;
+//	if(cmd_btn_matrix_col_cnt == 0)
+//		Serial.println("scan_cmd_btn_matrix");
 	mcp1.digitalWrite(cmd_btn_matrix_select_pins[cmd_btn_matrix_col_cnt], LOW);
 	
 	for (i=0; i<CMD_BTN_MATRIX_NR_COL; i++){

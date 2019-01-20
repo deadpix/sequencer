@@ -111,6 +111,10 @@ void setup(){
 	btn_timer.begin(check_btn, 1000);
 //	midi_timer.begin(upd_midi, 8000);
 
+#if CMD_BTN_MATRIX == 1
+	setup_cmd_btn_matrix();	
+#endif
+
 	// data initialization
 //	init_all_prog();
 	sequenception.init(gui_ctrl);
@@ -134,6 +138,8 @@ void loop(){
 #if CMD_BTN_MATRIX == 0
 		scan_menu_btn();
 		scan_param_btn();
+#else
+		scan_cmd_btn_matrix();
 #endif
 	}
 	// if menu prog is running, call menu update function
