@@ -101,7 +101,7 @@ static void setup_cmd_btn_matrix(){
 	cmd_btn_matrix_col_cnt = 0;
 
 	mcp1.begin(MCP1_ADDR);
-//	Wire.setClock(1000000);
+	Wire.setClock(1000000);
 
 	if(init_rd_cbck(&cmd_btn_matrix_digitalRead, CMD_BTN_MATRIX_CLBK)){
 		Serial.println("Could not init MCP23017 callback function array...");

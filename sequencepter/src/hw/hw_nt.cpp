@@ -65,6 +65,7 @@ void hw_nt::refresh_matrix(uint16_t id){
 }
 
 void hw_nt::upd_pxl(uint16_t id, uint8_t color, uint8_t brightness){
+/*
 	dbg::print("passe id");		
 	dbg::print(id);
 	dbg::print(" color ");		
@@ -73,5 +74,6 @@ void hw_nt::upd_pxl(uint16_t id, uint8_t color, uint8_t brightness){
 	dbg::print(brightness);
 	dbg::print(" rgb ");
 	dbg::println(_sqcpt_to_nt_color[brightness][color]);
+*/
 	_mt->setPixelColor(id, _sqcpt_to_nt_color[brightness][color]);
 }
