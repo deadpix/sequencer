@@ -44,7 +44,6 @@ uint8_t menu_btn_status;
 
 Bounce menu_btn = Bounce();
 Bounce param_btn = Bounce();
-param* param_ptr;
 
 static void init_menu_btn(prog* p){
 #if CMD_BTN_MATRIX == 0
@@ -93,6 +92,7 @@ int menu_on_release(){
 
 int param_on_push(){
 	led_matrix* prev = sequenception.lm_ptr;
+	
 	int ret = 0;
 	if(!flag_btn_active){
 		sequenception.current_prog = param_ptr;

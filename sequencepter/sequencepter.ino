@@ -58,6 +58,7 @@
 
 
 static sequenception sequenception;
+param* param_ptr;
 
 gui	 *gui_ctrl;
 volatile bool check_clk;
