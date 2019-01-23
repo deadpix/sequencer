@@ -134,14 +134,15 @@ static int cmd_btn_matrix_do_something(uint8_t cmd_btn, bool is_pushed){
 			break;
 
 		case 1:
-			if( (param_ptr = sequenception.current_prog->get_param()) ){
-				if(is_pushed){
+			if(is_pushed){
+				if( (param_ptr = sequenception.current_prog->get_param()) ){
 					ret = param_on_push();	
-				} else {
-					ret = param_on_release();
+				}
+				else {
+					ret = 1;
 				}
 			} else {
-				ret = 1;
+				ret = param_on_release();
 			}
 			break;
 

@@ -39,21 +39,21 @@ hw_nt::hw_nt(Adafruit_MultiTrellis* mt){
 	_sqcpt_to_nt_color[0][7] = seesaw_NeoPixel::Color(255, 255, 255);
 
 	_sqcpt_to_nt_color[1][0] = seesaw_NeoPixel::Color(0, 0, 0);
-	_sqcpt_to_nt_color[1][1] = seesaw_NeoPixel::Color(255, 100, 100);
-	_sqcpt_to_nt_color[1][2] = seesaw_NeoPixel::Color(100, 255, 100);
-	_sqcpt_to_nt_color[1][3] = seesaw_NeoPixel::Color(255, 255, 100);
-	_sqcpt_to_nt_color[1][4] = seesaw_NeoPixel::Color(100, 100, 255);
-	_sqcpt_to_nt_color[1][5] = seesaw_NeoPixel::Color(255, 100, 255);
-	_sqcpt_to_nt_color[1][6] = seesaw_NeoPixel::Color(100, 255, 255);
+	_sqcpt_to_nt_color[1][1] = seesaw_NeoPixel::Color(255, 10, 10);
+	_sqcpt_to_nt_color[1][2] = seesaw_NeoPixel::Color(10, 255, 10);
+	_sqcpt_to_nt_color[1][3] = seesaw_NeoPixel::Color(255, 255, 10);
+	_sqcpt_to_nt_color[1][4] = seesaw_NeoPixel::Color(10, 10, 255);
+	_sqcpt_to_nt_color[1][5] = seesaw_NeoPixel::Color(255, 10, 255);
+	_sqcpt_to_nt_color[1][6] = seesaw_NeoPixel::Color(10, 255, 255);
 	_sqcpt_to_nt_color[1][7] = seesaw_NeoPixel::Color(255, 255, 255);
 
 	_sqcpt_to_nt_color[2][0] = seesaw_NeoPixel::Color(0, 0, 0);
-	_sqcpt_to_nt_color[2][1] = seesaw_NeoPixel::Color(255, 200, 200);
-	_sqcpt_to_nt_color[2][2] = seesaw_NeoPixel::Color(200, 255, 200);
-	_sqcpt_to_nt_color[2][3] = seesaw_NeoPixel::Color(255, 255, 200);
-	_sqcpt_to_nt_color[2][4] = seesaw_NeoPixel::Color(200, 200, 255);
-	_sqcpt_to_nt_color[2][5] = seesaw_NeoPixel::Color(255, 200, 255);
-	_sqcpt_to_nt_color[2][6] = seesaw_NeoPixel::Color(200, 255, 255);
+	_sqcpt_to_nt_color[2][1] = seesaw_NeoPixel::Color(255, 20, 20);
+	_sqcpt_to_nt_color[2][2] = seesaw_NeoPixel::Color(20, 255, 20);
+	_sqcpt_to_nt_color[2][3] = seesaw_NeoPixel::Color(255, 255, 20);
+	_sqcpt_to_nt_color[2][4] = seesaw_NeoPixel::Color(20, 20, 255);
+	_sqcpt_to_nt_color[2][5] = seesaw_NeoPixel::Color(255, 20, 255);
+	_sqcpt_to_nt_color[2][6] = seesaw_NeoPixel::Color(20, 255, 255);
 	_sqcpt_to_nt_color[2][7] = seesaw_NeoPixel::Color(255, 255, 255);
 }
 
