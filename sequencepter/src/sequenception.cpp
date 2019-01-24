@@ -157,9 +157,9 @@ void sequenception::do_isr(){
 	if(clk_ms == 0){
 		clk_ms = eval_mst_clk();
 		track_upd = midi_seq.check_events(clk_ms, mst_clk->clk_get_step_cnt());
-	} else {
-		// Should not happen
-		Serial.println("do_isr() clk_ms > 0...");
+	}
+     	else {
+//		Serial.println("do_isr() clk_ms > 0...");
 	}	
 }
 void sequenception::init_midi_seq(){

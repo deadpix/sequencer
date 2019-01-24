@@ -97,10 +97,10 @@ void init_midi(){
 }
 
 void midi_loop(boolean flg){
-	MIDI.read();
-	if(flg){
-		MIDI.sendRealTime(MIDI_NAMESPACE::Clock);
-	}
+//	MIDI.read();
+//	if(flg){
+//		MIDI.sendRealTime(MIDI_NAMESPACE::Clock);
+//	}
 }
 
 	

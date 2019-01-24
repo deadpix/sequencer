@@ -7,6 +7,20 @@
 
 #define BUFFER_SIZE	512
 
+#define PERF_START(EN)				\
+	if(EN)					\
+		p.start_ms_counter();   	\
+
+#define PERF_END(EN, CNT)			\
+	if(EN){					\
+		p.stop_ms_counter();		\
+		if(p.get_perf_cnt() >= CNT){	\
+			p.print_perf();		\
+			p.reset_ms_counter();	\
+		}				\
+	}					\
+
+
 class perf {
 	private:
 		elapsedMillis _ms_cnt;

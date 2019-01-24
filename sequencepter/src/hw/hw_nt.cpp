@@ -24,6 +24,15 @@
 
 #include "hw_nt.h"
 #include <hw_debug.h>
+#include "../perf.h"
+
+#define TRACE_PERF 0
+
+#if TRACE_PERF == 1
+static perf p;
+#endif
+
+
 
 // sequenception to neotrellis color
 //static uint32_t sqcpt_to_nt_color[NR_LEVELS][NR_COLORS]; 
@@ -75,5 +84,18 @@ void hw_nt::upd_pxl(uint16_t id, uint8_t color, uint8_t brightness){
 	dbg::print(" rgb ");
 	dbg::println(_sqcpt_to_nt_color[brightness][color]);
 */
+#if TRACE_PERF == 1
+	p.start_ms_counter();
+#endif
+
 	_mt->setPixelColor(id, _sqcpt_to_nt_color[brightness][color]);
+#if TRACE_PERF == 1
+	p.stop_ms_counter();
+	if(p.get_perf_cnt() >= 1000){
+		p.print_perf();
+		p.reset_ms_counter();
+	}
+#endif
+
+
 }

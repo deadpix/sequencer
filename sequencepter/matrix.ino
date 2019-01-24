@@ -101,7 +101,7 @@ static void setup_cmd_btn_matrix(){
 	cmd_btn_matrix_col_cnt = 0;
 
 	mcp1.begin(MCP1_ADDR);
-	Wire.setClock(1000000);
+	Wire.setClock(I2C_RATE_800);
 
 	if(init_rd_cbck(&cmd_btn_matrix_digitalRead, CMD_BTN_MATRIX_CLBK)){
 		Serial.println("Could not init MCP23017 callback function array...");
@@ -182,6 +182,8 @@ static void scan_cmd_btn_matrix(){
 	int i = 0;
 //	if(cmd_btn_matrix_col_cnt == 0)
 //		Serial.println("scan_cmd_btn_matrix");
+
+
 	mcp1.digitalWrite(cmd_btn_matrix_select_pins[cmd_btn_matrix_col_cnt], LOW);
 	
 	for (i=0; i<CMD_BTN_MATRIX_NR_COL; i++){
@@ -202,6 +204,7 @@ static void scan_cmd_btn_matrix(){
 	
 	mcp1.digitalWrite(cmd_btn_matrix_select_pins[cmd_btn_matrix_col_cnt], HIGH);	
 	cmd_btn_matrix_col_cnt = (cmd_btn_matrix_col_cnt+1) % CMD_BTN_MATRIX_NR_COL;
+
 
 	cmd_btn_matrix_action(cmd_btn_matrix_col_cnt);
 }

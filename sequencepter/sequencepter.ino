@@ -119,7 +119,7 @@ void setup(){
 
 	// timer
 	ui_timer.begin(upd_gui, 1000);
-	btn_timer.begin(check_btn, 1000);
+	btn_timer.begin(check_btn, 10000);
 //	midi_timer.begin(upd_midi, 8000);
 
 #if CMD_BTN_MATRIX == 1
@@ -138,9 +138,9 @@ void setup(){
 
 void loop(){
 
-#if TRACE_PERF == 1
-	p.start_ms_counter();
-#endif
+//#if TRACE_PERF == 1
+//	p.start_ms_counter();
+//#endif
 
 	uint32_t clk_res = 0;
 //	if(check_clk){
@@ -148,15 +148,22 @@ void loop(){
 //		clk_res = sequenception.eval_mst_clk();
 //		check_clk = false;
 //	}
+
+
+
 	if(btn_flag){
+		PERF_START(1)
 		scan(sequenception.current_prog);
+		PERF_END(1, 500)
 #if CMD_BTN_MATRIX == 0
 		scan_menu_btn();
 		scan_param_btn();
 #else
 		scan_cmd_btn_matrix();
 #endif
+		btn_flag = false;
 	}
+
 
 	midi_loop(midi_flag);
 	if(midi_flag)
@@ -165,12 +172,5 @@ void loop(){
 	sequenception.loop(clk_res);
 
 
-#if TRACE_PERF == 1
-	p.stop_ms_counter();
-	if(p.get_perf_cnt() >= 1000){
-		p.print_perf();
-		p.reset_ms_counter();
-	}
-#endif
 
 }
