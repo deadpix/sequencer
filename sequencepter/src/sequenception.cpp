@@ -1,5 +1,6 @@
 #include <hw_debug.h>
 #include "sequenception.h"
+#include "../interrupts.h"
 
 static const uint8_t MIDI_DRUM_GM[8] = {37, 36, 42, 82, 40, 38, 46, 44};
 
@@ -16,6 +17,8 @@ fct_loop_setting sequenception::seq_option2;
 prog* sequenception::current_prog;
 led_matrix* sequenception::lm_ptr;
 clk* sequenception::mst_clk;
+uint32_t sequenception::clk_ms;
+volatile uint8_t sequenception::track_upd;
 
 void (*sequenception::fct_midi)(uint16_t, uint8_t, uint8_t);
 void (*sequenception::fct_tempo_change)(uint32_t);
@@ -107,6 +110,8 @@ void sequenception::init_all_prog(gui *g){
 	init_midi_controller();
 	init_sequencer();
 
+	track_upd = 0x0;
+
 	set_default_prog((prog *) &midi_seq);
 }
 
@@ -117,14 +122,45 @@ uint32_t sequenception::eval_mst_clk(){
 	return tempo_setting.check_mst_clk();
 } 
 void sequenception::loop(uint32_t ms){
+	// check if midi_clk_flg has been set
+	track* t = midi_seq.get_current_track(); 
+	if( (t->get_led_matrix() == lm_ptr)){
+		if(track_upd & (1<<t->get_track_id())){
+			t->init_animate_parents_no_irq();
+			track_upd = 0;
+		}
+		else {
+			t->upd_animate_parents_no_irq();
+		}
+	}
+
+	// read the clk_ms in CS
+	unsigned char reg = disable_irq();
+	uint32_t tmp = clk_ms;
+	clk_ms = 0;
+	enable_irq(reg);
+
+
 	// if menu prog is running, call menu update function
 	if(current_prog == prog_arr[nr_prog]){
 		menu_ctrl.menu_update();
 	}
 	else {
-		current_prog->update_ui(ms, mst_clk->clk_get_step_cnt());
+		current_prog->update_ui(tmp, mst_clk->clk_get_step_cnt());
 	}
-	midi_seq.check_clks(ms, mst_clk->clk_get_step_cnt());
+//	midi_seq.check_clks(ms, mst_clk->clk_get_step_cnt());
+
+
+}
+
+void sequenception::do_isr(){
+	if(clk_ms == 0){
+		clk_ms = eval_mst_clk();
+		track_upd = midi_seq.check_events(clk_ms, mst_clk->clk_get_step_cnt());
+	} else {
+		// Should not happen
+		Serial.println("do_isr() clk_ms > 0...");
+	}	
 }
 void sequenception::init_midi_seq(){
 	track* t;

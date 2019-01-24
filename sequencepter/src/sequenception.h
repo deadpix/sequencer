@@ -53,8 +53,13 @@ class sequenception {
 		static led_matrix* lm_ptr;
 		static clk* mst_clk;
 
+		static uint32_t clk_ms;
+		static volatile uint8_t track_upd; 
+
 		static void (*fct_midi)(uint16_t, uint8_t, uint8_t);
 		static void (*fct_tempo_change)(uint32_t);
+		
+		
 
 		sequenception();
 		~sequenception();
@@ -62,6 +67,7 @@ class sequenception {
 		void init(gui*);
 		uint32_t eval_mst_clk();
 		void loop(uint32_t);
+		void do_isr();
 };
 
 #endif

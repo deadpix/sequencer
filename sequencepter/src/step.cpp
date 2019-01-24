@@ -94,13 +94,13 @@ uint8_t step::get_step_color(){
 	return _color;
 }
 
-void step::set_clk(clk* c){
-	_c = c;
-}
+//void step::set_clk(clk* c){
+//	_c = c;
+//}
 
-clk* step::get_clk(){
-	return _c;
-}
+//clk* step::get_clk(){
+//	return _c;
+//}
 
 uint8_t step::get_step_gate_len(){
 	return gate_len_per;

@@ -55,6 +55,13 @@
 #include "src/sequencer/fct_step.h"
 #include "src/sequencer/fct_loop_setting.h"
 #include "src/seq_param.h"
+#include "src/perf.h"
+
+#define TRACE_PERF 1
+
+#if TRACE_PERF == 1
+static perf p;
+#endif
 
 
 static sequenception sequenception;
@@ -66,6 +73,7 @@ volatile bool check_clk;
 uint8_t btn_col_idx;
 volatile bool btn_flag;
 volatile bool midi_flag;
+
 
 IntervalTimer ui_timer;
 IntervalTimer btn_timer;
@@ -85,9 +93,11 @@ static void check_btn(){
 static void upd_gui(){
 #if HW_SHIFT_REG == 1 
 	upd_shift_reg(sequenception.lm_ptr);
+//	if(!check_clk){
+//		check_clk = true;
+//	}
 #endif
-	if(!check_clk)
-		check_clk = true;
+	sequenception.do_isr();	
 }
 
 static void tempo_change_handler(uint32_t ms){
@@ -99,10 +109,10 @@ static void tempo_change_handler(uint32_t ms){
 
 void setup(){
 	// Hardware init procedure
+	Serial.begin(9600);
+
 	gui_ctrl = setup_oled();
 	setup_matrix();
-//	setup_gui();
-//	init_matrix_btn();
 	init_midi();
 	sequenception.fct_midi = midi_note_on;
 	sequenception.fct_tempo_change = tempo_change_handler;
@@ -117,7 +127,6 @@ void setup(){
 #endif
 
 	// data initialization
-//	init_all_prog();
 	sequenception.init(gui_ctrl);
 	switch_matrix_ui(sequenception.lm_ptr, sequenception.lm_ptr);
 	
@@ -128,12 +137,17 @@ void setup(){
 
 
 void loop(){
+
+#if TRACE_PERF == 1
+	p.start_ms_counter();
+#endif
+
 	uint32_t clk_res = 0;
-	if(check_clk){
+//	if(check_clk){
 //		clk_res = sequenception.tempo_setting.check_mst_clk();
-		clk_res = sequenception.eval_mst_clk();
-		check_clk = false;
-	}
+//		clk_res = sequenception.eval_mst_clk();
+//		check_clk = false;
+//	}
 	if(btn_flag){
 		scan(sequenception.current_prog);
 #if CMD_BTN_MATRIX == 0
@@ -143,18 +157,20 @@ void loop(){
 		scan_cmd_btn_matrix();
 #endif
 	}
-	// if menu prog is running, call menu update function
-	if(sequenception.current_prog == sequenception.prog_arr[sequenception.nr_prog]){
-		sequenception.menu_ctrl.menu_update();
-	} 
-	else {
-		sequenception.current_prog->update_ui(clk_res, sequenception.mst_clk->clk_get_step_cnt());
-	}
 
 	midi_loop(midi_flag);
 	if(midi_flag)
 		midi_flag = false;
 		
-//	midi_seq.check_clks(clk_res, sequenception.mst_clk->clk_get_step_cnt());
 	sequenception.loop(clk_res);
+
+
+#if TRACE_PERF == 1
+	p.stop_ms_counter();
+	if(p.get_perf_cnt() >= 1000){
+		p.print_perf();
+		p.reset_ms_counter();
+	}
+#endif
+
 }

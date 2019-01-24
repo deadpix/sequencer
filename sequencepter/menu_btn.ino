@@ -58,7 +58,6 @@ static void init_menu_btn(prog* p){
 	param_btn.interval(MENU_BTN_BOUNCE_TIME);
 #endif	
 	param_ptr = NULL;
-	
 	sequenception.menu_ctrl.set_next_prog(p);
 }
 

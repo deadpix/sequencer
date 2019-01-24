@@ -28,7 +28,7 @@ struct note {
 class step {
 	private:
 		uint8_t step_id;
-		bool flag_active;
+		volatile bool flag_active;
 		bool _linked;
 		uint8_t _gate_bmp;
 		uint8_t gate_len_per; // percentage
@@ -38,7 +38,7 @@ class step {
 		
 		step* _next;
 		step* _prev;
-		clk* _c;
+//		clk* _c;
 	
 		uint8_t _color;
 
@@ -76,8 +76,8 @@ class step {
 		uint8_t get_step_color();
 
 
-		void set_clk(clk*);
-		clk* get_clk();
+//		void set_clk(clk*);
+//		clk* get_clk();
 
 		uint8_t get_step_gate_len();
 		uint8_t get_step_id();

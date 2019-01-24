@@ -1,6 +1,7 @@
 #include "track.h"
 #include "errata.h"
 #include <hw_debug.h>
+#include "../interrupts.h"
 
 #define CLK_LEN_PER 	(20)
 
@@ -149,7 +150,7 @@ void track::set_loop(step* first, step* last){
 //}
 
 track::track(){
-	curr_step_id = 0;
+//	curr_step_id = 0;
 	_hw_fct = _dummy_fct;
 	_max_step = DEFAULT_STEP_PER_SEQ;
 	_play = false;
@@ -221,25 +222,9 @@ void track::show_children_node(node* parent){
 }
 
 void track::show_parent_nodes(node* child, node* parent){
-/*
-	node* tmp = child;
-	
-	// redraw is not needed if the case of direct parent 
-	if(tmp->_parent != parent){	
-		dbg::printf("parent level %d child->_node_lvl=%d\n",parent->_node_lvl,child->_node_lvl);
-		for(int i=0; i<(child->_node_lvl - parent->_node_lvl); i++){
-			show_children_node(tmp);
-			tmp = tmp->_parent;
-		}
-	}
-//	else {
-//		dbg::printf("Don't redraw, direct parent\n");
-//	}
-*/
 	node* tmp = child->_parent;
 	
-	// redraw is not needed if the case of direct parent 
-
+	// redraw is not needed if the case of direct parent
 	if(tmp != parent){	
 		dbg::printf("parent level %d child->_node_lvl=%d\n",parent->_node_lvl,tmp->_node_lvl);
 		for(int i=0; i<(tmp->_node_lvl - parent->_node_lvl); i++){
@@ -394,18 +379,12 @@ void track::set_max_step(uint8_t max){
 bool track::next_step(uint32_t mst_ms){
 	step* prev = _cur_step;
 	_cur_step = _cur_step->get_next_step();
-	curr_step_id = _cur_step->_step_ui_id;
 
-//	Serial.print("numerator ");
-//	Serial.print(_clk_def.numerator * _cur_step->_clk_def.numerator);
-//	Serial.print(" denominator ");
-//	Serial.println(_clk_def.denominator * _cur_step->_clk_def.denominator);	
 	dbg::printf("mst_ms=%d _cur_step->_clk_def.numerator=%d _cur_step->_clk_def.denominator=%d step clk %d\n",mst_ms,_cur_step->_clk_def.numerator,_cur_step->_clk_def.denominator,_c.clk_get_ms());
 	
 	_c.clk_set_ratio(mst_ms
 	, _clk_def.numerator * _cur_step->_clk_def.numerator
 	, _clk_def.denominator * _cur_step->_clk_def.denominator );
-//		_mst_clk_cnt = 0;
 
 
 	// FIXME: calculate of gate len only when clock is 
@@ -413,23 +392,16 @@ bool track::next_step(uint32_t mst_ms){
 //	_cur_step->upd_step_gate_len(_cur_step->get_clk()->clk_get_ms());
 	_cur_step->upd_step_gate_len(_c.clk_get_ms());	
 
-	
-//	node* tmp;
-	// GUI is updated in function of the previous step
-//	if(prev->_node->_node_lvl > _cur_step->_node->_node_lvl){
-//		tmp = prev->_node->get_node_lvl(_cur_step->_node->_node_lvl);
-//	}
-//	else if(prev->_node->_node_lvl < _cur_step->_node->_node_lvl){
-//		tmp = _cur_step->_node->get_node_lvl(prev->_node->_node_lvl);
-//	}
-	node* common_parent = node::get_common_parent(_cur_step->_node, prev->_node); 
-	show_parent_nodes(_cur_step->_node, common_parent);
+
+	// FIXME should not be here	
+//	node* common_parent = node::get_common_parent(_cur_step->_node, prev->_node); 
+//	show_parent_nodes(_cur_step->_node, common_parent);
 
 	return ( _cur_step->is_step_active() );
 }
-uint8_t track::get_current_step(){
-	return curr_step_id;
-}
+//uint8_t track::get_current_step(){
+//	return curr_step_id;
+//}
 void track::step_reset(){
 	_cur_step = _first_step;
 }
@@ -468,13 +440,47 @@ bool track::is_playing(){
 	return _play;
 }
 
+void track::_init_animate_parents(step* cur){
+	node* tmp = cur->_node;
+
+	uint8_t color = 0;
+	if(!cur->is_step_active()){
+		color = LED_R_IDX;
+	}
+	// step animation only for the current track
+	while(tmp != &head){
+		_step_animation[(tmp->_node_lvl-1)].init_clk_animation(&_lm, errata_step[tmp->_mtx_id], color);
+		_step_animation[(tmp->_node_lvl-1)].start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
+		tmp = tmp->_parent;
+	}
+}
+void track::_upd_animate_parents(step *cur){
+	node* tmp = cur->_node;
+	while(tmp != &head){
+		_step_animation[(tmp->_node_lvl-1)].end_animation_n_restore();
+		tmp = tmp->_parent;		
+	}
+}
+
+void track::init_animate_parents_no_irq(){
+	step* tmp;
+	unsigned char reg = disable_irq();
+	tmp = _cur_step;
+	enable_irq(reg);
+	_init_animate_parents(tmp);
+	
+}
+void track::upd_animate_parents_no_irq(){
+	step* tmp;
+	unsigned char reg = disable_irq();
+	tmp = _cur_step;
+	enable_irq(reg);
+	_upd_animate_parents(tmp);
+}
+
 uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	UNUSED(mst_step_cnt);
-//	uint32_t res = _c.master_sync(ms, mst_step_cnt);
-	uint32_t res = _c.master_sync_ratio(ms, /*mst_step_cnt*/&_mst_clk_cnt);	
-//	if(ms > 0) _mst_clk_cnt++;
-//	uint32_t res = _cur_step->get_clk()->master_sync_ratio(ms, mst_step_cnt);	
-//	step s = arr_step[curr_step_id];
+	uint32_t res = _c.master_sync_ratio(ms, &_mst_clk_cnt);	
 	
 	if(res){
 		bool is_active;
@@ -485,33 +491,15 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 				}
 			}
 		}
-		node* tmp = _cur_step->_node;
-		uint8_t color = 0;
-		if(!is_active)
-			color = LED_R_IDX;
-		// step animation only for the current track
-		while(tmp != &head){
-//			_step_animation[(tmp->_node_lvl-1)].init_clk_animation(&_lm, errata_step[tmp->_mtx_id], _cur_step->get_step_color());
-			_step_animation[(tmp->_node_lvl-1)].init_clk_animation(&_lm, errata_step[tmp->_mtx_id], color);
-//			_step_animation.start_animation((_c.clk_get_ms()/* * CLK_LEN_PER / 100.*/));
-			_step_animation[(tmp->_node_lvl-1)].start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
-			tmp = tmp->_parent;
-		}
-//		_step_animation.init_clk_animation(&_lm, errata_step[curr_step_id], LED_R_IDX);
-//		_step_animation.start_animation(20);
+		// TODO should not be here!!!
+//		_init_animate_parents(_cur_step);
 
 	} else {
-//		if(arr_step[curr_step_id].upd_gate()){
 		if(_cur_step->upd_gate()){
 			_hw_fct(_cur_step->_note.pitch, 0, _out_id);
 		}
-		node* tmp = _cur_step->_node;
-		while(tmp != &head){
-			_step_animation[(tmp->_node_lvl-1)].end_animation_n_restore();
-			tmp = tmp->_parent;		
-		}
-
-//		_step_animation.end_animation_n_restore();
+		// TODO should not be here!!!
+//		_upd_animate_parents(_cur_step);
 	}
 	return res;
 }

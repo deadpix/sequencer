@@ -413,7 +413,8 @@ static void refresh_matrix(uint16_t led_id, uint8_t color){
 static void setup_matrix(){
 	if(!trellis.begin()){
 		Serial.println("failed to begin trellis");
-		while(1);
+		return;
+//		while(1);
 	}
 
 	flag_btn_active = false;
@@ -458,4 +459,17 @@ static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
 
 }
 
+#else
+static void scan(prog* p){
+}
+static void upd_shift_reg(led_matrix* lm){
+}
+static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
+}
+static void setup_matrix(){
+	Serial.println("empty matrix");
+	delay(1000);
+}
+static void refresh_matrix(uint16_t led_id, uint8_t color){
+}
 #endif

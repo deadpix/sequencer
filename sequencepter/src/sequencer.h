@@ -16,7 +16,7 @@
 #include "fct_clbk.h"
 
 //#define SEQUENCER_NR_TRACK MATRIX_NR_COL
-#define SEQUENCER_NR_TRACK 1
+#define SEQUENCER_NR_TRACK 8
 
 //typedef struct _transport {
 //	byte play;
@@ -63,7 +63,7 @@ class sequencer : public prog {
 		void on_long_release(uint8_t btn_id);
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 	
-		void check_clks(uint32_t mst_ms, uint16_t mst_step);
+		uint8_t check_events(uint32_t mst_ms, uint16_t mst_step);
 				
 		void menu_enter();
 		void menu_leave();

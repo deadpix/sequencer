@@ -27,7 +27,7 @@ struct signature_change {
 
 class track {
 	private:
-		uint16_t curr_step_id;
+//		uint16_t curr_step_id;
 		uint8_t _max_step;
 		uint8_t _track_id;
 		uint8_t _out_id;
@@ -45,6 +45,9 @@ class track {
 		bool mute_flg;
 //		LinkedList<track *> sub_track_list;
 		node head;
+		void _init_animate_parents(step* cur);
+		void _upd_animate_parents(step* cur);
+
 
 	public:
 //		step arr_step[NR_STEP];
@@ -105,7 +108,7 @@ class track {
 		
 //		bool is_step_on(uint8_t id);
 		bool next_step(uint32_t);
-		uint8_t get_current_step();
+//		uint8_t get_current_step();
 //		void toogle_step_x(uint8_t id);
 		void step_reset();
 
@@ -125,6 +128,8 @@ class track {
 		void set_play(bool);
 		bool is_playing();
 	
+		void upd_animate_parents_no_irq();
+		void init_animate_parents_no_irq();
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 };
 
