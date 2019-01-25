@@ -40,15 +40,19 @@ fct_clbk* sequencer::get_fct(uint8_t idx){
 	return fct_arr[idx];
 }
 
-uint8_t sequencer::check_events(uint32_t mst_ms, uint16_t mst_step){
+uint8_t sequencer::check_events(uint32_t mst_ms, uint16_t mst_step, event* e){
 	uint8_t res = 0;
+	
 	track* t;
 	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
 		t = &track_arr[i];
 		res |= (t->check_event(mst_ms, mst_step)) << i;	
 	}
+	e = new next_step_evt(this, res);
 	return res;
 }
+
+
 void sequencer::set_track_start(bool play){
 	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
 		track_arr[i].set_play(play);
@@ -118,4 +122,17 @@ void sequencer::update_ui(uint32_t mst_ms, uint16_t mst_step){
 }
 led_matrix* sequencer::get_led_matrix(){
 	return current->get_led_matrix();
+}
+
+void next_step_evt::do_evt(){
+	uint8_t res = 0;
+	
+	track* t;
+	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
+		t = _s->get_track(i);
+		if(step_evt_bmp & (i<<1))
+			t->init_animate_parents_no_irq();
+		else
+			t->upd_animate_parents_no_irq();
+	}
 }

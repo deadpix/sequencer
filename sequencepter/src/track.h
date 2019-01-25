@@ -115,11 +115,11 @@ class track {
 		uint32_t check_event(uint32_t, uint16_t/*bool, clk *c*/);
 		void init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t));
 
-		void init_menu();
-		void on_push(uint8_t btn_id);
-		void on_long_push(uint8_t btn_id){ UNUSED(btn_id); };
-		void on_release(uint8_t btn_id);
-		void on_long_release(uint8_t btn_id){ UNUSED(btn_id); };
+//		void init_menu();
+//		void on_push(uint8_t btn_id);
+//		void on_long_push(uint8_t btn_id){ UNUSED(btn_id); };
+//		void on_release(uint8_t btn_id);
+//		void on_long_release(uint8_t btn_id){ UNUSED(btn_id); };
 
 		void mute();
 		void unmute();
@@ -130,7 +130,7 @@ class track {
 	
 		void upd_animate_parents_no_irq();
 		void init_animate_parents_no_irq();
-		void update_ui(uint32_t mst_ms, uint16_t mst_step);
+//		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 };
 
 #endif

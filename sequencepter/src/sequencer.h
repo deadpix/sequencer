@@ -14,6 +14,7 @@
 #include "led_matrix.h"
 #include "track.h"
 #include "fct_clbk.h"
+#include "event.h"
 
 //#define SEQUENCER_NR_TRACK MATRIX_NR_COL
 #define SEQUENCER_NR_TRACK 8
@@ -63,7 +64,7 @@ class sequencer : public prog {
 		void on_long_release(uint8_t btn_id);
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 	
-		uint8_t check_events(uint32_t mst_ms, uint16_t mst_step);
+		uint8_t check_events(uint32_t mst_ms, uint16_t mst_step, event* e);
 				
 		void menu_enter();
 		void menu_leave();
@@ -72,4 +73,14 @@ class sequencer : public prog {
 		int  menu_on_release(uint8_t, uint8_t);		
 };
 
+class next_step_evt : public event {
+	private:
+		sequencer* _s;
+
+	public:
+		uint8_t step_evt_bmp;
+		next_step_evt(sequencer* s, uint8_t bmp){_s = s; step_evt_bmp = bmp; };
+		~next_step_evt(){};
+		void do_evt();
+};
 #endif

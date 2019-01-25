@@ -458,7 +458,7 @@ void track::_upd_animate_parents(step *cur){
 	node* tmp = cur->_node;
 	while(tmp != &head){
 		_step_animation[(tmp->_node_lvl-1)].end_animation_n_restore();
-		tmp = tmp->_parent;		
+		tmp = tmp->_parent;
 	}
 }
 
@@ -504,14 +504,14 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	return res;
 }
 
-void track::on_push(uint8_t btn_id){
-	UNUSED(btn_id);
-}
-void track::on_release(uint8_t btn_id){
-	UNUSED(btn_id);
-}
-
-void track::update_ui(uint32_t mst_ms, uint16_t mst_step){
-	UNUSED(mst_ms);
-	UNUSED(mst_step);
-}
+//void track::on_push(uint8_t btn_id){
+//	UNUSED(btn_id);
+//}
+//void track::on_release(uint8_t btn_id){
+//	UNUSED(btn_id);
+//}
+//
+//void track::update_ui(uint32_t mst_ms, uint16_t mst_step){
+//	UNUSED(mst_ms);
+//	UNUSED(mst_step);
+//}

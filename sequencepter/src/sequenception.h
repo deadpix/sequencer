@@ -23,8 +23,7 @@
 #include "sequencer/fct_step.h"
 #include "sequencer/fct_loop_setting.h"
 #include "seq_param.h"
-
-
+#include "event.h"
 
 class sequenception {
 	private:
@@ -59,15 +58,27 @@ class sequenception {
 		static void (*fct_midi)(uint16_t, uint8_t, uint8_t);
 		static void (*fct_tempo_change)(uint32_t);
 		
-		
-
 		sequenception();
 		~sequenception();
 
 		void init(gui*);
+	
 		uint32_t eval_mst_clk();
+		void evt_master_tick(event* evt);
+		LinkedList<event *> evt_list;
+
 		void loop(uint32_t);
 		void do_isr();
 };
 
+class master_clock_event : public event {
+	private: 
+		sequenception* _sequenception;
+
+	public:
+		uint32_t mst_clk_ms;
+		master_clock_event(uint32_t ms, sequenception* s);
+		~master_clock_event(){};
+		void do_evt();
+};
 #endif

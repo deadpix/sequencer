@@ -122,6 +122,8 @@ uint32_t sequenception::eval_mst_clk(){
 	return tempo_setting.check_mst_clk();
 } 
 void sequenception::loop(uint32_t ms){
+
+/*
 	// check if midi_clk_flg has been set
 	track* t = midi_seq.get_current_track(); 
 	if( (t->get_led_matrix() == lm_ptr)){
@@ -149,18 +151,43 @@ void sequenception::loop(uint32_t ms){
 		current_prog->update_ui(tmp, mst_clk->clk_get_step_cnt());
 	}
 //	midi_seq.check_clks(ms, mst_clk->clk_get_step_cnt());
+*/
+	// disable the irq to get the first evt 
+	unsigned char reg = disable_irq();
+	int nr_evt = evt_list.size();
+	enable_irq(reg);
 
+	for(int i=0;i<nr_evt;i++){
+		unsigned char reg = disable_irq();
+		event* tmp = evt_list.shift();
+		enable_irq(reg);
+		tmp->do_evt();
+		delete tmp;
+	}
 
 }
 
+void sequenception::evt_master_tick(event* evt){
+	uint32_t ms = eval_mst_clk();
+	evt = new master_clock_event(ms, this);
+	evt->set_event_id(EVT_MASTER_TICK);
+}
+
 void sequenception::do_isr(){
-	if(clk_ms == 0){
-		clk_ms = eval_mst_clk();
-		track_upd = midi_seq.check_events(clk_ms, mst_clk->clk_get_step_cnt());
-	}
-     	else {
+	event* evt;
+	evt_master_tick(evt);
+	if(evt) evt_list.add(evt);
+	midi_seq.check_events(clk_ms, mst_clk->clk_get_step_cnt(), evt);	
+	evt_list.add(evt);
+	
+//	if(clk_ms == 0){
+//		clk_ms = eval_mst_clk();
+//		track_upd = midi_seq.check_events(clk_ms, mst_clk->clk_get_step_cnt());
+//	}
+//     	else {
 //		Serial.println("do_isr() clk_ms > 0...");
-	}	
+//	}
+	
 }
 void sequenception::init_midi_seq(){
 	track* t;
@@ -175,3 +202,17 @@ void sequenception::init_midi_seq(){
 void sequenception::init_midi_controller(){
 	p1.init_hw_clbk(fct_midi);
 }
+
+master_clock_event::master_clock_event(uint32_t ms, sequenception* s){
+	mst_clk_ms = ms;
+	_sequenception = s;
+}
+void master_clock_event::do_evt(){
+	if(_sequenception->current_prog == _sequenception->prog_arr[_sequenception->nr_prog]){
+		_sequenception->menu_ctrl.menu_update();
+	}
+	else {
+		_sequenception->current_prog->update_ui(mst_clk_ms, _sequenception->mst_clk->clk_get_step_cnt());
+	}	
+}
+

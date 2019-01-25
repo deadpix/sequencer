@@ -106,7 +106,8 @@ void fct_loop_setting::on_long_release(uint8_t btn_id){
 void fct_loop_setting::update_ui(uint32_t mst_ms, uint16_t mst_step){
 	UNUSED(mst_ms);
 	UNUSED(mst_step);
-
+//	track* t = _seq->get_current_track();
+//	t->upd_animate_parents_no_irq();
 }
 void fct_loop_setting::on_start(){
 	track* t = _seq->get_current_track();
