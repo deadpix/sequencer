@@ -64,7 +64,7 @@ class sequencer : public prog {
 		void on_long_release(uint8_t btn_id);
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 	
-		uint8_t check_events(uint32_t mst_ms, uint16_t mst_step, event* e);
+		uint8_t check_events(uint32_t mst_ms, uint16_t mst_step, event** e);
 				
 		void menu_enter();
 		void menu_leave();

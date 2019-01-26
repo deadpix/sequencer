@@ -50,7 +50,7 @@ int led_toogle::start_animation(uint32_t ms){
 	_animation_time = ms;
 	_state = STARTED;
 	_time_cnt = 0;
-	
+
 	return ret;
 }
 

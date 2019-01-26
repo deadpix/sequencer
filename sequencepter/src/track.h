@@ -112,7 +112,7 @@ class track {
 //		void toogle_step_x(uint8_t id);
 		void step_reset();
 
-		uint32_t check_event(uint32_t, uint16_t/*bool, clk *c*/);
+		uint8_t check_event(uint32_t, uint16_t/*bool, clk *c*/);
 		void init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t));
 
 //		void init_menu();

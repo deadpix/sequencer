@@ -40,7 +40,7 @@ fct_clbk* sequencer::get_fct(uint8_t idx){
 	return fct_arr[idx];
 }
 
-uint8_t sequencer::check_events(uint32_t mst_ms, uint16_t mst_step, event* e){
+uint8_t sequencer::check_events(uint32_t mst_ms, uint16_t mst_step, event** e){
 	uint8_t res = 0;
 	
 	track* t;
@@ -48,7 +48,8 @@ uint8_t sequencer::check_events(uint32_t mst_ms, uint16_t mst_step, event* e){
 		t = &track_arr[i];
 		res |= (t->check_event(mst_ms, mst_step)) << i;	
 	}
-	e = new next_step_evt(this, res);
+	*e = new next_step_evt(this, res);
+	(*e)->set_event_id(EVT_NEXT_STEP);
 	return res;
 }
 
@@ -127,12 +128,22 @@ led_matrix* sequencer::get_led_matrix(){
 void next_step_evt::do_evt(){
 	uint8_t res = 0;
 	
+//	if(_s->get_led_matrix()->get_hw())
+//		Serial.println("ok");
+//	else 
+//		Serial.println("ko");
+
+	
+
 	track* t;
-	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
+	for(int i=0;i<SEQUENCER_NR_TRACK;i++){	
 		t = _s->get_track(i);
-		if(step_evt_bmp & (i<<1))
-			t->init_animate_parents_no_irq();
-		else
-			t->upd_animate_parents_no_irq();
+		if(t == _s->get_current_track()){
+			if(step_evt_bmp & (1<<i))
+				t->init_animate_parents_no_irq();
+			else
+				t->upd_animate_parents_no_irq();
+			
+		}
 	}
 }

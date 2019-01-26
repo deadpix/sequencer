@@ -64,7 +64,7 @@ class sequenception {
 		void init(gui*);
 	
 		uint32_t eval_mst_clk();
-		void evt_master_tick(event* evt);
+		uint32_t evt_master_tick(event** evt);
 		LinkedList<event *> evt_list;
 
 		void loop(uint32_t);

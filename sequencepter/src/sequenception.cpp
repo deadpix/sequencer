@@ -161,25 +161,29 @@ void sequenception::loop(uint32_t ms){
 		unsigned char reg = disable_irq();
 		event* tmp = evt_list.shift();
 		enable_irq(reg);
+
 		tmp->do_evt();
 		delete tmp;
 	}
 
 }
 
-void sequenception::evt_master_tick(event* evt){
+uint32_t sequenception::evt_master_tick(event** evt){
 	uint32_t ms = eval_mst_clk();
-	evt = new master_clock_event(ms, this);
-	evt->set_event_id(EVT_MASTER_TICK);
+	*evt = new master_clock_event(ms, this);
+	(*evt)->set_event_id(EVT_MASTER_TICK);
+	return ms;
 }
 
 void sequenception::do_isr(){
-	event* evt;
-	evt_master_tick(evt);
-	if(evt) evt_list.add(evt);
-	midi_seq.check_events(clk_ms, mst_clk->clk_get_step_cnt(), evt);	
+	event* evt = NULL;
+	uint32_t ms = evt_master_tick(&evt);
+	if(evt){
+	       	evt_list.add(evt);
+	}
+	midi_seq.check_events(ms, mst_clk->clk_get_step_cnt(), &evt);	
 	evt_list.add(evt);
-	
+
 //	if(clk_ms == 0){
 //		clk_ms = eval_mst_clk();
 //		track_upd = midi_seq.check_events(clk_ms, mst_clk->clk_get_step_cnt());
@@ -208,6 +212,7 @@ master_clock_event::master_clock_event(uint32_t ms, sequenception* s){
 	_sequenception = s;
 }
 void master_clock_event::do_evt(){
+//	Serial.println("do evt");
 	if(_sequenception->current_prog == _sequenception->prog_arr[_sequenception->nr_prog]){
 		_sequenception->menu_ctrl.menu_update();
 	}

@@ -118,7 +118,7 @@ void setup(){
 	sequenception.fct_tempo_change = tempo_change_handler;
 
 	// timer
-	ui_timer.begin(upd_gui, 1000);
+	ui_timer.begin(upd_gui, 10000);
 	btn_timer.begin(check_btn, 10000);
 //	midi_timer.begin(upd_midi, 8000);
 

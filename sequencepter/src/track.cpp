@@ -442,12 +442,10 @@ bool track::is_playing(){
 
 void track::_init_animate_parents(step* cur){
 	node* tmp = cur->_node;
-
 	uint8_t color = 0;
 	if(!cur->is_step_active()){
 		color = LED_R_IDX;
 	}
-	// step animation only for the current track
 	while(tmp != &head){
 		_step_animation[(tmp->_node_lvl-1)].init_clk_animation(&_lm, errata_step[tmp->_mtx_id], color);
 		_step_animation[(tmp->_node_lvl-1)].start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
@@ -467,6 +465,7 @@ void track::init_animate_parents_no_irq(){
 	unsigned char reg = disable_irq();
 	tmp = _cur_step;
 	enable_irq(reg);
+
 	_init_animate_parents(tmp);
 	
 }
@@ -478,7 +477,7 @@ void track::upd_animate_parents_no_irq(){
 	_upd_animate_parents(tmp);
 }
 
-uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
+uint8_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	UNUSED(mst_step_cnt);
 	uint32_t res = _c.master_sync_ratio(ms, &_mst_clk_cnt);	
 	
@@ -493,6 +492,8 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 		}
 		// TODO should not be here!!!
 //		_init_animate_parents(_cur_step);
+//		init_animate_parents_no_irq();
+		return 1;
 
 	} else {
 		if(_cur_step->upd_gate()){
@@ -500,8 +501,10 @@ uint32_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 		}
 		// TODO should not be here!!!
 //		_upd_animate_parents(_cur_step);
+//		upd_animate_parents_no_irq();
+		return 0;
 	}
-	return res;
+//	return res;
 }
 
 //void track::on_push(uint8_t btn_id){
