@@ -17,7 +17,7 @@
 #include "event.h"
 
 //#define SEQUENCER_NR_TRACK MATRIX_NR_COL
-#define SEQUENCER_NR_TRACK 8
+#define SEQUENCER_NR_TRACK 1
 
 //typedef struct _transport {
 //	byte play;

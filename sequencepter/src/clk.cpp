@@ -99,7 +99,7 @@ int clk::clk_set_bpm(uint16_t new_bpm){
 
 uint32_t clk::clk_set_ratio(uint32_t ms_ref, uint8_t numerator, uint8_t denominator){
 //	bool ret = false;
-//	if(_numerator != numerator || _denominator != denominator){
+	if(_numerator != numerator || _denominator != denominator){
 		_numerator = numerator;
 		_denominator = denominator;
 		
@@ -114,7 +114,7 @@ uint32_t clk::clk_set_ratio(uint32_t ms_ref, uint8_t numerator, uint8_t denomina
 		_bpm = ms_to_bpm(_ms);		
 		_step_cnt = 0;
 //		ret = true;
-//	}
+	}
 
 	// need to set lower limit for _ms (2ms, 5ms, 10ms ???)
 
@@ -124,7 +124,9 @@ uint32_t clk::clk_set_ratio(uint32_t ms_ref, uint8_t numerator, uint8_t denomina
 uint32_t clk::clk_sync_ratio(uint32_t ms, uint16_t step){
 	UNUSED(step);
 	uint32_t ret = 0;
-	
+
+	Serial.print("ms ");	
+	Serial.println(ms);	
 
 	_ms_ref = ms;
 	_ms = ms * _numerator / _denominator;
@@ -139,7 +141,10 @@ uint32_t clk::clk_sync_ratio(uint32_t ms, uint16_t step){
 
 uint32_t clk::clk_elapsed(){
 	uint32_t ret = 0;
-	if(_elapsed_ms > _ms){
+	if(_elapsed_ms >= _ms){
+	
+//		Serial.print("_elapsed_ms");	
+//		Serial.println(_elapsed_ms);	
 		_elapsed_ms = 0;
 		_step_cnt = (_step_cnt + 1) % _max_step;
 		ret = _ms;
@@ -150,17 +155,29 @@ uint32_t clk::clk_elapsed(){
 uint32_t clk::master_sync_ratio(uint32_t mst_ms, uint16_t* mst_cnt){
 	uint32_t ret = 0;
 
+//	Serial.print("numerator ");
+//	Serial.println(_numerator);
+
 	if(mst_ms > 0){
 	       if(*mst_cnt >= _numerator){
+//		       Serial.println("sync");
 			ret = clk_sync_ratio(mst_ms, *mst_cnt);
 			*mst_cnt = 1;
 	       } else {
-	       	       *mst_cnt = *mst_cnt + 1;
-
+		       *mst_cnt = *mst_cnt + 1;
 	       }
 		
 	} else if(_step_cnt < (_denominator - 1)){
+//	} else if(_step_cnt < (_denominator)){
+//		Serial.print("_step_cnt ");
+//		Serial.println(_step_cnt);
 		ret = clk_elapsed();
-	}
+//		if(ret){
+//			Serial.print("ret ");
+//			Serial.println(ret);
+//
+//		}
+			
+	} 
 	return ret;
 }

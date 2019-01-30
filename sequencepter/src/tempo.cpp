@@ -115,10 +115,15 @@ void tempo::menu_update(uint32_t mst_ms, uint16_t mst_step){
 	
 	//TODO start clk animation on new clock
 
+	if(mst_ms > 0){
+		_clk_animation.turn_on_n_save_led();
+		_clk_animation.start_animation(LED_ANIMATION_MS);
 
-	_tap_animation.end_animation_n_restore();
-	_clk_animation.end_animation_n_restore();
-	
+	} else {
+		_tap_animation.end_animation_n_restore();
+		_clk_animation.end_animation_n_restore();
+	}
+		
 }
 
 

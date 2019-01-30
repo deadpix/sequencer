@@ -389,7 +389,10 @@ bool track::next_step(uint32_t mst_ms){
 	_cur_step = _cur_step->get_next_step();
 
 //	dbg::printf("mst_ms=%d _cur_step->_clk_def.numerator=%d _cur_step->_clk_def.denominator=%d step clk %d\n",mst_ms,_cur_step->_clk_def.numerator,_cur_step->_clk_def.denominator,_c.clk_get_ms());
-	
+
+//	Serial.print("denominator ");
+//	Serial.println(_clk_def.denominator);
+
 	uint32_t step_ms = _c.clk_set_ratio(mst_ms
 	, _clk_def.numerator * _cur_step->_clk_def.numerator
 	, _clk_def.denominator * _cur_step->_clk_def.denominator );
@@ -484,6 +487,7 @@ void track::upd_animate_parents_no_irq(){
 	_upd_animate_parents(tmp);
 }
 
+//static uint32_t trig_cnt = 0;
 uint8_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	UNUSED(mst_step_cnt);
 	uint32_t res = _c.master_sync_ratio(ms, &_mst_clk_cnt);	
@@ -493,6 +497,8 @@ uint8_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 		if(_play){	
 			if((is_active = next_step(ms))){
 				if(_cur_step->reset_gate()){
+//					Serial.print(" trig: ");
+//					Serial.print(trig_cnt++);
 					_hw_fct(_cur_step->_note.pitch, _cur_step->_note.velocity, _out_id);
 				}
 			}
