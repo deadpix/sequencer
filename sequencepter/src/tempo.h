@@ -36,11 +36,12 @@ class tempo : public prog {
 		clk* get_mst_clk();
 		void clr_tap(void);
 		
-		uint32_t check_mst_clk(void);
+//		uint32_t check_mst_clk(void);
+		uint32_t check_mst_clk_isr(void);
 		
 		void menu_enter();
 		void menu_leave();
-		void menu_update();
+		void menu_update(uint32_t mst_ms, uint16_t mst_step);
 		int  menu_on_push(uint8_t, uint8_t);
 		int  menu_on_release(uint8_t, uint8_t);
 		

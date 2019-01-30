@@ -119,7 +119,7 @@ void sequenception::init(gui *g){
 	init_all_prog(g);
 }
 uint32_t sequenception::eval_mst_clk(){
-	return tempo_setting.check_mst_clk();
+	return tempo_setting.check_mst_clk_isr();
 } 
 void sequenception::loop(uint32_t ms){
 
@@ -153,9 +153,9 @@ void sequenception::loop(uint32_t ms){
 //	midi_seq.check_clks(ms, mst_clk->clk_get_step_cnt());
 */
 	// disable the irq to get the first evt 
-	unsigned char reg = disable_irq();
+	DISABLE_IRQ();
 	int nr_evt = evt_list.size();
-	enable_irq(reg);
+	ENABLE_IRQ();
 
 	for(int i=0;i<nr_evt;i++){
 		unsigned char reg = disable_irq();
@@ -214,7 +214,7 @@ master_clock_event::master_clock_event(uint32_t ms, sequenception* s){
 void master_clock_event::do_evt(){
 //	Serial.println("do evt");
 	if(_sequenception->current_prog == _sequenception->prog_arr[_sequenception->nr_prog]){
-		_sequenception->menu_ctrl.menu_update();
+		_sequenception->menu_ctrl.menu_update(mst_clk_ms,_sequenception->mst_clk->clk_get_step_cnt());
 	}
 	else {
 		_sequenception->current_prog->update_ui(mst_clk_ms, _sequenception->mst_clk->clk_get_step_cnt());

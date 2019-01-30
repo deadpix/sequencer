@@ -16,7 +16,7 @@ void test_proj_two::menu_enter(){
 }
 void test_proj_two::menu_leave(){
 }
-void test_proj_two::menu_update(){
+void test_proj_two::menu_update(uint32_t mst_ms, uint16_t mst_step){
 }
 
 void test_proj_two::on_push(uint8_t btn_id){

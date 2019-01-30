@@ -7,6 +7,11 @@
 	#include <WProgram.h>
 #endif
 
+#define DISABLE_IRQ()				\
+	unsigned char tmp_reg = disable_irq();	\
+
+#define ENABLE_IRQ()				\
+	enable_irq(tmp_reg);			\
 
 static inline unsigned char disable_irq(){
 	unsigned char reg = SREG;

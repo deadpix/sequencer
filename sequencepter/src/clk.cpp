@@ -25,6 +25,7 @@
 #include "clk.h"
 #include "types.h"
 #include <hw_debug.h>
+#include "../interrupts.h"
 
 #define MAX_DIVIDER 	16
 #define DELAY_MS		50
@@ -59,6 +60,13 @@ clk::~clk(){
 uint32_t clk::clk_get_ms(){
 	return _ms;
 }
+uint32_t clk::clk_get_ms_lock(){
+	uint32_t ms;
+	DISABLE_IRQ();
+	ms = _ms;
+	ENABLE_IRQ();
+	return ms;
+}
 uint16_t clk::clk_get_step_cnt(){
 	return _step_cnt;
 }
@@ -89,9 +97,9 @@ int clk::clk_set_bpm(uint16_t new_bpm){
 	return ret;
 }
 
-bool clk::clk_set_ratio(uint32_t ms_ref, uint8_t numerator, uint8_t denominator){
-	bool ret = false;
-	if(_numerator != numerator || _denominator != denominator){
+uint32_t clk::clk_set_ratio(uint32_t ms_ref, uint8_t numerator, uint8_t denominator){
+//	bool ret = false;
+//	if(_numerator != numerator || _denominator != denominator){
 		_numerator = numerator;
 		_denominator = denominator;
 		
@@ -105,12 +113,12 @@ bool clk::clk_set_ratio(uint32_t ms_ref, uint8_t numerator, uint8_t denominator)
 
 		_bpm = ms_to_bpm(_ms);		
 		_step_cnt = 0;
-		ret = true;
-	}
+//		ret = true;
+//	}
 
 	// need to set lower limit for _ms (2ms, 5ms, 10ms ???)
 
-	return ret;
+	return _ms;
 }
 
 uint32_t clk::clk_sync_ratio(uint32_t ms, uint16_t step){

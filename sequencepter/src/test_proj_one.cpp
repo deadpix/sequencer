@@ -34,7 +34,7 @@ void test_proj_one::menu_enter(){
 }
 void test_proj_one::menu_leave(){
 }
-void test_proj_one::menu_update(){
+void test_proj_one::menu_update(uint32_t mst_ms, uint16_t mst_step){
 }
 
 

@@ -86,14 +86,16 @@ void seq_param::on_push(uint8_t btn_id){
 		dbg::printf("passe");
 	}
 	else if(btn_id >= CLK_DIVIDER_LED_OFFSET && btn_id < CLK_MULTIPLIER_LED_OFFSET){ 
-		_s->get_current_track()->_clk_def.numerator = (btn_id-CLK_DIVIDER_LED_OFFSET+1);
-		_s->get_current_track()->_clk_def.denominator = 1;	
-
+//		_s->get_current_track()->_clk_def.numerator = (btn_id-CLK_DIVIDER_LED_OFFSET+1);
+//		_s->get_current_track()->_clk_def.denominator = 1;	
+		
+		_s->get_current_track()->set_clk_def_lock((btn_id-CLK_DIVIDER_LED_OFFSET+1), 1);
 		_s->prog::display_str("div", 1);
 	}
 	else if(btn_id >= CLK_MULTIPLIER_LED_OFFSET && btn_id < (CLK_MULTIPLIER_LED_OFFSET + 8)){
-		_s->get_current_track()->_clk_def.numerator = 1;
-		_s->get_current_track()->_clk_def.denominator = (btn_id-CLK_MULTIPLIER_LED_OFFSET+1);
+//		_s->get_current_track()->_clk_def.numerator = 1;
+//		_s->get_current_track()->_clk_def.denominator = (btn_id-CLK_MULTIPLIER_LED_OFFSET+1);
+		_s->get_current_track()->set_clk_def_lock(1, (btn_id-CLK_MULTIPLIER_LED_OFFSET+1));
 
 		_s->prog::display_str("mult", 1);
 	}

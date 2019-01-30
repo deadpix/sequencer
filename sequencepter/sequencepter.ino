@@ -108,6 +108,7 @@ static void tempo_change_handler(uint32_t ms){
 }
 
 void setup(){
+	noInterrupts();
 	// Hardware init procedure
 	Serial.begin(9600);
 
@@ -132,7 +133,7 @@ void setup(){
 	
 	// MUST BE LAST...
 	init_menu_btn(sequenception.current_prog);
-
+	interrupts();
 }
 
 

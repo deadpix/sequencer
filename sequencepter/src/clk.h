@@ -58,6 +58,7 @@ class clk {
 		~clk();
 		
 		uint32_t clk_get_ms();
+		uint32_t clk_get_ms_lock();
 		uint16_t clk_get_step_cnt();
 		uint32_t clk_get_elapsed_ms();
 		uint16_t clk_get_bpm();
@@ -67,7 +68,7 @@ class clk {
 
 		void clk_set_max_step(uint8_t);
 		
-		bool clk_set_ratio(uint32_t, uint8_t, uint8_t);
+		uint32_t clk_set_ratio(uint32_t, uint8_t, uint8_t);
 		uint32_t clk_elapsed();
 		uint32_t clk_sync_ratio(uint32_t, uint16_t);
 		uint32_t master_sync_ratio(uint32_t, uint16_t*);

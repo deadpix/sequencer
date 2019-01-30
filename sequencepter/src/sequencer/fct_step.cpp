@@ -1,6 +1,7 @@
 #include "fct_step.h"
 #include "../errata.h"
 #include <hw_debug.h>
+#include "../../interrupts.h"
 
 #define BASE10	10
 #define LONG_PRESS_MS	100
@@ -142,7 +143,7 @@ void fct_step::on_release(uint8_t btn_id){
 	else if(_lp_cnt == 2){
 		// FIXME Must be executed when track is paused...
 
-
+		DISABLE_IRQ();
 
 		// TODO create substep
 //		s->_clk_def.numerator = (to-from);
@@ -208,6 +209,8 @@ void fct_step::on_release(uint8_t btn_id){
 		// FIXME: end might not have a step => should find the first step 
 //		start->_children->get(len-1)->_step->set_next_step(end->get_first_step(NR_STEP/DEFAULT_STEP_PER_SEQ));
 //		start->_children->get(len-1)->_step->set_prev_step(end->get_first_step(NR_STEP/DEFAULT_STEP_PER_SEQ));
+
+		ENABLE_IRQ();
 
 		dbg::printf("new steps / nodes have been created: num=%d denom=%d\n",new_numerator,new_denominator);
 		// create tree

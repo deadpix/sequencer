@@ -14,6 +14,13 @@ static void _dummy_fct(uint16_t arg1, uint8_t arg2, uint8_t arg3){
 	UNUSED(arg3);
 }
 
+void track::set_clk_def_lock(uint8_t num, uint8_t denom){
+	DISABLE_IRQ();
+	_clk_def.numerator = num;
+	_clk_def.denominator = denom;
+	ENABLE_IRQ();
+}
+
 bool track::delete_step(LinkedList<step *> *l, step* s){
 	bool ret = false;
 	for(int i=0;i<l->size();i++){
@@ -104,7 +111,8 @@ void track::create_tree(node* parent, uint8_t max_steps, uint8_t num,
 		s->_node = n;
 		s->_clk_def.numerator = num;
 		s->_clk_def.denominator = denom;
-
+//		s->upd_step_gate_len(_c.clk_get_ms());	
+	
 		n->_mtx_id = mtx_off + i;
 		s->_step_ui_id = mtx_off + i;
 		_mtx_to_node[mtx_off + i] = n;
@@ -380,17 +388,13 @@ bool track::next_step(uint32_t mst_ms){
 	step* prev = _cur_step;
 	_cur_step = _cur_step->get_next_step();
 
-	dbg::printf("mst_ms=%d _cur_step->_clk_def.numerator=%d _cur_step->_clk_def.denominator=%d step clk %d\n",mst_ms,_cur_step->_clk_def.numerator,_cur_step->_clk_def.denominator,_c.clk_get_ms());
+//	dbg::printf("mst_ms=%d _cur_step->_clk_def.numerator=%d _cur_step->_clk_def.denominator=%d step clk %d\n",mst_ms,_cur_step->_clk_def.numerator,_cur_step->_clk_def.denominator,_c.clk_get_ms());
 	
-	_c.clk_set_ratio(mst_ms
+	uint32_t step_ms = _c.clk_set_ratio(mst_ms
 	, _clk_def.numerator * _cur_step->_clk_def.numerator
 	, _clk_def.denominator * _cur_step->_clk_def.denominator );
 
-
-	// FIXME: calculate of gate len only when clock is 
-	//	  changed or at init time
-//	_cur_step->upd_step_gate_len(_cur_step->get_clk()->clk_get_ms());
-	_cur_step->upd_step_gate_len(_c.clk_get_ms());	
+	_cur_step->upd_step_gate_len(step_ms);
 
 
 	// FIXME should not be here	
@@ -403,7 +407,9 @@ bool track::next_step(uint32_t mst_ms){
 //	return curr_step_id;
 //}
 void track::step_reset(){
+	DISABLE_IRQ();
 	_cur_step = _first_step;
+	ENABLE_IRQ();
 }
 
 
@@ -448,7 +454,7 @@ void track::_init_animate_parents(step* cur){
 	}
 	while(tmp != &head){
 		_step_animation[(tmp->_node_lvl-1)].init_clk_animation(&_lm, errata_step[tmp->_mtx_id], color);
-		_step_animation[(tmp->_node_lvl-1)].start_animation((_c.clk_get_ms() * CLK_LEN_PER / 100.));
+		_step_animation[(tmp->_node_lvl-1)].start_animation((_c.clk_get_ms_lock() * CLK_LEN_PER / 100.));
 		tmp = tmp->_parent;
 	}
 }
@@ -462,18 +468,19 @@ void track::_upd_animate_parents(step *cur){
 
 void track::init_animate_parents_no_irq(){
 	step* tmp;
-	unsigned char reg = disable_irq();
+	DISABLE_IRQ();
 	tmp = _cur_step;
-	enable_irq(reg);
+	ENABLE_IRQ();
 
 	_init_animate_parents(tmp);
 	
 }
 void track::upd_animate_parents_no_irq(){
 	step* tmp;
-	unsigned char reg = disable_irq();
+	DISABLE_IRQ();
 	tmp = _cur_step;
-	enable_irq(reg);
+	ENABLE_IRQ();
+
 	_upd_animate_parents(tmp);
 }
 

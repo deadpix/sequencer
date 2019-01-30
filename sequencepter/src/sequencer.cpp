@@ -69,7 +69,7 @@ void sequencer::menu_enter(){
 }
 void sequencer::menu_leave(){
 }
-void sequencer::menu_update(){
+void sequencer::menu_update(uint32_t mst_ms, uint16_t mst_step){
 }
 
 

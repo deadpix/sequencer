@@ -12,6 +12,8 @@
 #define PLAY_BTN_COLOR			LED_B_IDX
 #define PAUSE_BTN_COLOR			LED_R_IDX
 
+#include "../interrupts.h"
+
 static void (*on_tempo_change)(uint32_t ms);
 
 tempo::tempo(){	
@@ -64,7 +66,11 @@ void tempo::tap(){
 			avg += _tap_timestamp[i];
 		}
 		avg /= (NR_TAP-1);
+
+		DISABLE_IRQ()
 		_mst.clk_bpms_to_bpm(avg);
+		ENABLE_IRQ()
+
 		on_tempo_change(avg);
 	}
 	_tap_cnt = (_tap_cnt + 1) % NR_TAP;
@@ -81,15 +87,18 @@ clk* tempo::get_mst_clk(){
 	return &_mst;
 }
 		
-
-uint32_t tempo::check_mst_clk(){
-	uint32_t ret = _mst.clk_elapsed();
-	if(ret && _in_menu_mode){
-		_clk_animation.turn_on_n_save_led();
-		_clk_animation.start_animation(LED_ANIMATION_MS);
-	}
-	return ret;
+uint32_t tempo::check_mst_clk_isr(){
+	return _mst.clk_elapsed();
 }
+
+//uint32_t tempo::check_mst_clk(){
+//	uint32_t ret = _mst.clk_elapsed();
+//	if(ret && _in_menu_mode){
+//		_clk_animation.turn_on_n_save_led();
+//		_clk_animation.start_animation(LED_ANIMATION_MS);
+//	}
+//	return ret;
+//}
 
 void tempo::menu_enter(){
 	_in_menu_mode = true;
@@ -99,12 +108,17 @@ void tempo::menu_leave(){
 	_in_menu_mode = false;
 }
 
-void tempo::menu_update(){
+void tempo::menu_update(uint32_t mst_ms, uint16_t mst_step){
 //	check_mst_clk();
 //	_tap_animation.update_animation();
 //	_clk_animation.update_animation();
+	
+	//TODO start clk animation on new clock
+
+
 	_tap_animation.end_animation_n_restore();
 	_clk_animation.end_animation_n_restore();
+	
 }
 
 

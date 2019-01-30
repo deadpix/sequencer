@@ -40,6 +40,7 @@ class track {
 
 //		uint8_t track_len;
 		clk _c;
+
 //		elapsedMillis elapsed_ms;
 		led_matrix _lm;
 		bool mute_flg;
@@ -66,7 +67,8 @@ class track {
 		static void set_loop(step* first, step* last);
 		void create_tree(node*, uint8_t, uint8_t, uint8_t, uint8_t);
 //		step* arr_step;
-		struct clk_def _clk_def;
+		volatile struct clk_def _clk_def;
+		void set_clk_def_lock(uint8_t num, uint8_t denom); 		
 
 		static bool delete_step(LinkedList<step *> *l, step* s);
 

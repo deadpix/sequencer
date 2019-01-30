@@ -58,11 +58,11 @@ void menu::menu_leave(){
 			p->menu_leave();
 	}
 }
-void menu::menu_update(){
+void menu::menu_update(uint32_t mst_ms, uint16_t mst_step){
 	for(int i=0;i<MATRIX_NR_COL;i++){
 		prog* p = prog_arr[i];
 		if(p)
-			p->menu_update();			
+			p->menu_update(mst_ms, mst_step);
 	}
 }
 
