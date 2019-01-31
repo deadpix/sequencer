@@ -60,7 +60,7 @@ void sequenception::init_sequencer(){
 
 	/* MUST BE called after sequencer initialization 	*/
 	/* as parameters depends on sequencer options/fct 	*/
-	/* initialization 									*/
+	/* initialization 					*/
 	seq_param_ui.init(&midi_seq, mst_clk);
 	seq_param_ui.param::set_prog(&midi_seq);
 }
@@ -157,6 +157,11 @@ void sequenception::loop(uint32_t ms){
 	int nr_evt = evt_list.size();
 	ENABLE_IRQ();
 
+	if(nr_evt > 3){
+		Serial.print("nr_evt ");
+		Serial.println(nr_evt);
+	}
+
 	for(int i=0;i<nr_evt;i++){
 		unsigned char reg = disable_irq();
 		event* tmp = evt_list.shift();
@@ -177,13 +182,45 @@ uint32_t sequenception::evt_master_tick(event** evt){
 
 void sequenception::do_isr(){
 	event* evt = NULL;
-	uint32_t ms = evt_master_tick(&evt);
-	if(evt){
-	       	evt_list.add(evt);
-	}
-	midi_seq.check_events(ms, mst_clk->clk_get_step_cnt(), &evt);	
-	evt_list.add(evt);
+	bool flg_mst_tick = false;	
+	bool flg_next_step = false;	
+	uint8_t tmp;
 
+	for(int i=0;i<evt_list.size();i++){
+		evt = evt_list.get(i);
+		if(evt->get_event_id() == EVT_MASTER_TICK){
+			flg_mst_tick = true;
+		}
+		else if(evt->get_event_id() == EVT_NEXT_STEP){
+			flg_next_step = true;
+		}
+	}
+
+	uint32_t ms = evt_master_tick(&evt);
+
+	if(evt_list.size() == 0 || ms > 0 || !flg_mst_tick){
+		evt_list.add(evt);
+	}
+/*
+	if(evt_list.size() > 0){
+		for(int i=0;i<evt_list.size();i++){
+			evt = evt_list.get(i);
+			if(evt->get_event_id() == EVT_MASTER_TICK){
+				flg_mst_tick = true;
+				break;
+			}
+		}
+		if(ms > 0 || !flg_mst_tick)
+			evt_list.add(evt);
+	}
+	else {
+		evt_list.add(evt);
+	}
+*/
+	tmp = midi_seq.check_events(ms, mst_clk->clk_get_step_cnt(), &evt);	
+	if(evt_list.size() == 0 || tmp || !flg_next_step){
+		evt_list.add(evt);
+	}
 //	if(clk_ms == 0){
 //		clk_ms = eval_mst_clk();
 //		track_upd = midi_seq.check_events(clk_ms, mst_clk->clk_get_step_cnt());
