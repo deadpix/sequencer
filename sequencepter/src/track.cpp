@@ -329,7 +329,7 @@ void track::set_out_id(uint8_t id){
 	_out_id = id;
 }
 void track::set_all_step_note(uint16_t note){
-
+	// FIXME _step_list is no longer used, should be removed!
 	for(int i=0;i<_step_list.size();i++){
 		_step_list.get(i)->step_set_note(127, note);
 	}
@@ -497,8 +497,8 @@ uint8_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 		if(_play){	
 			if((is_active = next_step(ms))){
 				if(_cur_step->reset_gate()){
-//					Serial.print(" trig: ");
-//					Serial.print(trig_cnt++);
+					Serial.print(" _cur_step->_note.pitch ");
+					Serial.print(_cur_step->_note.pitch);
 					_hw_fct(_cur_step->_note.pitch, _cur_step->_note.velocity, _out_id);
 				}
 			}

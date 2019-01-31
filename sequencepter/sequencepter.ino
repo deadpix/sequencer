@@ -27,6 +27,7 @@
 #include <LinkedList.h>
 #include <Adafruit_NeoTrellis.h>
 #include <hw_debug.h>
+#include "interrupts.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include <Arduino.h>
@@ -108,7 +109,8 @@ static void tempo_change_handler(uint32_t ms){
 }
 
 void setup(){
-	noInterrupts();
+//	noInterrupts();
+	DISABLE_IRQ();
 	// Hardware init procedure
 	Serial.begin(9600);
 
@@ -131,10 +133,11 @@ void setup(){
 	
 	// MUST BE LAST...
 	init_menu_btn(sequenception.current_prog);
-	interrupts();
+//	interrupts();
 
 	ui_timer.begin(upd_gui, 1000);
 	btn_timer.begin(check_btn, 10000);
+	ENABLE_IRQ();
 
 }
 

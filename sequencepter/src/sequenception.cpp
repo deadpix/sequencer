@@ -155,9 +155,8 @@ void sequenception::loop(uint32_t ms){
 	// disable the irq to get the first evt 
 	DISABLE_IRQ();
 	int nr_evt = evt_list.size();
-	ENABLE_IRQ();
 
-	if(nr_evt > 3){
+	if(nr_evt > 4){
 		Serial.print("nr_evt ");
 		Serial.println(nr_evt);
 	}
@@ -171,6 +170,7 @@ void sequenception::loop(uint32_t ms){
 		delete tmp;
 	}
 
+	ENABLE_IRQ();
 }
 
 uint32_t sequenception::evt_master_tick(event** evt){
@@ -186,6 +186,7 @@ void sequenception::do_isr(){
 	bool flg_next_step = false;	
 	uint8_t tmp;
 
+/*	
 	for(int i=0;i<evt_list.size();i++){
 		evt = evt_list.get(i);
 		if(evt->get_event_id() == EVT_MASTER_TICK){
@@ -195,12 +196,12 @@ void sequenception::do_isr(){
 			flg_next_step = true;
 		}
 	}
-
+*/
 	uint32_t ms = evt_master_tick(&evt);
 
-	if(evt_list.size() == 0 || ms > 0 || !flg_mst_tick){
+//	if(evt_list.size() == 0 || ms > 0 || !flg_mst_tick){
 		evt_list.add(evt);
-	}
+//	}
 /*
 	if(evt_list.size() > 0){
 		for(int i=0;i<evt_list.size();i++){
@@ -218,9 +219,12 @@ void sequenception::do_isr(){
 	}
 */
 	tmp = midi_seq.check_events(ms, mst_clk->clk_get_step_cnt(), &evt);	
-	if(evt_list.size() == 0 || tmp || !flg_next_step){
+//	if(evt_list.size() == 0 || tmp || !flg_next_step){
 		evt_list.add(evt);
-	}
+//	}
+
+
+
 //	if(clk_ms == 0){
 //		clk_ms = eval_mst_clk();
 //		track_upd = midi_seq.check_events(clk_ms, mst_clk->clk_get_step_cnt());
@@ -235,7 +239,7 @@ void sequenception::init_midi_seq(){
 	midi_seq.set_current_track(0);
 	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
 		t = midi_seq.get_track(i);
-		t->set_out_id(i+1);
+		t->set_out_id(1);
 		t->set_all_step_note(MIDI_DRUM_GM[i]);
 		t->init_hw_clbk(fct_midi);	
 	}
