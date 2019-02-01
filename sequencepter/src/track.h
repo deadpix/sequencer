@@ -32,9 +32,10 @@ class track {
 		uint8_t _track_id;
 		uint8_t _out_id;
 		bool	_play;	
+
 		step*	_cur_step;
 		step*	_first_step;
-		step*  	_last_step;
+		step* 	_last_step;
 		
 		uint16_t _mst_clk_cnt;
 
@@ -52,7 +53,7 @@ class track {
 
 	public:
 //		step arr_step[NR_STEP];
-		LinkedList<step *> _step_list;
+//		LinkedList<step *> _step_list;
 //		LinkedList<step *> _sub_step_list;
 		LinkedList<struct signature_change*> _signature_change_list;
 		

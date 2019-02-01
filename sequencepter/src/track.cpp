@@ -330,9 +330,14 @@ void track::set_out_id(uint8_t id){
 }
 void track::set_all_step_note(uint16_t note){
 	// FIXME _step_list is no longer used, should be removed!
-	for(int i=0;i<_step_list.size();i++){
-		_step_list.get(i)->step_set_note(127, note);
+	step* tmp = _first_step;
+	while(tmp != _last_step){
+		tmp->step_set_note(127, note);
 	}
+
+//	for(int i=0;i<_step_list.size();i++){
+//		_step_list.get(i)->step_set_note(127, note);
+//	}
 }
 //void track::set_step_note(uint16_t note, uint8_t step_id){
 //	if(step_id <= NR_STEP){

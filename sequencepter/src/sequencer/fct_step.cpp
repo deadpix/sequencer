@@ -79,6 +79,11 @@ void fct_step::on_release(uint8_t btn_id){
 
 		// check if we want to delete a subsequence
 		if(btn_id == _lp_ui[0]._id && !t->is_playing() && !t->get_node_from_matrix(errata_btn[_lp_ui[0]._id])->_node_is_step){
+
+
+
+			DISABLE_IRQ();
+
 			node* start = t->get_node_from_matrix(errata_btn[_lp_ui[0]._id]);
 			node* p = start->_parent;
 			step* tmp_next = (start->_children->get(start->_children->size()-1))->_step->get_next_step();
@@ -133,6 +138,9 @@ void fct_step::on_release(uint8_t btn_id){
 			else {
 				t->get_led_matrix()->clr_n_restore(errata_btn[start->_mtx_id], BACKGROUND);	
 			}
+
+
+			ENABLE_IRQ();
 
 		}
 		else {
