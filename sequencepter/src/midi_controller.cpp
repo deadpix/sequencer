@@ -1,4 +1,4 @@
-#include "test_proj_one.h"
+#include "midi_controller.h"
 
 #define BTN_LED_DELAY_MS	50
 
@@ -13,36 +13,44 @@ static void _dummy_fct(uint16_t arg1, uint8_t arg2, uint8_t arg3){
 	UNUSED(arg3);
 }
 
-
-test_proj_one::test_proj_one(){
+midi_controller::midi_controller(){
 	_hw_fct = _dummy_fct;
+	display_midi_keyboard();
 }
 
-test_proj_one::~test_proj_one(){
+midi_controller::~midi_controller(){
 }
 
-void test_proj_one::init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t)){
+void midi_controller::init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t)){
 	_hw_fct = fct;
 }
 
 
-led_matrix* test_proj_one::get_led_matrix(void){
+led_matrix* midi_controller::get_led_matrix(void){
 	return &_lm;
 }
 
-void test_proj_one::menu_enter(){
+void midi_controller::display_midi_keyboard(){
+	for(int i=0; i<4; i++){
+		display_keys(&_lm, i);
+		display_scale(&_lm, i);
+		display_root(&_lm, i);
+	}
 }
-void test_proj_one::menu_leave(){
+
+void midi_controller::menu_enter(){
 }
-void test_proj_one::menu_update(uint32_t mst_ms, uint16_t mst_step){
+void midi_controller::menu_leave(){
+}
+void midi_controller::menu_update(uint32_t mst_ms, uint16_t mst_step){
 }
 
 
-void test_proj_one::on_push(uint8_t btn_id){
+void midi_controller::on_push(uint8_t btn_id){
 	_lm.save_n_set(LED_GBR_IDX, btn_id, FOREGROUND2);
 	_hw_fct(MIDI_DRUM_GM[btn_id], 127, 1);
 }
-void test_proj_one::on_release(uint8_t btn_id){
+void midi_controller::on_release(uint8_t btn_id){
 //	_lm.toogle_led_x(LED_GBR_IDX, btn_id);	
 	led_toogle* lt = new led_toogle();
 	lt->init_animation(&_lm, btn_id, LED_GBR_IDX);
@@ -51,7 +59,7 @@ void test_proj_one::on_release(uint8_t btn_id){
 
 	_hw_fct(MIDI_DRUM_GM[btn_id], 0, 1);
 }
-void test_proj_one::on_long_release(uint8_t btn_id){
+void midi_controller::on_long_release(uint8_t btn_id){
 //	_lm.toogle_led_x(LED_GBR_IDX, btn_id);	
 	led_toogle* lt = new led_toogle();
 	lt->init_animation(&_lm, btn_id, LED_GBR_IDX);
@@ -61,7 +69,7 @@ void test_proj_one::on_long_release(uint8_t btn_id){
 	_hw_fct(MIDI_DRUM_GM[btn_id], 0, 1);
 }
 
-int test_proj_one::menu_on_push(uint8_t func_id, uint8_t opt_id){
+int midi_controller::menu_on_push(uint8_t func_id, uint8_t opt_id){
 	int ret = 1;
 	UNUSED(func_id);
 	UNUSED(opt_id);
@@ -69,7 +77,7 @@ int test_proj_one::menu_on_push(uint8_t func_id, uint8_t opt_id){
 
 	return ret;
 }
-int test_proj_one::menu_on_release(uint8_t func_id, uint8_t opt_id){
+int midi_controller::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	int ret = 1;
 	for(int i=0; i<MATRIX_NR_COL; i++){
 		if(i == opt_id){
@@ -81,7 +89,7 @@ int test_proj_one::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	}	
 	return ret;
 }
-void test_proj_one::update_ui(uint32_t mst_ms, uint16_t mst_step){
+void midi_controller::update_ui(uint32_t mst_ms, uint16_t mst_step){
 	int len = _btn_animation_list.size();
 	
 	UNUSED(mst_ms);
@@ -98,8 +106,9 @@ void test_proj_one::update_ui(uint32_t mst_ms, uint16_t mst_step){
 			_btn_animation_list.add(lt);
 		}
 	}
-
 //	if(_btn_animation.update_animation())
 //		_btn_animation.turn_off_led();
-		
 }
+
+
+

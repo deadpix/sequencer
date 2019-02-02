@@ -16,7 +16,7 @@
 #include "led_matrix.h"
 #include "tempo.h"
 #include "sequencer.h"
-#include "test_proj_one.h"
+#include "midi_controller.h"
 #include "test_proj_two.h"
 #include "gui.h"
 #include "clk.h"
@@ -41,7 +41,7 @@ class sequenception {
 
 		static tempo tempo_setting;
 		static sequencer midi_seq;
-		static test_proj_one p1;
+		static midi_controller mc;
 		static test_proj_two p2;
 
 		static seq_param seq_param_ui;

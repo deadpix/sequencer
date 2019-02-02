@@ -51,7 +51,7 @@
 #include "src/gui.h"
 
 #include "src/tempo.h"
-#include "src/test_proj_one.h"
+#include "src/midi_controller.h"
 #include "src/test_proj_two.h"
 #include "src/sequencer/fct_step.h"
 #include "src/sequencer/fct_loop_setting.h"

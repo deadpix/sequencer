@@ -2,8 +2,6 @@
 #include <MIDI.h>
 #include "src/clk.h"
 #include "src/sequencer.h"
-#include "src/track.h"
-#include "src/test_proj_one.h"
 #include "src/hw.h"
 
 #include "src/midi_cst.h"

@@ -9,7 +9,7 @@ prog* sequenception::prog_arr[MATRIX_NR_COL];
 uint8_t sequenception::nr_prog;
 tempo sequenception::tempo_setting;
 sequencer sequenception::midi_seq;
-test_proj_one sequenception::p1;
+midi_controller sequenception::mc;
 test_proj_two sequenception::p2;
 seq_param sequenception::seq_param_ui;
 fct_step sequenception::seq_option1;
@@ -78,7 +78,7 @@ void sequenception::init_all_prog(gui *g){
 	init_prog((prog *) &tempo_setting, nr_prog, "Setting");
 	nr_prog++;
 	
-	init_prog((prog *) &p1, nr_prog, "MIDIctl");
+	init_prog((prog *) &mc, nr_prog, "MIDIctl");
 //	menu_lmtx->set_led_x(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	menu_lmtx->save_n_set(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0, 0);
 	nr_prog++;
@@ -245,7 +245,7 @@ void sequenception::init_midi_seq(){
 	}
 }
 void sequenception::init_midi_controller(){
-	p1.init_hw_clbk(fct_midi);
+	mc.init_hw_clbk(fct_midi);
 }
 
 master_clock_event::master_clock_event(uint32_t ms, sequenception* s){

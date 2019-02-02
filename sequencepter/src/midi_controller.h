@@ -7,18 +7,21 @@
 #include "prog.h"
 #include "led_matrix.h"
 #include "led_toogle.h"
+#include "keyboard.h"
 
-class test_proj_one : public prog {
+class midi_controller : public prog {
 	private:
 		led_matrix _lm;
 		led_toogle _btn_animation;
 		LinkedList<led_toogle *> _btn_animation_list;
-		
+		keyboard kb;
+	
 	public:
-		test_proj_one();
-		~test_proj_one();
+		midi_controller();
+		~midi_controller();
 
 		led_matrix* get_led_matrix(void);
+		void display_midi_keyboard();
 		void init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t));
 
 		void on_push(uint8_t btn_id);
