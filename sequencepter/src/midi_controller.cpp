@@ -2,7 +2,7 @@
 
 #define BTN_LED_DELAY_MS	50
 
-static const uint8_t MIDI_DRUM_GM[16] = {37, 36, 42, 82, 40, 38, 46, 44, 48, 47, 45, 43, 49, 55, 51, 53};
+//static const uint8_t MIDI_DRUM_GM[16] = {37, 36, 42, 82, 40, 38, 46, 44, 48, 47, 45, 43, 49, 55, 51, 53};
 
 static void (*_hw_fct)(uint16_t, uint8_t, uint8_t);
 
@@ -32,9 +32,9 @@ led_matrix* midi_controller::get_led_matrix(void){
 
 void midi_controller::display_midi_keyboard(){
 	for(int i=0; i<4; i++){
-		display_keys(&_lm, i);
-		display_scale(&_lm, i);
-		display_root(&_lm, i);
+		kb.display_keys(&_lm, i);
+		kb.display_scale(&_lm, i);
+		kb.display_root(&_lm, i);
 	}
 }
 

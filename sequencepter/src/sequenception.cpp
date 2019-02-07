@@ -1,8 +1,9 @@
 #include <hw_debug.h>
 #include "sequenception.h"
 #include "../interrupts.h"
+#include "midi_cst.h"
 
-static const uint8_t MIDI_DRUM_GM[8] = {37, 36, 42, 82, 40, 38, 46, 44};
+//static const uint8_t MIDI_DRUM_GM[8] = {37, 36, 42, 82, 40, 38, 46, 44};
 
 menu sequenception::menu_ctrl;
 prog* sequenception::prog_arr[MATRIX_NR_COL];
@@ -72,6 +73,7 @@ void sequenception::set_default_prog(prog* p){
 }
 
 void sequenception::init_all_prog(gui *g){
+
 	nr_prog = 0;
 	led_matrix* menu_lmtx = menu_ctrl.get_menu_led_matrix();
 	
@@ -79,17 +81,14 @@ void sequenception::init_all_prog(gui *g){
 	nr_prog++;
 	
 	init_prog((prog *) &mc, nr_prog, "MIDIctl");
-//	menu_lmtx->set_led_x(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	menu_lmtx->save_n_set(LED_R_IDX, nr_prog * MATRIX_NR_ROW + 0, 0);
 	nr_prog++;
 
 	init_prog((prog *) &p2, nr_prog, "Prog 2");
-//	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	menu_lmtx->save_n_set(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0, 0);
 	nr_prog++;
 
 	init_prog((prog *) &midi_seq, nr_prog, "MIDIseq");
-//	menu_lmtx->set_led_x(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0);
 	menu_lmtx->save_n_set(LED_B_IDX, nr_prog * MATRIX_NR_ROW + 0, 0);
 	nr_prog++;
 		
@@ -111,6 +110,7 @@ void sequenception::init_all_prog(gui *g){
 	init_sequencer();
 
 	track_upd = 0x0;
+
 
 	set_default_prog((prog *) &midi_seq);
 }
@@ -156,10 +156,10 @@ void sequenception::loop(uint32_t ms){
 	DISABLE_IRQ();
 	int nr_evt = evt_list.size();
 
-	if(nr_evt > 4){
-		Serial.print("nr_evt ");
-		Serial.println(nr_evt);
-	}
+//	if(nr_evt > 0){
+//		Serial.print("nr_evt ");
+//		Serial.println(nr_evt);
+//	}
 
 	for(int i=0;i<nr_evt;i++){
 		unsigned char reg = disable_irq();
@@ -186,7 +186,7 @@ void sequenception::do_isr(){
 	bool flg_next_step = false;	
 	uint8_t tmp;
 
-/*	
+	
 	for(int i=0;i<evt_list.size();i++){
 		evt = evt_list.get(i);
 		if(evt->get_event_id() == EVT_MASTER_TICK){
@@ -196,12 +196,14 @@ void sequenception::do_isr(){
 			flg_next_step = true;
 		}
 	}
-*/
+
 	uint32_t ms = evt_master_tick(&evt);
 
-//	if(evt_list.size() == 0 || ms > 0 || !flg_mst_tick){
+	if(evt_list.size() == 0 || ms > 0 || !flg_mst_tick){
 		evt_list.add(evt);
-//	}
+	} else {
+		delete evt;
+	}
 /*
 	if(evt_list.size() > 0){
 		for(int i=0;i<evt_list.size();i++){
@@ -219,9 +221,12 @@ void sequenception::do_isr(){
 	}
 */
 	tmp = midi_seq.check_events(ms, mst_clk->clk_get_step_cnt(), &evt);	
-//	if(evt_list.size() == 0 || tmp || !flg_next_step){
+	if(evt_list.size() == 0 || tmp || !flg_next_step){
 		evt_list.add(evt);
-//	}
+	} 
+	else {
+		delete evt;
+	}
 
 
 

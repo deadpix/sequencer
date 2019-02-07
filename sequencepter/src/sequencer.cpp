@@ -48,8 +48,10 @@ uint8_t sequencer::check_events(uint32_t mst_ms, uint16_t mst_step, event** e){
 		t = &track_arr[i];
 		res |= (t->check_event(mst_ms, mst_step)) << i;	
 	}
+
 	*e = new next_step_evt(this, res);
 	(*e)->set_event_id(EVT_NEXT_STEP);
+
 	return res;
 }
 
