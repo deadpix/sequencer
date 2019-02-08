@@ -20,6 +20,6 @@ enum MIDI_KEY {
 	mC8=108
 };
 
-
+#define MIDI_C1_OFFSET	mC1
 
 #endif

@@ -11,10 +11,10 @@
 
 class midi_controller : public prog {
 	private:
-		led_matrix _lm;
-		led_toogle _btn_animation;
-		LinkedList<led_toogle *> _btn_animation_list;
-		keyboard kb;
+		led_matrix lm_;
+		LinkedList<led_toogle *> btn_animation_list_;
+		keyboard kb_;
+		uint8_t midi_out_;
 	
 	public:
 		midi_controller();
@@ -23,6 +23,9 @@ class midi_controller : public prog {
 		led_matrix* get_led_matrix(void);
 		void display_midi_keyboard();
 		void init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t));
+		uint8_t get_midi_out(){ return midi_out_;};
+		void set_midi_out(uint8_t out){ midi_out_ = out;};
+	
 
 		void on_push(uint8_t btn_id);
 		void on_long_push(uint8_t btn_id){ UNUSED(btn_id); };
