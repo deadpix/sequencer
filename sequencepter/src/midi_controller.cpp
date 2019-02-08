@@ -31,10 +31,10 @@ led_matrix* midi_controller::get_led_matrix(void){
 }
 
 void midi_controller::display_midi_keyboard(){
-	for(int i=0; i<4; i++){
-		kb.display_keys(&_lm, i);
-		kb.display_scale(&_lm, i);
-		kb.display_root(&_lm, i);
+	for(int i=0; i<(KEYBOARD_NR_ROW/2); i++){
+		kb.display_keys(&_lm, i*2);
+		kb.display_scale(&_lm, i*2);
+		kb.display_root(&_lm, i*2);
 	}
 }
 

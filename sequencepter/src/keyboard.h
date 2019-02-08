@@ -6,6 +6,7 @@
 
 #define KEYBOARD_NR_INTERVALS	12 // 12 semi-tones
 #define KEYBOARD_NR_COL		8
+#define KEYBOARD_NR_ROW		8
 
 struct scale {
 	uint8_t nr_notes;
