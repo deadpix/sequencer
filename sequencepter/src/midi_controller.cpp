@@ -49,21 +49,26 @@ void midi_controller::on_push(uint8_t btn_id){
 	lm_.save_n_set(LED_GBR_IDX, btn_id, FOREGROUND2);
 	kb_.get_note_offset_C_centered(btn_id, &pitch);
 	_hw_fct((MIDI_C1_OFFSET+pitch), 127, midi_out_);
+	Serial.print("push kbd ");
+	Serial.println(btn_id);
 }
 void midi_controller::on_release(uint8_t btn_id){
 	uint16_t pitch;
 	led_toogle* lt = new led_toogle();
-	lt->init_animation(&lm_, btn_id, LED_GBR_IDX);
+	lt->init_animation(&lm_, btn_id, LED_GBR_IDX, FOREGROUND2);
 	lt->start_animation(BTN_LED_DELAY_MS);
 	btn_animation_list_.add(lt);
 
 	kb_.get_note_offset_C_centered(btn_id, &pitch);
 	_hw_fct((MIDI_C1_OFFSET+pitch), 0, midi_out_);
+	Serial.print("release kbd ");
+	Serial.println(btn_id);
+
 }
 void midi_controller::on_long_release(uint8_t btn_id){
 	uint16_t pitch;
 	led_toogle* lt = new led_toogle();
-	lt->init_animation(&lm_, btn_id, LED_GBR_IDX);
+	lt->init_animation(&lm_, btn_id, LED_GBR_IDX, FOREGROUND2);
 	lt->start_animation(BTN_LED_DELAY_MS);
 	btn_animation_list_.add(lt);
 

@@ -125,8 +125,8 @@ uint32_t clk::clk_sync_ratio(uint32_t ms, uint16_t step){
 	UNUSED(step);
 	uint32_t ret = 0;
 
-	Serial.print("ms ");	
-	Serial.println(ms);	
+//	Serial.print("ms ");	
+//	Serial.println(ms);	
 
 	_ms_ref = ms;
 	_ms = ms * _numerator / _denominator;

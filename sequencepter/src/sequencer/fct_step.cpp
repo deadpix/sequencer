@@ -226,9 +226,10 @@ void fct_step::on_release(uint8_t btn_id){
 
 		// clear ui
 		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
+		
+//		t->get_led_matrix()->clr_n_restore(errata_btn[start->_mtx_id], BACKGROUND);
+		t->get_led_matrix()->save_n_ovw(LED_GBR_IDX, errata_btn[start->_mtx_id], BACKGROUND); 
 
-		t->get_led_matrix()->clr_n_restore(errata_btn[start->_mtx_id], BACKGROUND);
-		t->get_led_matrix()->save_n_set(LED_GBR_IDX, errata_btn[start->_mtx_id], BACKGROUND); 
 		t->show_children_node(start);	
 	
 	} 
@@ -236,7 +237,7 @@ void fct_step::on_release(uint8_t btn_id){
 		if(n && n->_node_is_step){
 			step* s = t->_mtx_to_node[id]->_step;
 			if(s->is_step_active()){
-			s->clr_step_active();
+				s->clr_step_active();
 				t->get_led_matrix()->clr_n_restore(btn_id, BACKGROUND);
 			} else {
 				s->set_step_active();

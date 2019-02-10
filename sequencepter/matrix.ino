@@ -372,8 +372,8 @@ Adafruit_MultiTrellis trellis((Adafruit_NeoTrellis *)t_array, BTN_NUM_ROW/4, BTN
 static hw_nt hw(&trellis);
 
 TrellisCallback trellis_btn_clbck(keyEvent evt){
-	Serial.print("Triggered event ");
-	Serial.println(evt.bit.NUM);
+//	Serial.print("Triggered event ");
+//	Serial.println(evt.bit.NUM);
 	prog* p = sequenception.current_prog;
 	uint8_t row = evt.bit.NUM / BTN_NUM_ROW;	
 	uint8_t offset = evt.bit.NUM % BTN_NUM_ROW;
@@ -386,8 +386,10 @@ TrellisCallback trellis_btn_clbck(keyEvent evt){
 	}
 	else if(evt.bit.EDGE == SEESAW_KEYPAD_EDGE_FALLING){
 		flag_btn_active = false;
+//		if(btn_ms_cnt[evt.bit.NUM] > LONG_PRESS_TIME_MS){
 		if(btn_status.long_pushed_bmp[row] & (1<<offset)){
 			// release
+//			p->on_long_push(evt.bit.NUM);
 			p->on_long_release(evt.bit.NUM);
 		} 
 		else {
@@ -397,13 +399,13 @@ TrellisCallback trellis_btn_clbck(keyEvent evt){
 		btn_status.long_pushed_bmp[row] &= ~(1<<offset);
 
 	}
-	if( (btn_status.pushed_bmp[row] & (1<<offset)) 
-	&& !(btn_status.long_pushed_bmp[row] & (1<<offset))){
-		if(btn_ms_cnt[evt.bit.NUM] > LONG_PRESS_TIME_MS){
-			btn_status.long_pushed_bmp[row] |= (1<<offset);
-			p->on_long_push(evt.bit.NUM);
-		}
-	}
+//	if( (btn_status.pushed_bmp[row] & (1<<offset)) 
+//	&& !(btn_status.long_pushed_bmp[row] & (1<<offset))){
+//		if(btn_ms_cnt[evt.bit.NUM] > LONG_PRESS_TIME_MS){
+//			btn_status.long_pushed_bmp[row] |= (1<<offset);
+//			p->on_long_push(evt.bit.NUM);
+//		}
+//	}
 
 	return 0;
 }
@@ -439,8 +441,22 @@ static void setup_matrix(){
 }
 static void scan(prog* p){
 //	if(!digitalRead(NT_INT_PIN)){
-		trellis.read(false);
+//		trellis.read(false);
 //	}
+	trellis.read();
+
+	for(int row = 0; row < BTN_NUM_ROW; row++){
+		for (uint8_t offset=0; offset<BTN_NUM_COL;offset++){
+			uint8_t idx = row * 8 + offset;
+			if( (btn_status.pushed_bmp[row] & (1<<offset)) 
+			&& !(btn_status.long_pushed_bmp[row] & (1<<offset))){
+				if(btn_ms_cnt[idx] > LONG_PRESS_TIME_MS){
+					btn_status.long_pushed_bmp[row] |= (1<<offset);
+					p->on_long_push(idx);
+				}
+			}
+		}
+	}
 }
 static void upd_shift_reg(led_matrix* lm){
 }
