@@ -17,6 +17,7 @@
 #include "tempo.h"
 #include "sequencer.h"
 #include "midi_controller.h"
+#include "midi_controller_param.h"
 #include "test_proj_two.h"
 #include "gui.h"
 #include "clk.h"
@@ -41,7 +42,10 @@ class sequenception {
 
 		static tempo tempo_setting;
 		static sequencer midi_seq;
+	
 		static midi_controller mc;
+		static midi_controller_param mcp;
+
 		static test_proj_two p2;
 
 		static seq_param seq_param_ui;

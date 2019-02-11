@@ -3,15 +3,15 @@
 
 #include "midi_controller.h"
 
-class midi_ctrl_param: public param {
+class midi_controller_param: public param {
 	private:
-		midi_controller mc_;
+		midi_controller* mc_;
 	
 	public:
-		midi_ctrl_param(){};
-		~midi_ctrl_param(){};
+		midi_controller_param(){};
+		~midi_controller_param(){};
 
-		void init(midi_controller mc);
+		void init(midi_controller* mc);
 
 		void on_push(uint8_t btn_id);
 		void on_long_push(uint8_t btn_id){ UNUSED(btn_id); };

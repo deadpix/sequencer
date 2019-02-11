@@ -142,7 +142,12 @@ static int cmd_btn_matrix_do_something(uint8_t cmd_btn, bool is_pushed){
 					ret = 1;
 				}
 			} else {
-				ret = param_on_release();
+				if(param_ptr){
+					ret = param_on_release();
+				}
+				else { 
+					ret = 1;
+				}
 			}
 			break;
 

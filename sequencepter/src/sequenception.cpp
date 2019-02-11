@@ -11,6 +11,7 @@ uint8_t sequenception::nr_prog;
 tempo sequenception::tempo_setting;
 sequencer sequenception::midi_seq;
 midi_controller sequenception::mc;
+midi_controller_param sequenception::mcp;
 test_proj_two sequenception::p2;
 seq_param sequenception::seq_param_ui;
 fct_step sequenception::seq_option1;
@@ -251,6 +252,9 @@ void sequenception::init_midi_seq(){
 }
 void sequenception::init_midi_controller(){
 	mc.init_hw_clbk(fct_midi);
+	mc.prog::set_param(&mcp);
+	mcp.init(&mc);
+	mcp.param::set_prog(&mc);
 }
 
 master_clock_event::master_clock_event(uint32_t ms, sequenception* s){
