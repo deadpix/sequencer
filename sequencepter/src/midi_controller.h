@@ -13,6 +13,7 @@ class midi_controller : public prog {
 	private:
 		led_matrix lm_;
 		LinkedList<led_toogle *> btn_animation_list_;
+		uint8_t kb_mask_[KEYBOARD_NR_ROW];
 		keyboard kb_;
 		uint8_t midi_out_;
 	

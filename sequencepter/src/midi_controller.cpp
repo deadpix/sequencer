@@ -1,5 +1,5 @@
 #include "midi_controller.h"
-
+#include "bit.h"
 #define BTN_LED_DELAY_MS	50
 
 static void (*_hw_fct)(uint16_t, uint8_t, uint8_t);
@@ -13,6 +13,9 @@ static void _dummy_fct(uint16_t arg1, uint8_t arg2, uint8_t arg3){
 midi_controller::midi_controller(){
 	_hw_fct = _dummy_fct;
 	midi_out_ = 2;
+	for(int i=0;i<KEYBOARD_NR_ROW;i++){
+		kb_mask_[i] = 0x0;
+	}
 	display_midi_keyboard();
 }
 
@@ -29,10 +32,13 @@ led_matrix* midi_controller::get_led_matrix(void){
 }
 
 void midi_controller::display_midi_keyboard(){
-	for(int i=0; i<(KEYBOARD_NR_ROW/2); i++){
-		kb_.display_keys(&lm_, i*2);
-		kb_.display_scale(&lm_, i*2);
-		kb_.display_root(&lm_, i*2);
+//	for(int i=0; i<(KEYBOARD_NR_ROW/2); i++){
+	for(int i=0; i<4; i=i+2){
+		kb_mask_[i] = 0xff;
+		kb_mask_[i+1] = 0xff;
+		kb_.display_keys(&lm_, i);
+		kb_.display_scale(&lm_, i);
+		kb_.display_root(&lm_, i);
 	}
 }
 
@@ -47,10 +53,11 @@ void midi_controller::menu_update(uint32_t mst_ms, uint16_t mst_step){
 void midi_controller::on_push(uint8_t btn_id){
 	uint16_t pitch;
 	lm_.save_n_set(LED_GBR_IDX, btn_id, FOREGROUND2);
-	kb_.get_note_offset_C_centered(btn_id, &pitch);
-	_hw_fct((MIDI_C1_OFFSET+pitch), 127, midi_out_);
-	Serial.print("push kbd ");
-	Serial.println(btn_id);
+	
+	if(kb_.get_note_offset_C_centered(btn_id, &pitch)
+		&& (BIT::is_bit_set(kb_mask_[btn_id/KEYBOARD_NR_ROW], (btn_id%KEYBOARD_NR_COL)))){
+		_hw_fct((MIDI_C1_OFFSET+pitch), 127, midi_out_);
+	}
 }
 void midi_controller::on_release(uint8_t btn_id){
 	uint16_t pitch;
@@ -59,11 +66,10 @@ void midi_controller::on_release(uint8_t btn_id){
 	lt->start_animation(BTN_LED_DELAY_MS);
 	btn_animation_list_.add(lt);
 
-	kb_.get_note_offset_C_centered(btn_id, &pitch);
-	_hw_fct((MIDI_C1_OFFSET+pitch), 0, midi_out_);
-	Serial.print("release kbd ");
-	Serial.println(btn_id);
-
+	if(kb_.get_note_offset_C_centered(btn_id, &pitch)
+		&& (BIT::is_bit_set(kb_mask_[btn_id/KEYBOARD_NR_ROW], (btn_id%KEYBOARD_NR_COL)))){
+		_hw_fct((MIDI_C1_OFFSET+pitch), 0, midi_out_);
+	}
 }
 void midi_controller::on_long_release(uint8_t btn_id){
 	uint16_t pitch;
@@ -72,8 +78,10 @@ void midi_controller::on_long_release(uint8_t btn_id){
 	lt->start_animation(BTN_LED_DELAY_MS);
 	btn_animation_list_.add(lt);
 
-	kb_.get_note_offset_C_centered(btn_id, &pitch);
-	_hw_fct((MIDI_C1_OFFSET+pitch), 0, midi_out_);
+	if(kb_.get_note_offset_C_centered(btn_id, &pitch) 
+		&& (BIT::is_bit_set(kb_mask_[btn_id/KEYBOARD_NR_ROW], (btn_id%KEYBOARD_NR_COL)))){
+		_hw_fct((MIDI_C1_OFFSET+pitch), 0, midi_out_);
+	}
 }
 
 int midi_controller::menu_on_push(uint8_t func_id, uint8_t opt_id){

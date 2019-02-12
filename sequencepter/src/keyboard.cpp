@@ -1,5 +1,5 @@
 #include "keyboard.h"
-
+#include <hw_debug.h>
 
 keyboard::keyboard(){
 	root_key_ = DO;
@@ -37,11 +37,12 @@ void keyboard::display_root(led_matrix* lm, uint8_t row){
 	if(row > KEYBOARD_NR_COL - 2)
 		return;
 
+	row_offset = row * KEYBOARD_NR_COL;
 	lm->save_n_ovw(LED_G_IDX, row_offset + keys_offset[root_key_], BACKGROUND);
 }
 
 int keyboard::get_note_offset_C_centered(uint8_t key, uint16_t* midi_note){	
-	int note = keys_offset[key%16];
+	int note = key%16;
 	int octave_offset = octave_ + (key / 16) - 2;
 
 	if( (keys_to_midi_offset[note] == -1) || (octave_offset < 0))

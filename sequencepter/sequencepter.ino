@@ -113,20 +113,19 @@ void setup(){
 	DISABLE_IRQ();
 	// Hardware init procedure
 	Serial.begin(9600);
-
+	
 	gui_ctrl = setup_oled();
 	setup_matrix();
 	init_midi();
 	sequenception.fct_midi = midi_note_on;
 	sequenception.fct_tempo_change = tempo_change_handler;
-
+	
 	// timer
 //	midi_timer.begin(upd_midi, 8000);
 
 #if CMD_BTN_MATRIX == 1
 	setup_cmd_btn_matrix();	
 #endif
-
 	// data initialization
 	sequenception.init(gui_ctrl);
 	switch_matrix_ui(sequenception.lm_ptr, sequenception.lm_ptr);
