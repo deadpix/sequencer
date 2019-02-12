@@ -392,8 +392,16 @@ void track::set_max_step(uint8_t max){
 	_max_step = max;
 */
 }
+
+void track::show_current_step_nodes_no_irq(){
+	DISABLE_IRQ();
+	node* common_parent = node::get_common_parent(_cur_step->_node, _prev_step->_node);
+	show_parent_nodes(_cur_step->_node, common_parent);
+	ENABLE_IRQ();
+}
+
 bool track::next_step(uint32_t mst_ms){
-	step* prev = _cur_step;
+	_prev_step = _cur_step;
 	_cur_step = _cur_step->get_next_step();
 
 //	dbg::printf("mst_ms=%d _cur_step->_clk_def.numerator=%d _cur_step->_clk_def.denominator=%d step clk %d\n",mst_ms,_cur_step->_clk_def.numerator,_cur_step->_clk_def.denominator,_c.clk_get_ms());

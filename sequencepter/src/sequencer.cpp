@@ -135,17 +135,18 @@ void next_step_evt::do_evt(){
 //	else 
 //		Serial.println("ko");
 
-	
-
 	track* t;
 	for(int i=0;i<SEQUENCER_NR_TRACK;i++){	
 		t = _s->get_track(i);
 		if(t == _s->get_current_track()){
-			if(step_evt_bmp & (1<<i))
+		
+			if(step_evt_bmp & (1<<i)){
+				t->show_current_step_nodes_no_irq();
 				t->init_animate_parents_no_irq();
-			else
+			}
+			else {
 				t->upd_animate_parents_no_irq();
-			
+			}
 		}
 	}
 }

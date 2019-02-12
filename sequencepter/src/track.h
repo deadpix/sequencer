@@ -34,6 +34,7 @@ class track {
 		bool	_play;	
 
 		step*	_cur_step;
+		step*	_prev_step;
 		step*	_first_step;
 		step* 	_last_step;
 		
@@ -80,6 +81,7 @@ class track {
 		void mask_npo_nodes(uint8_t npo);
 		void show_children_node(node*);
 		void show_parent_nodes(node*, node*);
+		void show_current_step_nodes_no_irq();
 
 		track();
 //		track(uint8_t);
