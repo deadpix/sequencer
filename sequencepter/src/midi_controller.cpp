@@ -12,11 +12,16 @@ static void _dummy_fct(uint16_t arg1, uint8_t arg2, uint8_t arg3){
 
 midi_controller::midi_controller(){
 	_hw_fct = _dummy_fct;
-	midi_out_ = 2;
-	for(int i=0;i<KEYBOARD_NR_ROW;i++){
-		kb_mask_[i] = 0x0;
+//	midi_out_ = 2;
+	for(int i=0;i<MATRIX_NR_ROW;i++){
+		for(int j=0;j<KEYBOARD_NR_ROW;j++){
+			conf_[i].kb_mask_[j] = 0x0;
+		}
+		conf_[i].id = i;
+		conf_[i].midi_out_ = i;
 	}
-	display_midi_keyboard();
+	current_conf_ = &conf_[0];
+	display_midi_keyboard(current_conf_);
 }
 
 midi_controller::~midi_controller(){
@@ -31,14 +36,14 @@ led_matrix* midi_controller::get_led_matrix(void){
 	return &lm_;
 }
 
-void midi_controller::display_midi_keyboard(){
+void midi_controller::display_midi_keyboard(struct midi_controller_conf* c){
 //	for(int i=0; i<(KEYBOARD_NR_ROW/2); i++){
 	for(int i=0; i<4; i=i+2){
-		kb_mask_[i] = 0xff;
-		kb_mask_[i+1] = 0xff;
-		kb_.display_keys(&lm_, i);
-		kb_.display_scale(&lm_, i);
-		kb_.display_root(&lm_, i);
+		c->kb_mask[i] = 0xff;
+		c->kb_mask[i+1] = 0xff;
+		c->kb.display_keys(&lm_, i);
+		c->kb.display_scale(&lm_, i);
+		c->kb.display_root(&lm_, i);
 	}
 }
 
@@ -54,9 +59,9 @@ void midi_controller::on_push(uint8_t btn_id){
 	uint16_t pitch;
 	lm_.save_n_set(LED_GBR_IDX, btn_id, FOREGROUND2);
 	
-	if(kb_.get_note_offset_C_centered(btn_id, &pitch)
-		&& (BIT::is_bit_set(kb_mask_[btn_id/KEYBOARD_NR_ROW], (btn_id%KEYBOARD_NR_COL)))){
-		_hw_fct((MIDI_C1_OFFSET+pitch), 127, midi_out_);
+	if(current_conf_->kb.get_note_offset_C_centered(btn_id, &pitch)
+		&& (BIT::is_bit_set(current_conf_->kb_mask[btn_id/KEYBOARD_NR_ROW], (btn_id%KEYBOARD_NR_COL)))){
+		_hw_fct((MIDI_C1_OFFSET+pitch), 127, current_conf_->midi_out);
 	}
 }
 void midi_controller::on_release(uint8_t btn_id){
@@ -66,9 +71,9 @@ void midi_controller::on_release(uint8_t btn_id){
 	lt->start_animation(BTN_LED_DELAY_MS);
 	btn_animation_list_.add(lt);
 
-	if(kb_.get_note_offset_C_centered(btn_id, &pitch)
-		&& (BIT::is_bit_set(kb_mask_[btn_id/KEYBOARD_NR_ROW], (btn_id%KEYBOARD_NR_COL)))){
-		_hw_fct((MIDI_C1_OFFSET+pitch), 0, midi_out_);
+	if(current_conf_->kb.get_note_offset_C_centered(btn_id, &pitch)
+		&& (BIT::is_bit_set(current_conf_->kb_mask[btn_id/KEYBOARD_NR_ROW], (btn_id%KEYBOARD_NR_COL)))){
+		_hw_fct((MIDI_C1_OFFSET+pitch), 0, current_conf_->midi_out);
 	}
 }
 void midi_controller::on_long_release(uint8_t btn_id){
@@ -78,9 +83,9 @@ void midi_controller::on_long_release(uint8_t btn_id){
 	lt->start_animation(BTN_LED_DELAY_MS);
 	btn_animation_list_.add(lt);
 
-	if(kb_.get_note_offset_C_centered(btn_id, &pitch) 
-		&& (BIT::is_bit_set(kb_mask_[btn_id/KEYBOARD_NR_ROW], (btn_id%KEYBOARD_NR_COL)))){
-		_hw_fct((MIDI_C1_OFFSET+pitch), 0, midi_out_);
+	if(current_conf_->kb.get_note_offset_C_centered(btn_id, &pitch) 
+		&& (BIT::is_bit_set(current_conf_->kb_mask[btn_id/KEYBOARD_NR_ROW], (btn_id%KEYBOARD_NR_COL)))){
+		_hw_fct((MIDI_C1_OFFSET+pitch), 0, current_conf_->midi_out);
 	}
 }
 
@@ -97,6 +102,7 @@ int midi_controller::menu_on_release(uint8_t func_id, uint8_t opt_id){
 	for(int i=0; i<MATRIX_NR_COL; i++){
 		if(i == opt_id){
 			get_menu_lm()->save_n_set(LED_R_IDX, func_id * MATRIX_NR_ROW + i, FOREGROUND2);
+			current_conf_ = &conf_[opt_id];
 		}
 		else {
 			get_menu_lm()->clr_n_restore(func_id * MATRIX_NR_ROW + i, FOREGROUND2);
