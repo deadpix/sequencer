@@ -35,6 +35,7 @@ class midi_controller : public prog {
 		void init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t));
 //		uint8_t get_midi_out(){ return midi_out_;};
 //		void set_midi_out(uint8_t out){ midi_out_ = out;};
+		struct midi_controller_conf* get_midi_controller_conf(){ return current_conf_;};
 	
 
 		void on_push(uint8_t btn_id);

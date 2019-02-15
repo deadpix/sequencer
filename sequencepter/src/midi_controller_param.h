@@ -6,6 +6,9 @@
 class midi_controller_param: public param {
 	private:
 		midi_controller* mc_;
+		struct midi_controller_conf* last_conf_;
+	
+		void redraw_midi_controller_param();
 	
 	public:
 		midi_controller_param(){};
@@ -19,7 +22,7 @@ class midi_controller_param: public param {
 		void on_long_release(uint8_t btn_id){ UNUSED(btn_id); };
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 
-		void param_on_enter(){};
-		void param_on_leave(){};
+		void param_on_enter();
+		void param_on_leave();
 };
 #endif
