@@ -15,10 +15,10 @@ midi_controller::midi_controller(){
 //	midi_out_ = 2;
 	for(int i=0;i<MATRIX_NR_ROW;i++){
 		for(int j=0;j<KEYBOARD_NR_ROW;j++){
-			conf_[i].kb_mask_[j] = 0x0;
+			conf_[i].kb_mask[j] = 0x0;
 		}
 		conf_[i].id = i;
-		conf_[i].midi_out_ = i;
+		conf_[i].midi_out = i;
 	}
 	current_conf_ = &conf_[0];
 	display_midi_keyboard(current_conf_);

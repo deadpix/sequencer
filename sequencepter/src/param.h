@@ -18,11 +18,11 @@
 class param: public prog {
 	
 	protected:
-		led_matrix  _lm;
 		prog* _p;
 	
 	public:
 		
+		led_matrix  _lm;
 //		param();
 //		~param();
 

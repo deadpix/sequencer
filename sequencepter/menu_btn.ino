@@ -96,8 +96,8 @@ int param_on_push(){
 	if(!flag_btn_active){
 		sequenception.current_prog = param_ptr;
 		sequenception.lm_ptr = param_ptr->get_led_matrix();
-		switch_matrix_ui(sequenception.lm_ptr, prev);
 		param_ptr->param_on_enter();
+		switch_matrix_ui(sequenception.lm_ptr, prev);
 //		param_btn_status = FCT_BTN_IDLE;
 		ret = 1;
 	}
