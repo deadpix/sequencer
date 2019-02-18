@@ -50,12 +50,16 @@ class track {
 		node head;
 		void _init_animate_parents(step* cur);
 		void _upd_animate_parents(step* cur);
+		uint8_t track_color_;
 
 
 	public:
 //		step arr_step[NR_STEP];
 //		LinkedList<step *> _step_list;
 //		LinkedList<step *> _sub_step_list;
+
+		void set_track_color(uint8_t color){track_color_ = color;};
+		uint8_t get_track_color(){ return track_color_;};
 		LinkedList<struct signature_change*> _signature_change_list;
 		
 		led_toogle _step_animation[DEFAULT_STEP_PER_SEQ];

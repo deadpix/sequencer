@@ -165,6 +165,7 @@ track::track(){
 	_clk_def.numerator = 1;
 	_clk_def.denominator = 1;
 	_mst_clk_cnt = 1;
+	track_color_ = LED_R_IDX;
 
 	create_tree(&head, _max_step, 1, 1, 0);
 	reset_mtx_to_node(_mtx_to_node, &head);
@@ -469,7 +470,7 @@ void track::_init_animate_parents(step* cur){
 	node* tmp = cur->_node;
 	uint8_t color = 0;
 	if(!cur->is_step_active()){
-		color = LED_R_IDX;
+		color = get_track_color();
 	}
 	while(tmp != &head){
 		_step_animation[(tmp->_node_lvl-1)].init_clk_animation(&_lm, errata_step[tmp->_mtx_id], color);

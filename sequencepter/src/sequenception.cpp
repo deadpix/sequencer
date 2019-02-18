@@ -53,8 +53,15 @@ void sequenception::init_sequencer(){
 	seq_option1.init(&midi_seq, "step");
 	seq_option2.init(&midi_seq, "looplen");
 	
-	midi_seq.add_fct(&seq_option1, 0);
-	midi_seq.add_fct(&seq_option2, 1);
+	midi_seq.add_fct(&seq_option1, SEQ_PARAM_STEP_RED_BTN_ID);
+	midi_seq.add_fct(&seq_option1, SEQ_PARAM_STEP_BLUE_BTN_ID);
+	midi_seq.add_fct(&seq_option1, SEQ_PARAM_STEP_GREEN_BTN_ID);
+	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_RED_BTN_ID);
+	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_BLUE_BTN_ID);
+	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_GREEN_BTN_ID);
+	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_RED_BLUE_BTN_ID);
+	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_RED_GREEN_BTN_ID);
+	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_BLUE_GREEN_BTN_ID);
 
 	midi_seq.set_current_param(0);
 	midi_seq.prog::display_str("step", 1);

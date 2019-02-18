@@ -1,8 +1,8 @@
 #include "seq_param.h"
 #include <hw_debug.h>
 
-#define CLK_DIVIDER_LED_OFFSET		8
-#define CLK_MULTIPLIER_LED_OFFSET	16
+#define CLK_DIVIDER_LED_OFFSET		16
+#define CLK_MULTIPLIER_LED_OFFSET	24
 #define LED_ANIMATION_PER		20
 
 void seq_param::clk_divider_ui(uint32_t mst_ms, uint16_t mst_step){
@@ -56,13 +56,33 @@ void seq_param::init(sequencer* const s, clk* const c){
 	_s = s;
 	_clk_ref = c;
 	int ret;
-	for(int i=0;i<(MATRIX_NR_COL*MATRIX_NR_ROW);i++){
-		if(_s->get_fct(i)){
-			param::_lm.save_n_set(LED_R_IDX, i, FOREGROUND2);
-		}
-	}
+	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_STEP_RED_BTN_ID]
+			, SEQ_PARAM_STEP_RED_BTN_ID, BACKGROUND);
+	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_STEP_BLUE_BTN_ID]
+			, SEQ_PARAM_STEP_BLUE_BTN_ID, BACKGROUND);
+	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_STEP_GREEN_BTN_ID]
+			, SEQ_PARAM_STEP_GREEN_BTN_ID, BACKGROUND);
+
+	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_LOOP_RED_BTN_ID]
+			, SEQ_PARAM_LOOP_RED_BTN_ID, BACKGROUND);
+	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_LOOP_BLUE_BTN_ID]
+			, SEQ_PARAM_LOOP_BLUE_BTN_ID, BACKGROUND);
+	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_LOOP_GREEN_BTN_ID]
+			, SEQ_PARAM_LOOP_GREEN_BTN_ID, BACKGROUND);
+	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_LOOP_RED_BLUE_BTN_ID]
+			, SEQ_PARAM_LOOP_RED_BLUE_BTN_ID, BACKGROUND);
+	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_LOOP_RED_GREEN_BTN_ID]
+			, SEQ_PARAM_LOOP_RED_GREEN_BTN_ID, BACKGROUND);
+	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_LOOP_BLUE_GREEN_BTN_ID]
+			, SEQ_PARAM_LOOP_BLUE_GREEN_BTN_ID, BACKGROUND);
+
+//	for(int i=0;i<(MATRIX_NR_COL*MATRIX_NR_ROW);i++){
+//		if(_s->get_fct(i)){
+//			param::_lm.save_n_set(LED_R_IDX, i, FOREGROUND2);
+//		}
+//	}
 	if(_s->get_fct(_s->current_param_id)){
-		ret = param::_lm.save_n_ovw(LED_GBR_IDX, _s->current_param_id, FOREGROUND2);
+		ret = param::_lm.save_n_ovw(seq_param_btn_to_color[_s->current_param_id], _s->current_param_id, FOREGROUND2);
 	}
 
 	for(int i=0;i<MAX_DIVIDER;i++){
@@ -81,22 +101,15 @@ void seq_param::on_push(uint8_t btn_id){
 	fct_clbk* fc = _s->get_fct(btn_id);
 	if(fc){
 		_s->prog::display_str(fc->get_fct_name(), 1);
-		param::_lm.save_n_ovw(LED_R_IDX, _s->get_current_param(), FOREGROUND2);
-		param::_lm.save_n_ovw(LED_GBR_IDX, btn_id, FOREGROUND2);
-		dbg::printf("passe");
+		param::_lm.clr_n_restore(_s->get_current_param(), FOREGROUND2);
+		param::_lm.save_n_ovw(seq_param_btn_to_color[btn_id], btn_id, FOREGROUND2);
 	}
 	else if(btn_id >= CLK_DIVIDER_LED_OFFSET && btn_id < CLK_MULTIPLIER_LED_OFFSET){ 
-//		_s->get_current_track()->_clk_def.numerator = (btn_id-CLK_DIVIDER_LED_OFFSET+1);
-//		_s->get_current_track()->_clk_def.denominator = 1;	
-		
 		_s->get_current_track()->set_clk_def_lock((btn_id-CLK_DIVIDER_LED_OFFSET+1), 1);
 		_s->prog::display_str("div", 1);
 	}
 	else if(btn_id >= CLK_MULTIPLIER_LED_OFFSET && btn_id < (CLK_MULTIPLIER_LED_OFFSET + 8)){
-//		_s->get_current_track()->_clk_def.numerator = 1;
-//		_s->get_current_track()->_clk_def.denominator = (btn_id-CLK_MULTIPLIER_LED_OFFSET+1);
 		_s->get_current_track()->set_clk_def_lock(1, (btn_id-CLK_MULTIPLIER_LED_OFFSET+1));
-
 		_s->prog::display_str("mult", 1);
 	}
 	else {
@@ -108,6 +121,9 @@ void seq_param::on_release(uint8_t btn_id){
 	fct_clbk* fc = _s->get_fct(btn_id);
 	if(fc){
 		_s->set_current_param(btn_id);
+		if(btn_id >= SEQ_PARAM_STEP_RED_BTN_ID && btn_id <= SEQ_PARAM_STEP_GREEN_BTN_ID){
+			_s->get_current_track()->set_track_color(seq_param_btn_to_color[btn_id]);
+		}
 	}
 }
 
