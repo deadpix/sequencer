@@ -1,14 +1,17 @@
 #include "midi_controller_param.h"
 
+#define PARAM_KEYBOARD_ROW	2
+static uint16_t play_bmp;
+
 void midi_controller_param::redraw_midi_controller_param(){
 	for(int i=0; i<MATRIX_NR_ROW*MATRIX_NR_COL;i++){
 		param::_lm.clr_n_restore(i,BACKGROUND);
 	}
 	param::_lm.save_n_set(LED_R_IDX,last_conf_->midi_out, BACKGROUND);	
 	// display keyboard starting from row 2
-	last_conf_->kb.display_keys(&(param::_lm), 2);	
-	last_conf_->kb.display_scale(&(param::_lm), 2);
-	last_conf_->kb.display_root(&(param::_lm), 2);	
+	last_conf_->kb.display_keys(&(param::_lm), PARAM_KEYBOARD_ROW);	
+	last_conf_->kb.display_scale(&(param::_lm), PARAM_KEYBOARD_ROW);
+	last_conf_->kb.display_root(&(param::_lm), PARAM_KEYBOARD_ROW);	
 }
 
 void midi_controller_param::init(midi_controller* mc){
@@ -20,13 +23,22 @@ void midi_controller_param::init(midi_controller* mc){
 void midi_controller_param::on_push(uint8_t btn_id){
 	if(btn_id < 16){
 		// change midi out
+		// clear previous out_id
+		param::_lm.clr_n_restore(last_conf_->midi_out, BACKGROUND);
+		last_conf_->midi_out = btn_id;
+		param::_lm.save_n_set(LED_R_IDX, last_conf_->midi_out, BACKGROUND);
 	}
 	else if(btn_id >= 16 && btn_id < 32){
-		// KBD event
-	
+		// KBD event -> set root note
+		int key = keys_to_midi_offset[btn_id%16];
+		if(key > -1){
+			last_conf_->kb.display_scale(&(param::_lm), PARAM_KEYBOARD_ROW);
+			last_conf_->kb.display_root(&(param::_lm), PARAM_KEYBOARD_ROW, key);
+		}	
 	}
 	else if(btn_id == 32){
 		// octave down
+		
 	}
 	else if(btn_id == 33){
 		// octave up
