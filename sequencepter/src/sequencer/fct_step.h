@@ -28,6 +28,7 @@ class fct_step: public fct_clbk {
 //		btn_state _bs;
 		struct led_blink_t _lp_ui[BTN_MAX_LONG_PUSH_STATE];
 		uint8_t _lp_cnt;
+		uint8_t step_color_;
 	
 	public:
 		fct_step(){};

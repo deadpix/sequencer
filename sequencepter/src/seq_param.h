@@ -14,6 +14,7 @@
 #define SEQ_PARAM_STEP_BLUE_BTN_ID	1
 #define SEQ_PARAM_STEP_GREEN_BTN_ID	2
 
+// Warning: changing these values might crash the system...
 #define SEQ_PARAM_LOOP_RED_BTN_ID	 8
 #define SEQ_PARAM_LOOP_BLUE_BTN_ID	 9
 #define SEQ_PARAM_LOOP_GREEN_BTN_ID	 10

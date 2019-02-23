@@ -17,12 +17,19 @@
 #include "clk.h"
 #include "node.h"
 
+#define SEQ_NR_LOOP_SETTING	6
+
 struct signature_change {
 	uint8_t num;
 	uint8_t denom;
 	step* s;
 	uint8_t color;
 	led_toogle* signature_ui;
+};
+
+struct loop_step {
+	step* first;
+	step* last;
 };
 
 class track {
@@ -35,9 +42,12 @@ class track {
 
 		step*	_cur_step;
 		step*	_prev_step;
-		step*	_first_step;
-		step* 	_last_step;
-		
+//		step*	_first_step;
+//		step* 	_last_step;
+
+		struct loop_step loop_step_[SEQ_NR_LOOP_SETTING]; 
+		uint8_t cur_loop_;
+
 		uint16_t _mst_clk_cnt;
 
 //		uint8_t track_len;
@@ -136,7 +146,10 @@ class track {
 		void toogle_play();	
 		void set_play(bool);
 		bool is_playing();
-	
+
+		void set_current_loop(uint8_t loop_id);
+		uint8_t get_current_loop(){ return cur_loop_; };
+
 		void upd_animate_parents_no_irq();
 		void init_animate_parents_no_irq();
 //		void update_ui(uint32_t mst_ms, uint16_t mst_step);

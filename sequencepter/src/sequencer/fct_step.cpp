@@ -10,6 +10,7 @@ void fct_step::init(sequencer* seq, char* name){
 	_seq = seq;
 	_lp_cnt = 0;
 	fct_clbk::set_fct_name(name);
+	step_color_ = _seq->get_current_track()->get_track_color();
 }
 
 static void clear_all_long_pushed_ui(track* t, uint8_t* lp_cnt, struct led_blink_t* lp_ui){
@@ -241,7 +242,10 @@ void fct_step::on_release(uint8_t btn_id){
 				t->get_led_matrix()->clr_n_restore(btn_id, BACKGROUND);
 			} else {
 				s->set_step_active();
-				t->get_led_matrix()->save_n_set(s->get_step_color(), btn_id, BACKGROUND); 
+//				Serial.print("step_color_ ");
+//				Serial.println(step_color_);
+				s->set_step_color(step_color_);
+				t->get_led_matrix()->save_n_set(step_color_, btn_id, BACKGROUND); 
 			}
 		}
 	}
@@ -349,6 +353,8 @@ void fct_step::update_ui(uint32_t mst_ms, uint16_t mst_step){
 }
 
 void fct_step::on_start(){
+	step_color_ = _seq->get_current_track()->get_track_color();
+
 }
 void fct_step::on_leave(){
 	clear_all_long_pushed_ui(_seq->get_current_track(), &_lp_cnt, _lp_ui);

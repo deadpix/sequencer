@@ -124,6 +124,9 @@ void seq_param::on_release(uint8_t btn_id){
 		if(btn_id >= SEQ_PARAM_STEP_RED_BTN_ID && btn_id <= SEQ_PARAM_STEP_GREEN_BTN_ID){
 			_s->get_current_track()->set_track_color(seq_param_btn_to_color[btn_id]);
 		}
+		else if(btn_id >= SEQ_PARAM_LOOP_RED_BTN_ID && btn_id <= SEQ_PARAM_LOOP_BLUE_GREEN_BTN_ID){
+			_s->get_current_track()->set_current_loop(btn_id - SEQ_PARAM_LOOP_RED_BTN_ID);
+		}
 	}
 }
 

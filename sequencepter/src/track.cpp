@@ -171,11 +171,16 @@ track::track(){
 	reset_mtx_to_node(_mtx_to_node, &head);
 
 	_cur_step = head._children->get(0)->_step;
-	_first_step = _cur_step;
-	_last_step = head._children->get(head._children->size() - 1)->_step;
+//	_first_step = _cur_step;
+//	_last_step = head._children->get(head._children->size() - 1)->_step;
+//	set_loop(_first_step, _last_step);
 //	chain_step_from_node_list(head._children, _first_step, _last_step);
-	set_loop(_first_step, _last_step);
-//
+	for(int i=0;i<SEQ_NR_LOOP_SETTING;i++){
+		loop_step_.first[i] = _cur_step;
+		loop_step_.last[i] = head._children->get(head._children->size() - 1)->_step;
+	}
+	cur_loop_ = 0;
+	set_loop(loop_step_.first[0], loop_step_.last[0]);
 //	dump_step(_first_step);
 	
 }
@@ -330,9 +335,11 @@ void track::set_out_id(uint8_t id){
 	_out_id = id;
 }
 void track::set_all_step_note(uint16_t note){
-	step* tmp = _first_step;
+//	step* tmp = _first_step;
+	step* tmp = loop_step_[cur_loop_].first;
 
-	while(tmp != _last_step){
+//	while(tmp != _last_step){
+	while(tmp != loop_step_[cur_loop_].last){
 		tmp->step_set_note(127, note);
 		tmp = tmp->get_next_step();
 	}
@@ -428,8 +435,12 @@ bool track::next_step(uint32_t mst_ms){
 //}
 void track::step_reset(){
 	DISABLE_IRQ();
-	_cur_step = _first_step;
+//	_cur_step = _first_step;
+	_cur_step = loop_step_[cur_loop_].first;
 	ENABLE_IRQ();
+}
+
+void track::set_current_loop(uint8_t loop_id){
 }
 
 
