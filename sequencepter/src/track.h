@@ -88,10 +88,6 @@ class track {
 
 		static bool delete_step(LinkedList<step *> *l, step* s);
 
-		int  add_signature_change(step* s, uint8_t num, uint8_t denom, uint8_t color);
-		int  del_signature_change(step* s);
-		void show_signature_change(uint32_t);
-
 		void mask_npo_nodes(uint8_t npo);
 		void show_children_node(node*);
 		void show_parent_nodes(node*, node*);
@@ -114,13 +110,17 @@ class track {
 		uint8_t get_out_id();
 
 		step* get_first_step(){
-			return _first_step;	
+			return loop_step_[cur_loop_].first;
 		}
 		step* get_last_step(){
-			return _last_step;
+			return loop_step_[cur_loop_].last;
 		}
+		void  set_first_step(step * s){
+			loop_step_[cur_loop_].first = s;
+		}
+
 		void  set_last_step(step * s){
-			_last_step = s;
+			loop_step_[cur_loop_].last = s;
 		}
 		void set_all_step_note(uint16_t);
 //		void set_step_note(uint16_t, uint8_t );

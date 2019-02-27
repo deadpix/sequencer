@@ -251,68 +251,6 @@ void track::show_parent_nodes(node* child, node* parent){
 
 
 
-int track::add_signature_change(step* s, uint8_t num, uint8_t denom, uint8_t color){
-	struct signature_change* sc;
-
-	// sanity check
-	for(int i = 0; i<_signature_change_list.size();i++){
-		step* tmp = _signature_change_list.get(i)->s;
-		if(s == tmp){
-			return -1;
-		}
-	}
-	
-	sc = new signature_change();	
-//	new(sc) signature_change;
-	sc->s = s;
-	sc->num = num;
-	sc->denom = denom;
-	sc->color = color;
-	sc->signature_ui = new led_toogle();
-	sc->signature_ui->init_animation(&_lm, s->_step_ui_id, color, FOREGROUND1);
-	
-	
-	_signature_change_list.add(sc);	
-	return 0;
-	
-}
-
-int track::del_signature_change(step* s){
-	int error = -1;
-	for(int i = 0; i<_signature_change_list.size();i++){
-		struct signature_change* sc = _signature_change_list.get(i);
-		if(sc->s == s){
-			_signature_change_list.remove(i);
-			delete sc->signature_ui;
-			delete sc;
-			error = 0;
-			break;
-		}
-	}
-	return error;
-}
-
-//static void update_signature_animation(struct signature_change* sc, uint32_t ms){
-//	if( sc->signature_ui->end_animation_n_restore() ){
-////		led_matrix* lm = sc->signature_ui->get_led_matrix();
-////		uint8_t new_color = lm->get_ground_color(sc->s->_step_ui_id, BACKGROUND);
-//		
-//		sc->signature_ui->start_animation( (ms * sc->num / sc->denom) * 0.2 );
-//	}
-//}
-
-void track::show_signature_change(uint32_t ms){
-	UNUSED(ms);
-//	struct signature_change* sc;
-//	for(int i = 0; i<_signature_change_list.size();i++){
-//		sc = _signature_change_list.get(i);
-//		// TODO
-//		if(_mtx_btn_to_step[sc->s->_step_ui_id]){
-//			update_signature_animation(sc,ms);
-//		}
-//	}
-}
-
 void track::init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t)){
 	_hw_fct = fct;
 }
