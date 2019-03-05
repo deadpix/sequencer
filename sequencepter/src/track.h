@@ -64,10 +64,6 @@ class track {
 
 
 	public:
-//		step arr_step[NR_STEP];
-//		LinkedList<step *> _step_list;
-//		LinkedList<step *> _sub_step_list;
-
 		void set_track_color(uint8_t color){track_color_ = color;};
 		uint8_t get_track_color(){ return track_color_;};
 		LinkedList<struct signature_change*> _signature_change_list;

@@ -28,6 +28,7 @@ class led_toogle {
 
 		led_matrix* get_led_matrix();
 		void set_color(uint8_t color);		
+		void set_led_id(uint16_t id){ _led_id = id };
 
 		void turn_on_n_save_led(void);
 		void turn_off_n_restore_led(void);

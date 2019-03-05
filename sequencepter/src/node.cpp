@@ -63,6 +63,27 @@ step* node::get_first_step(uint8_t max_lvl){
 	return ret;
 }
 
+step* node::get_last_step(uint8_t max_lvl){
+	node* tmp = this;
+	step* ret = NULL;
+	
+	for(uint8_t i=0; i<max_lvl; i++){
+		if(tmp->_node_is_step){
+			ret = tmp->_step;
+			return ret;
+		}
+		else {
+			tmp = tmp->_children->get(tmp->_children->size());
+			if(!tmp){
+				dbg::println("problem in node::get_last_step function");
+				break;
+			}
+		}
+	}
+	dbg::println("unrecoverable error in node::get_last_step");
+	return ret;
+}
+
 node* node::get_common_parent(node* n1, node* n2){
 	node* tmp1 = n1;
 	node* tmp2 = n2;
