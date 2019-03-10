@@ -176,11 +176,11 @@ track::track(){
 //	set_loop(_first_step, _last_step);
 //	chain_step_from_node_list(head._children, _first_step, _last_step);
 	for(int i=0;i<SEQ_NR_LOOP_SETTING;i++){
-		loop_step_.first[i] = _cur_step;
-		loop_step_.last[i] = head._children->get(head._children->size() - 1)->_step;
+		loop_step_[i].first = _cur_step;
+		loop_step_[i].last = head._children->get(head._children->size() - 1)->_step;
 	}
 	cur_loop_ = 0;
-	set_loop(loop_step_.first[0], loop_step_.last[0]);
+	set_loop(loop_step_[0].first, loop_step_[0].last);
 //	dump_step(_first_step);
 	
 }

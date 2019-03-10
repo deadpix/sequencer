@@ -41,16 +41,16 @@ void midi_controller::display_midi_keyboard(struct midi_controller_conf* c){
 	for(int i=0; i<4; i=i+2){
 		c->kb_mask[i] = 0xff;
 		c->kb_mask[i+1] = 0xff;
-		c->kb.display_keys(&lm_, i);
+		c->kb.display_keys(&lm_, i, 0);
 		c->kb.display_scale(&lm_, i);
 		c->kb.display_root(&lm_, i);
 	}
 }
-void midi_controller::display_midi_drum(struct midi_controller_conf* c){
-	for(int i=0; ){
-
-	}
-}
+//void midi_controller::display_midi_drum(struct midi_controller_conf* c){
+//	for(int i=0; ){
+//
+//	}
+//}
 
 void midi_controller::menu_enter(){
 }

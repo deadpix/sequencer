@@ -18,22 +18,16 @@ static void upd_display(sequencer* seq, uint8_t val){
 //	seq->prog::display_str(itoa(val,str,BASE10), 2);
 }
 
-static void init_loop_animation(led_matrix* lm, led_toogle* loop_animation_, uint8_t id){
-	loop_animation_->init_animation(lm, id, LED_GBR_IDX, FOREGROUND1);
-	
-}
-
 void fct_loop_setting::init(sequencer* seq, char* name){
 	_seq = seq;
 	fct_clbk::set_fct_name(name);
-	loop_flg_ = false;
 
 	track* t = _seq->get_current_track();
 	start_loop_ = (t->get_first_step())->_node;
 	end_loop_ = (t->get_last_step())->_node;
 	
-	loop_animation_[0]->init_animation(t->get_led_matrix(), start_loop_->_mtx_id, LED_GBR_IDX, FOREGROUND1);
-	loop_animation_[1]->init_animation(t->get_led_matrix(), end_loop_->_mtx_id, LED_GBR_IDX, FOREGROUND1);
+//	loop_animation_[0]->init_animation(t->get_led_matrix(), start_loop_->_mtx_id, LED_GBR_IDX, FOREGROUND1);
+//	loop_animation_[1]->init_animation(t->get_led_matrix(), end_loop_->_mtx_id, LED_GBR_IDX, FOREGROUND1);
 
 }
 
@@ -44,13 +38,21 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 
 	if(id < nr_step){
 
-
-
+		if(loop_cnt_ == 0){
+			start_loop_ = t->get_node_from_matrix(id);
+		} 
+		else {
+			end_loop_ = t->get_node_from_matrix(id);
+		}
+		
 	
 		// GUI 
-		
+		t->get_led_matrix()->clr_n_restore(loop_animation_[loop_cnt_].led_id, FOREGROUND1);
+		t->get_led_matrix()->save_n_set(LED_GBR_IDX, id, FOREGROUND1);
+		loop_animation_[loop_cnt_].led_id = id;
+	
 		// button flag
-		loop_flg_ = !loop_flg_;
+		loop_cnt_ = (loop_cnt_ + 1) % 1;
 	}
 /*
 	node* n = t->get_node_from_matrix(id);
@@ -102,12 +104,32 @@ void fct_loop_setting::on_long_release(uint8_t btn_id){
 	UNUSED(btn_id);
 }
 
+static void update_loop_animation(struct loop_animation* la, uint32_t deadline, track* t){
+	if(la->time_cnt >= deadline){
+		if(la->is_turned_on){
+			t->get_led_matrix()->clr_n_restore(la->led_id, FOREGROUND1);
+		}
+		else {
+			t->get_led_matrix()->save_n_set(LED_GBR_IDX, la->led_id, FOREGROUND1);
+		}
+		la->is_turned_on = !la->is_turned_on;
+		la->time_cnt = 0;
+	}
+}
+
 void fct_loop_setting::update_ui(uint32_t mst_ms, uint16_t mst_step){
 	UNUSED(mst_ms);
 	UNUSED(mst_step);
+	track* t = _seq->get_current_track();
+
+	update_loop_animation(&(loop_animation_[0]), LED_ANIMATION_MS, t);
+	if(start_loop_ != end_loop_){
+		update_loop_animation(&(loop_animation_[1]), LED_ANIMATION_MS, t);
+	}
+
 }
 void fct_loop_setting::on_start(){
-	loop_flg_ = false;
+	loop_cnt_ = 0;
 	track* t = _seq->get_current_track();
 	uint8_t nr_step = t->get_max_step();
 
@@ -117,19 +139,29 @@ void fct_loop_setting::on_start(){
 	start_loop_ = (t->get_first_step())->_node;
 	end_loop_ = (t->get_last_step())->_node;
 
+	loop_animation_[0].time_cnt = 0;
+	loop_animation_[0].led_id = start_loop_->_mtx_id;
+	loop_animation_[1].time_cnt = 0;		
+	loop_animation_[1].led_id = end_loop_->_mtx_id;
+	
+	t->get_led_matrix()->save_n_set(LED_GBR_IDX, loop_animation_[0].led_id, FOREGROUND1);
+	t->get_led_matrix()->save_n_set(LED_GBR_IDX, loop_animation_[1].led_id, FOREGROUND1);
+
 //	t->get_led_matrix()->save_n_set(LED_GBR_IDX, errata_step[nr_step-1], FOREGROUND1);
-	if(start_loop_ == end_loop_){
-		loop_animation_[0].start_animation(LED_ANIMATION_MS);
-	} 
-	else {
-		loop_animation_[0].start_animation(LED_ANIMATION_MS);
-		loop_animation_[1].start_animation(LED_ANIMATION_MS);	
-	}
+//	if(start_loop_ == end_loop_){
+//		loop_animation_[0].start_animation(LED_ANIMATION_MS);
+//	} 
+//	else {
+//		loop_animation_[0].start_animation(LED_ANIMATION_MS);
+//		loop_animation_[1].start_animation(LED_ANIMATION_MS);	
+//	}
 	
 }
 void fct_loop_setting::on_leave(){	
 	track* t = _seq->get_current_track();
-	uint8_t nr_step = t->get_max_step();
-	t->get_led_matrix()->clr_n_restore(errata_step[nr_step-1], FOREGROUND1);	
+//	uint8_t nr_step = t->get_max_step();
+//	t->get_led_matrix()->clr_n_restore(errata_step[nr_step-1], FOREGROUND1);	
+	t->get_led_matrix()->clr_n_restore(start_loop_->_mtx_id, FOREGROUND1);
+	t->get_led_matrix()->clr_n_restore(end_loop_->_mtx_id, FOREGROUND1);
 }
 

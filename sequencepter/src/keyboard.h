@@ -66,6 +66,7 @@ class keyboard {
 
 		uint8_t get_root_key(){return root_key_;};
 		void set_root_key(uint8_t root_key){ root_key_ = root_key;};
+		void upd_root(led_matrix* lm, uint8_t row, uint8_t root_key);
 		
 		const scale* get_cur_scale(){return cur_scale_;};
 		void set_cur_scale(const struct scale* s){cur_scale_ = s;};

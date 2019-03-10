@@ -13,14 +13,21 @@
 #include "../sequencer.h"
 #include "../led_toogle.h"
 
+struct loop_animation {
+	elapsedMillis time_cnt;
+	uint16_t led_id;
+	bool is_turned_on;
+};
+
 class fct_loop_setting: public fct_clbk {
 	private:
 		sequencer* _seq;
 		uint8_t end_loop;
-		bool loop_flg_;
+		uint8_t loop_cnt_;
 		node* start_loop_;
 		node* end_loop_;
-		led_toogle loop_animation_[2];		
+//		led_toogle loop_animation_[2];		
+		struct loop_animation loop_animation_[2];
 	
 
 	public:

@@ -9,7 +9,7 @@ void midi_controller_param::redraw_midi_controller_param(){
 	}
 	param::_lm.save_n_set(LED_R_IDX,last_conf_->midi_out, BACKGROUND);	
 	// display keyboard starting from row 2
-	last_conf_->kb.display_keys(&(param::_lm), PARAM_KEYBOARD_ROW);	
+	last_conf_->kb.display_keys(&(param::_lm), PARAM_KEYBOARD_ROW, 0);	
 	last_conf_->kb.display_scale(&(param::_lm), PARAM_KEYBOARD_ROW);
 	last_conf_->kb.display_root(&(param::_lm), PARAM_KEYBOARD_ROW);	
 }
@@ -33,7 +33,8 @@ void midi_controller_param::on_push(uint8_t btn_id){
 		int key = keys_to_midi_offset[btn_id%16];
 		if(key > -1){
 			last_conf_->kb.display_scale(&(param::_lm), PARAM_KEYBOARD_ROW);
-			last_conf_->kb.display_root(&(param::_lm), PARAM_KEYBOARD_ROW, key);
+//			last_conf_->kb.display_root(&(param::_lm), PARAM_KEYBOARD_ROW, key);
+			last_conf_->kb.upd_root(&(param::_lm), PARAM_KEYBOARD_ROW, key);
 		}	
 	}
 	else if(btn_id == 32){
