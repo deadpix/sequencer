@@ -5,7 +5,7 @@
 #include <hw_debug.h>
 
 #define BASE10	10
-#define LED_ANIMATION_MS	500
+#define LED_ANIMATION_MS	50
 
 
 
@@ -38,21 +38,25 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 
 	if(id < nr_step){
 
+		node* tmp = t->get_node_from_matrix(id);
 		if(loop_cnt_ == 0){
-			start_loop_ = t->get_node_from_matrix(id);
+			t->set_first_in_loop(start_loop_, tmp, end_loop_);
+			start_loop_ = tmp;
 		} 
 		else {
-			end_loop_ = t->get_node_from_matrix(id);
+			t->set_last_in_loop(end_loop_, tmp, start_loop_); 
+			end_loop_ = tmp;
 		}
 		
-	
+//		t->set_loop(start_loop_->_step, end_loop_->_step);
+
 		// GUI 
 		t->get_led_matrix()->clr_n_restore(loop_animation_[loop_cnt_].led_id, FOREGROUND1);
 		t->get_led_matrix()->save_n_set(LED_GBR_IDX, id, FOREGROUND1);
 		loop_animation_[loop_cnt_].led_id = id;
 	
 		// button flag
-		loop_cnt_ = (loop_cnt_ + 1) % 1;
+		loop_cnt_ = (loop_cnt_ + 1) % 2;
 	}
 /*
 	node* n = t->get_node_from_matrix(id);
