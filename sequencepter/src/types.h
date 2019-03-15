@@ -39,6 +39,7 @@
 #define LED_COLOR_BLUE_INDEX		2
 
 
+
 #if MATRIX_NR_ROW <= 8
 typedef volatile uint8_t  mat_row_bmp_t;
 #elif MATRIX_NR_ROW <= 16
@@ -57,6 +58,38 @@ typedef volatile uint32_t mat_row_bmp_t;
 #define MICRO_OLED_GUI 	1
 
 typedef uint8_t (*cbck_fct_rd)(uint8_t pin);
+
+
+#define DEBUG	1
+
+#define likely(x)               __builtin_expect(!!(x), 1)
+#define unlikely(x)             __builtin_expect(!!(x), 0)
+#define infinite_loop() do {} while (1)
+
+#include <hw_debug.h>
+
+#define assert_failed(p)                                            		\
+        do {                                                            	\
+		dbg::print("Assertion failed: ");				\
+		dbg::print(__FILE__);						\
+		dbg::print(" at line ");					\
+		dbg::print(__LINE__);						\
+                infinite_loop();                                          	\
+        } while (0)                                                     	\
+
+#if defined(DEBUG) 
+
+#define ASSERT(p)                                                   		\
+        do {                                                            	\
+                if ( unlikely(!(p)) ) assert_failed(#p);                    	\
+        } while (0)                                                     	\
+
+#else
+
+#define ASSERT(p) 
+
+#endif
+
 
 
 #endif
