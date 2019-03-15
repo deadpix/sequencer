@@ -144,27 +144,37 @@ static void reset_mtx_to_node(node* arr[], node* parent){
 	}
 }
 
-void track::set_first_in_loop(step* first, step* new_first, step* last){
+//void track::set_first_in_loop(step* first, step* new_first, step* last){
+void track::set_first_in_loop(step* new_first, uint8_t loop_id){
+	step* first = loop_step_[loop_id].first;
+	step* last = loop_step_[loop_id].last;
+
 	// restore the previous link of the old first step
 	node* parent = first->_node->_parent;
 	uint8_t id = (first->_node->_node_id + _max_step - 1) % _max_step; 
 	//TODO add assertion on parent
 	node* tmp = parent->_children->get(id);
-	first->set_prev_step(tmp->_step);
+	first->set_prev_step(tmp->get_last_step(NODE_TREE_MAX_LVL(_max_step)));
 	
 	// chain the new first step
 	new_first->set_prev_step(last);
+	loop_step_[loop_id].first = new_first;
 }
-void track::set_last_in_loop(step* last, step* new_last, step* first){
+//void track::set_last_in_loop(step* last, step* new_last, step* first){
+void track::set_last_in_loop(step* new_last, uint8_t loop_id){
+	step* first = loop_step_[loop_id].first;
+	step* last = loop_step_[loop_id].last;
+
 	// restore the next link of the old last step
 	node* parent = last->_node->_parent;
 	uint8_t id = (last->_node->_node_id + 1) % _max_step; 
 	//TODO add assertion on parent
 	node* tmp = parent->_children->get(id);
-	last->set_next_step(tmp->_step);
+	last->set_next_step(tmp->get_first_step(NODE_TREE_MAX_LVL(_max_step)));
 	
 	// chain the new first step
 	new_last->set_next_step(first);
+	loop_step_[loop_id].last = new_last;
 }
 
 //void track::set_loop(step* first, step* last){

@@ -9,6 +9,8 @@ class node;
 
 #include "step.h"
 
+#define NODE_TREE_MAX_LVL(nr_steps)	(nr_steps/MATRIX_NR_COL)
+
 class node {
 	public:
 		LinkedList<node *>* _children;

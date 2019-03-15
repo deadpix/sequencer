@@ -40,11 +40,11 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 
 		node* tmp = t->get_node_from_matrix(id);
 		if(loop_cnt_ == 0){
-			t->set_first_in_loop(start_loop_, tmp, end_loop_);
+			t->set_first_in_loop(tmp->get_first_step(NODE_TREE_MAX_LVL(t->get_max_step())), t->get_current_loop_id());
 			start_loop_ = tmp;
 		} 
 		else {
-			t->set_last_in_loop(end_loop_, tmp, start_loop_); 
+			t->set_last_in_loop(tmp->get_last_step(NODE_TREE_MAX_LVL(t->get_max_step())), t->get_current_loop_id()); 
 			end_loop_ = tmp;
 		}
 		

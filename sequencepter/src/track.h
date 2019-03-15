@@ -77,8 +77,8 @@ class track {
 		void  set_node_in_matrix(uint8_t, node*);
 		static void chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end);
 //		static void set_loop(step* first, step* last);
-		void set_first_in_loop(step* first, step* new_first, step* last);
-		void set_last_in_loop(step* last, step* new_last, step* first);
+		void set_first_in_loop(step* new_first, uint8_t loop_id);
+		void set_last_in_loop(step* new_last, uint8_t loop_id);
 
 		void create_tree(node*, uint8_t, uint8_t, uint8_t, uint8_t);
 //		step* arr_step;
@@ -116,6 +116,9 @@ class track {
 		}
 		void  set_first_step(step * s){
 			loop_step_[cur_loop_].first = s;
+		}
+		uint8_t get_current_loop_id(){
+			return cur_loop_;
 		}
 
 		void  set_last_step(step * s){

@@ -28,7 +28,6 @@ class fct_loop_setting: public fct_clbk {
 		node* end_loop_;
 //		led_toogle loop_animation_[2];		
 		struct loop_animation loop_animation_[2];
-	
 
 	public:
 		fct_loop_setting(){};
