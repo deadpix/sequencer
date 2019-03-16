@@ -158,6 +158,7 @@ void track::set_first_in_loop(step* new_first, uint8_t loop_id){
 	
 	// chain the new first step
 	new_first->set_prev_step(last);
+	last->set_next_step(new_first);
 	loop_step_[loop_id].first = new_first;
 }
 //void track::set_last_in_loop(step* last, step* new_last, step* first){
@@ -174,6 +175,7 @@ void track::set_last_in_loop(step* new_last, uint8_t loop_id){
 	
 	// chain the new first step
 	new_last->set_next_step(first);
+	first->set_prev_step(new_last);
 	loop_step_[loop_id].last = new_last;
 }
 
