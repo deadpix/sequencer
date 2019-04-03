@@ -25,7 +25,9 @@ SOURCES += main.cpp \
 	../../sequencepter/src/tempo.cpp \
 	../../sequencepter/src/gate.cpp \
 	../../sequencepter/src/menu.cpp \
-	../../sequencepter/src/test_proj_one.cpp \
+	../../sequencepter/src/midi_controller.cpp \
+	../../sequencepter/src/midi_controller_param.cpp \
+	../../sequencepter/src/keyboard.cpp \
 	../../sequencepter/src/gui.cpp \
 	../../sequencepter/src/param.cpp \
 	../../sequencepter/src/sequencer.cpp \
@@ -53,7 +55,8 @@ HEADERS  += mainwindow.h \
 	../../sequencepter/src/tempo.h \
 	../../sequencepter/src/gate.h \
 	../../sequencepter/src/menu.h \
-	../../sequencepter/src/test_proj_one.h \
+	../../sequencepter/src/midi_controller.h \
+	../../sequencepter/src/midi_controller_param.h \
 	../../sequencepter/src/gui.h \
 	../../sequencepter/src/param.h \
 	../../sequencepter/src/sequencer.h \

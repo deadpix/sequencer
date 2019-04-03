@@ -1,7 +1,8 @@
 #include "track.h"
 #include "errata.h"
 #include <hw_debug.h>
-#include "../interrupts.h"
+//#include "../interrupts.h"
+#include <interrupts.h>
 
 #define CLK_LEN_PER 	(20)
 
@@ -295,12 +296,12 @@ led_matrix* track::get_led_matrix(){
 	return &_lm;
 }
 
-uint8_t track::get_track_id(){
-	return _track_id;
-}
-void track::set_track_id(uint8_t id){
-	_track_id = id;
-}
+//uint8_t track::get_track_id(){
+//	return _track_id;
+//}
+//void track::set_track_id(uint8_t id){
+//	_track_id = id;
+//}
 
 uint8_t track::get_out_id(){
 	return _out_id;
@@ -432,18 +433,18 @@ clk* track::get_clk(){
 //}
 
 
-void track::mute(){
-	mute_flg = true;
-}
-void track::unmute(){
-	mute_flg = false;
-}
-void track::toogle_mute(){
-	mute_flg = !mute_flg;
-}
-void track::toogle_play(){
-	_play = !_play;
-}
+//void track::mute(){
+//	mute_flg = true;
+//}
+//void track::unmute(){
+//	mute_flg = false;
+//}
+//void track::toogle_mute(){
+//	mute_flg = !mute_flg;
+//}
+//void track::toogle_play(){
+//	_play = !_play;
+//}
 void track::set_play(bool play){
 	_play = play;
 }
@@ -521,15 +522,3 @@ uint8_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	}
 //	return res;
 }
-
-//void track::on_push(uint8_t btn_id){
-//	UNUSED(btn_id);
-//}
-//void track::on_release(uint8_t btn_id){
-//	UNUSED(btn_id);
-//}
-//
-//void track::update_ui(uint32_t mst_ms, uint16_t mst_step){
-//	UNUSED(mst_ms);
-//	UNUSED(mst_step);
-//}

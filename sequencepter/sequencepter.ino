@@ -27,7 +27,8 @@
 #include <LinkedList.h>
 #include <Adafruit_NeoTrellis.h>
 #include <hw_debug.h>
-#include "interrupts.h"
+//#include "interrupts.h"
+#include <interrupts.h>
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include <Arduino.h>

@@ -275,15 +275,18 @@ void MainWindow::handleTimerUI(){
 #if TRACE_PERF == 1
 	p.start_ms_counter();
 #endif
-	uint32_t clk_res = sequenception.eval_mst_clk();
+	sequenception.do_isr();
+	sequenception.loop(0);
 
-	if(sequenception.current_prog == sequenception.prog_arr[sequenception.nr_prog]){
-		sequenception.menu_ctrl.menu_update();
-	} 
-	else {
-		sequenception.current_prog->update_ui(clk_res, sequenception.mst_clk->clk_get_step_cnt());
-	}
-	sequenception.loop(clk_res);
+//	uint32_t clk_res = sequenception.eval_mst_clk();
+//
+//	if(sequenception.current_prog == sequenception.prog_arr[sequenception.nr_prog]){
+//		sequenception.menu_ctrl.menu_update();
+//	} 
+//	else {
+//		sequenception.current_prog->update_ui(clk_res, sequenception.mst_clk->clk_get_step_cnt());
+//	}
+//	sequenception.loop(clk_res);
 
 #if HW_SHIFT_REGISTER == 1
 //	updBtnColor(sequenception.lm_ptr, btnMatrix);

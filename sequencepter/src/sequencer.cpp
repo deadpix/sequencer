@@ -6,9 +6,9 @@ sequencer::sequencer(){
 		fct_arr[i] = NULL;
 	}
 	_ls_ui.step_id = -1;
-	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
-		track_arr[i].set_track_id(i);
-	}
+//	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
+//		track_arr[i].set_track_id(i);
+//	}
 }
 
 sequencer::~sequencer(){

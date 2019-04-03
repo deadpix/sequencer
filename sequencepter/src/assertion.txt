@@ -1,0 +1,24 @@
+#define likely(x)               __builtin_expect(!!(x), 1)
+#define unlikely(x)             __builtin_expect(!!(x), 0)
+#define infinite_loop() do {} while (1)
+
+#define assert_failed(p)                                            		\
+        do {                                                            	\
+//                printk("Assertion '%s' failed, line %d, file %s\r\n", p ,   	\
+//                                              __LINE__, __FILE__);       	\
+                infinite_loop();                                          	\
+        } while (0)                                                     	\
+
+#if defined(DEBUG) 
+
+#define ASSERT(p)                                                   		\
+        do {                                                            	\
+                if ( unlikely(!(p)) ) assert_failed(#p);                    	\
+        } while (0)                                                     	\
+
+#else
+
+#define ASSERT(p) 
+
+#endif
+

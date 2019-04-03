@@ -25,7 +25,9 @@
 #include "clk.h"
 #include "types.h"
 #include <hw_debug.h>
-#include "../interrupts.h"
+#include <interrupts.h>
+//#include "../interrupts.h"
+
 
 #define MAX_DIVIDER 	16
 #define DELAY_MS		50

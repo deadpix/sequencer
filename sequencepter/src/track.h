@@ -2,11 +2,6 @@
 #define __TRACK_H__
 
 #include <stdint.h>
-//#if defined(ARDUINO) && ARDUINO >= 100
-//	#include <Arduino.h>
-//#else
-//	#include <WProgram.h>
-//#endif
 
 #include "types.h"
 #include "led_matrix.h"
@@ -19,6 +14,7 @@
 
 #define SEQ_NR_LOOP_SETTING	6
 
+/*
 struct signature_change {
 	uint8_t num;
 	uint8_t denom;
@@ -26,6 +22,7 @@ struct signature_change {
 	uint8_t color;
 	led_toogle* signature_ui;
 };
+*/
 
 struct loop_step {
 	step* first;
@@ -36,7 +33,9 @@ class track {
 	private:
 //		uint16_t curr_step_id;
 		uint8_t _max_step;
-		uint8_t _track_id;
+//		uint8_t _track_id;
+
+		//TODO _out_id should be accessed via midi controller
 		uint8_t _out_id;
 		bool	_play;	
 
@@ -55,23 +54,21 @@ class track {
 
 //		elapsedMillis elapsed_ms;
 		led_matrix _lm;
-		bool mute_flg;
+//		bool mute_flg;
 //		LinkedList<track *> sub_track_list;
 		node head;
+		uint8_t track_color_;
+		led_toogle _step_animation[DEFAULT_STEP_PER_SEQ];
+
+		bool next_step(uint32_t);
 		void _init_animate_parents(step* cur);
 		void _upd_animate_parents(step* cur);
-		uint8_t track_color_;
-
 
 	public:
 		void set_track_color(uint8_t color){track_color_ = color;};
 		uint8_t get_track_color(){ return track_color_;};
-		LinkedList<struct signature_change*> _signature_change_list;
-		
-		led_toogle _step_animation[DEFAULT_STEP_PER_SEQ];
-//		led_toogle _step_animation;
+//		LinkedList<struct signature_change*> _signature_change_list;
 
-//		step* _mtx_btn_to_step[NR_STEP];
 		node* _mtx_to_node[NR_STEP];
 		node* get_node_from_matrix(uint8_t);
 		void  set_node_in_matrix(uint8_t, node*);
@@ -81,7 +78,6 @@ class track {
 		void set_last_in_loop(step* new_last, uint8_t loop_id);
 
 		void create_tree(node*, uint8_t, uint8_t, uint8_t, uint8_t);
-//		step* arr_step;
 		volatile struct clk_def _clk_def;
 		void set_clk_def_lock(uint8_t num, uint8_t denom); 		
 
@@ -93,7 +89,6 @@ class track {
 		void show_current_step_nodes_no_irq();
 
 		track();
-//		track(uint8_t);
 		~track();
 		
 		led_matrix * get_led_matrix();
@@ -101,51 +96,27 @@ class track {
 
 		void set_max_step(uint8_t max);
 		uint8_t get_max_step();
-		
-		void set_track_id(uint8_t id);
-		uint8_t get_track_id();
 
 		void set_out_id(uint8_t id);
 		uint8_t get_out_id();
 
-		step* get_first_step(){
-			return loop_step_[cur_loop_].first;
-		}
-		step* get_last_step(){
-			return loop_step_[cur_loop_].last;
-		}
-		void  set_first_step(step * s){
-			loop_step_[cur_loop_].first = s;
-		}
-		uint8_t get_current_loop_id(){
-			return cur_loop_;
-		}
+		step* get_first_step(){ return loop_step_[cur_loop_].first; };
+		step* get_last_step(){	return loop_step_[cur_loop_].last; };
+		void  set_first_step(step * s){	loop_step_[cur_loop_].first = s; };
+		uint8_t get_current_loop_id(){	return cur_loop_;};
+		void  set_last_step(step * s){ loop_step_[cur_loop_].last = s; };
 
-		void  set_last_step(step * s){
-			loop_step_[cur_loop_].last = s;
-		}
 		void set_all_step_note(uint16_t);
-//		void set_step_note(uint16_t, uint8_t );
 		
-//		bool is_step_on(uint8_t id);
-		bool next_step(uint32_t);
-//		uint8_t get_current_step();
-//		void toogle_step_x(uint8_t id);
 		void step_reset();
 
 		uint8_t check_event(uint32_t, uint16_t/*bool, clk *c*/);
 		void init_hw_clbk(void (*fct)(uint16_t, uint8_t, uint8_t));
 
-//		void init_menu();
-//		void on_push(uint8_t btn_id);
-//		void on_long_push(uint8_t btn_id){ UNUSED(btn_id); };
-//		void on_release(uint8_t btn_id);
-//		void on_long_release(uint8_t btn_id){ UNUSED(btn_id); };
-
-		void mute();
-		void unmute();
-		void toogle_mute();
-		void toogle_play();	
+//		void mute();
+//		void unmute();
+//		void toogle_mute();
+//		void toogle_play();	
 		void set_play(bool);
 		bool is_playing();
 
@@ -154,7 +125,6 @@ class track {
 
 		void upd_animate_parents_no_irq();
 		void init_animate_parents_no_irq();
-//		void update_ui(uint32_t mst_ms, uint16_t mst_step);
 };
 
 #endif

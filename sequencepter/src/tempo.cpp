@@ -1,5 +1,6 @@
 #include "tempo.h"
 #include <hw_debug.h>
+#include <interrupts.h>
 
 #define DEBUG				1
 #define LED_ANIMATION_MS		60
@@ -12,7 +13,7 @@
 #define PLAY_BTN_COLOR			LED_B_IDX
 #define PAUSE_BTN_COLOR			LED_R_IDX
 
-#include "../interrupts.h"
+//#include "../interrupts.h"
 
 static void (*on_tempo_change)(uint32_t ms);
 

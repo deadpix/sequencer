@@ -1,6 +1,7 @@
 #include <hw_debug.h>
 #include "sequenception.h"
-#include "../interrupts.h"
+//#include "../interrupts.h"
+#include <interrupts.h>
 #include "midi_cst.h"
 
 //static const uint8_t MIDI_DRUM_GM[8] = {37, 36, 42, 82, 40, 38, 46, 44};
@@ -170,9 +171,9 @@ void sequenception::loop(uint32_t ms){
 //	}
 
 	for(int i=0;i<nr_evt;i++){
-		unsigned char reg = disable_irq();
+//		unsigned char reg = disable_irq();
 		event* tmp = evt_list.shift();
-		enable_irq(reg);
+//		enable_irq(reg);
 
 		tmp->do_evt();
 		delete tmp;
