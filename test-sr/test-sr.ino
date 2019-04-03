@@ -38,16 +38,28 @@ volatile char check_ui;
 
 byte red[8];
 int row_counter;
+int freq_cnt;
+int freq_len;
 void led_next_row(){
 //	uint32_t data = 0xFF000000 | (1 << (16+row_counter));
 //	uint32_t data = 0x000000ff | (1 << (24+row_counter));
-	uint32_t data = 0xffFF0000 | (1 << row_counter);
-	data |= ~red[row_counter] << 8;
+//	uint32_t data = 0xffFF0000 | (1 << row_counter);
+//	uint32_t data = 0xff00FF00 | (1 << row_counter);
+	uint32_t data = 0x00FFFF00 | (1 << row_counter);
+//	data |= ~red[row_counter] << 8;
+//	data |= ~red[row_counter] << 16;
+	data |= ~red[row_counter] << 24;
+//	data |= ~red[row_counter] << 0;
 //	uint32_t data = 0xF0F0 | (1 << (8+row_counter));
 //	digitalWrite(latchPin, LOW);
 //	shiftOut(dataPin, clockPin, LSBFIRST, data);
 //	shiftOut(dataPin, clockPin, LSBFIRST, data >> 8);
 //	digitalWrite(latchPin, HIGH);
+
+//	Serial.println(data);
+
+//	freq_cnt = (freq_cnt + 1) % freq_len;
+//	if(freq_cnt == (freq_len-1)){
 
 	digitalWrite(latchPin, LOW);
 	shiftOut(dataPin, clockPin, MSBFIRST, data);
@@ -56,6 +68,7 @@ void led_next_row(){
 	shiftOut(dataPin, clockPin, MSBFIRST, data >> 24);
 	digitalWrite(latchPin, HIGH);
 	row_counter = (row_counter + 1) % 8;
+//	}
 }
 
 void upd_ui(){
@@ -77,7 +90,10 @@ void setup() {
   pinMode(dataPin, OUTPUT);
 	check_ui = false;
 	row_counter = 0;
-	ui_timer.begin(upd_ui, 1000);
+	ui_timer.begin(upd_ui, 2000);
+
+	freq_len = 2;
+	freq_cnt = 0;
 }
 
 void set_test1(){
@@ -239,10 +255,14 @@ void loop() {
 //	set_led_x(x);
 //	x++;
 //	all_leds();
-//	Serial.println("ouaich");
+	Serial.println("ouaich");
 	for(int i=0;i<64;i++){
 		red[i/8] = (1<<(i%8));
 		delay(100);
 	}
+//	delay(100);
+//	freq_len = (freq_len + 1) % 5;
+	freq_len++;
+	if(freq_len == 5) freq_len = 1;
 }
 
