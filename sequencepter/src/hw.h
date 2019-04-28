@@ -41,9 +41,15 @@
 
 
 #include <stdint.h>
+#include "types.h"
+typedef struct {
+	mat_row_bmp_t bitmap[LED_MATRIX_NR_COLORS];
+} led_t;
+
 
 class hw {
 	public:
+		virtual led_t  get_led(uint8_t) = 0;
 		virtual void refresh_matrix(uint16_t id) = 0;
 		virtual void upd_pxl(uint16_t id, uint8_t color, uint8_t brightness) = 0;
 };

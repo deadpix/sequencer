@@ -29,9 +29,9 @@
 #include "../hw.h"
 #include "../types.h" 
 
-typedef struct {
-	mat_row_bmp_t bitmap[LED_MATRIX_NR_COLORS];
-} led_t;
+//typedef struct {
+//	mat_row_bmp_t bitmap[LED_MATRIX_NR_COLORS];
+//} led_t;
 
 
 class hw_sr : public hw {

@@ -40,6 +40,7 @@ class hw_nt : public hw {
 	public:
 		hw_nt(Adafruit_MultiTrellis* mt);
 		~hw_nt();
+		led_t get_led(uint8_t){};
 		void refresh_matrix(uint16_t id);
 		void upd_pxl(uint16_t id, uint8_t color, uint8_t brightness);
 };

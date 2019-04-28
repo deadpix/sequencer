@@ -222,8 +222,9 @@ static void scan_cmd_btn_matrix(){
 
 static elapsedMillis btn_ms_cnt[NR_LEDS];
 
-#if HW_SHIFT_REG == 1
+#if HW_SHIFT_REGISTER == 1
 
+#include "src/hw/hw_sr.h"
 #define latchPin 		22
 #define clockPin 		23
 #define dataPin  		21
@@ -233,9 +234,11 @@ static elapsedMillis btn_ms_cnt[NR_LEDS];
 #define GREEN_OFFSET		24
 #define RED_OFFSET		8
 
+static hw_sr hw;
 
-static uint8_t btn_select_pins[BTN_NUM_COL] = {3,2,1,0,12,13,14,15}; // ground switch
-static uint8_t btn_read_pins[BTN_NUM_ROW] = {7,8,6,9,5,10,4,11};
+static uint8_t btn_select_pins[BTN_NUM_COL] = {0,1,2,3,4,5,6,7}; // ground switch
+static uint8_t btn_read_pins[BTN_NUM_ROW] = {8,9,10,11,12,13,14,15};
+
 //static uint8_t btn_select_pins[BTN_NUM_COL] 	= { 7, 6, 5, 4, 3, 2, 1, 0};
 //static uint8_t btn_read_pins[BTN_NUM_ROW] 	= {12, 13, 14, 15, 8, 9, 10, 11 };
 static ArrBounce btn_row[BTN_NUM_COL];
@@ -264,7 +267,7 @@ static void setup_matrix(){
 	flag_btn_active = false;
 
 	init_rd_cbck(&btn_matrix_digitalRead, 0);
-	mcp.begin(6);
+	mcp.begin(0x0);
 	Wire.setClock(1000000);
 
 	for(i=0;i<BTN_NUM_COL;i++){
@@ -291,10 +294,10 @@ static void scan(prog* p){
 // 	Select current columns
 	mcp.digitalWrite(btn_select_pins[btn_col_idx], LOW);
 
+
 // 	Read the button inputs
 	for (i=0; i<BTN_NUM_ROW; i++){
 		if(btn_row[btn_col_idx].update(i)){
-
 			if(btn_row[btn_col_idx].read(i) == HIGH){
 //				p->on_release(btn_col_idx*BTN_NUM_COL + i);
 				flag_btn_active = false;
@@ -328,24 +331,41 @@ static void scan(prog* p){
 }
 static void write_shift_reg(uint32_t val){
 	digitalWrite(latchPin, LOW);
-	shiftOut(dataPin, clockPin, LSBFIRST, val);
-	shiftOut(dataPin, clockPin, LSBFIRST, val >> 8);
-	shiftOut(dataPin, clockPin, LSBFIRST, val >> 16);
-	shiftOut(dataPin, clockPin, LSBFIRST, val >> 24);
+	shiftOut(dataPin, clockPin, MSBFIRST, val);
+	shiftOut(dataPin, clockPin, MSBFIRST, val >> 8);
+	shiftOut(dataPin, clockPin, MSBFIRST, val >> 16);
+	shiftOut(dataPin, clockPin, MSBFIRST, val >> 24);
 	digitalWrite(latchPin, HIGH);
 }
 
 static void upd_shift_reg(led_matrix* lm){
 	uint32_t tmp = ((1<<(grd_cnt/*+4*/))) << GRD_OFFSET;
-	led_t l = lm->get_led(grd_cnt);	
-	tmp |= (l.bitmap[LED_COLOR_RED_INDEX] << RED_OFFSET)
-		 | (l.bitmap[LED_COLOR_GREEN_INDEX] << GREEN_OFFSET)
-		 | (l.bitmap[LED_COLOR_BLUE_INDEX] << BLUE_OFFSET);
+	led_t l = lm->get_hw()->get_led(grd_cnt);	
+	tmp |= (~l.bitmap[LED_COLOR_RED_INDEX] << RED_OFFSET)
+		 | (~l.bitmap[LED_COLOR_GREEN_INDEX] << GREEN_OFFSET)
+		 | (~l.bitmap[LED_COLOR_BLUE_INDEX] << BLUE_OFFSET);
+
+//`	Serial.println(tmp);
 	
 	write_shift_reg(tmp);
 	grd_cnt = (grd_cnt + 1) % LED_MATRIX_NR_GROUND;
 }
-static void switch_matrix_ui(led_matrix* lm){
+static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
+	prev->set_hw(NULL);
+	next->set_hw(&hw);
+
+	for(int i=0; i<NR_LEDS; i++){
+		struct led_status* tmp = next->get_led_status(i);
+		if(tmp->bmp){
+			uint8_t idx = BIT::get_highest_bit_set(tmp->bmp);
+			hw.upd_pxl(i, tmp->color[idx], idx);
+		}
+		else {
+			hw.upd_pxl(i, 0, 0);
+		}
+		hw.refresh_matrix(0);
+	}
+	
 }
 
 #elif HW_ADAFRUIT_NEOTRELLIS == 1
@@ -359,7 +379,7 @@ static void switch_matrix_ui(led_matrix* lm){
 #define NT_ADDR1 0x2F
 #define NT_ADDR2 0x30
 #define NT_ADDR3 0x36
-#define NT_ADDR4 0x3E
+#define NT_ADDR4 0x2E
 
 //create a matrix of trellis panels
 Adafruit_NeoTrellis t_array[BTN_NUM_ROW/4][BTN_NUM_COL/4] = {
@@ -385,12 +405,17 @@ TrellisCallback trellis_btn_clbck(keyEvent evt){
 
 	if(evt.bit.EDGE == SEESAW_KEYPAD_EDGE_RISING){
 		flag_btn_active = true;
+		Serial.print("push ");
+		Serial.println(evt.bit.NUM);
 		p->on_push(evt.bit.NUM);
 		btn_ms_cnt[evt.bit.NUM] = 0;
 		btn_status.pushed_bmp[row] |= (1<<offset);	
 	}
 	else if(evt.bit.EDGE == SEESAW_KEYPAD_EDGE_FALLING){
 		flag_btn_active = false;
+		Serial.print("release ");
+		Serial.println(evt.bit.NUM);
+
 //		if(btn_ms_cnt[evt.bit.NUM] > LONG_PRESS_TIME_MS){
 		if(btn_status.long_pushed_bmp[row] & (1<<offset)){
 			// release
@@ -436,7 +461,8 @@ static void setup_matrix(){
 			trellis.activateKey(x, y, SEESAW_KEYPAD_EDGE_RISING, true);
 			trellis.activateKey(x, y, SEESAW_KEYPAD_EDGE_FALLING, true);
 			trellis.registerCallback(x, y, trellis_btn_clbck);
-			trellis.setPixelColor(x, y, 0x000000); //addressed with x,y
+		//	trellis.setPixelColor(x, y, 0x000000); //addressed with x,y
+			trellis.setPixelColor(x, y, 0x0000AA); //addressed with x,y
 			trellis.show(); //show all LEDs
     		}
 		btn_status.pushed_bmp[y] = 0x0;
@@ -480,7 +506,6 @@ static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
 		}
 		hw.refresh_matrix(0);
 	}
-
 }
 
 #else

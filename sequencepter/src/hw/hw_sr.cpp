@@ -42,6 +42,7 @@ led_t* hw_sr::get_led_arr(){
 led_t hw_sr::get_led(uint8_t x){
 	return led_arr[x];
 }
+//int hw_sr::clr_led_x_coor(uint8_t color, uint16_t x, uint16_t y){
 int hw_sr::set_led_x_coor(uint8_t color, uint16_t x, uint16_t y){
 	int res = 0;
 	led_arr[x].bitmap[color] |= (1<<y);
@@ -49,6 +50,7 @@ int hw_sr::set_led_x_coor(uint8_t color, uint16_t x, uint16_t y){
 }
 
 int hw_sr::clr_led_x_coor(uint8_t color, uint16_t x, uint16_t y){
+//int hw_sr::set_led_x_coor(uint8_t color, uint16_t x, uint16_t y){
 	int res = 0;
 	led_arr[x].bitmap[color] &= ~(1<<y);
 	return res;

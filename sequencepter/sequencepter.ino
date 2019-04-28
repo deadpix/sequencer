@@ -93,11 +93,8 @@ static void check_btn(){
 }
 
 static void upd_gui(){
-#if HW_SHIFT_REG == 1 
+#if HW_SHIFT_REGISTER == 1 
 	upd_shift_reg(sequenception.lm_ptr);
-//	if(!check_clk){
-//		check_clk = true;
-//	}
 #endif
 	sequenception.do_isr();	
 }

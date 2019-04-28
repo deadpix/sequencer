@@ -31,6 +31,7 @@
 
 #define NR_MENU_BTN		4
 #define MENU_BTN_BOUNCE_TIME	5
+
 #define PIN_MENU_BTN		17
 #define PIN_PARAM_BTN		16
 
@@ -50,8 +51,8 @@ static void init_menu_btn(prog* p){
 	param_btn_status = FCT_BTN_IDLE;
 	menu_btn_status = FCT_BTN_IDLE;
 
-	pinMode(PIN_MENU_BTN,INPUT);
-	pinMode(PIN_PARAM_BTN,INPUT);
+	pinMode(PIN_MENU_BTN,INPUT_PULLUP);
+	pinMode(PIN_PARAM_BTN,INPUT_PULLUP);
 	menu_btn.attach(PIN_MENU_BTN);
 	menu_btn.interval(MENU_BTN_BOUNCE_TIME);
 	param_btn.attach(PIN_PARAM_BTN);
