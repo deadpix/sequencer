@@ -40,11 +40,11 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 
 		node* tmp = t->get_node_from_matrix(id);
 		if(loop_cnt_ == 0){
-			t->set_first_in_loop(tmp->get_first_step(NODE_TREE_MAX_LVL(t->get_max_step())), t->get_current_loop_id());
+			t->set_first_in_loop(tmp->get_first_step(NODE_TREE_MAX_DEPTH(t->get_max_step())), t->get_current_loop_id());
 			start_loop_ = tmp;
 		} 
 		else {
-			t->set_last_in_loop(tmp->get_last_step(NODE_TREE_MAX_LVL(t->get_max_step())), t->get_current_loop_id()); 
+			t->set_last_in_loop(tmp->get_last_step(NODE_TREE_MAX_DEPTH(t->get_max_step())), t->get_current_loop_id()); 
 			end_loop_ = tmp;
 		}
 		
@@ -69,7 +69,7 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 	// last step is the looping point
 	// if push a button whose id is different from last step id
 
-	if(n && (n->_node_lvl == 1) && (n != (looping_node = s->_node->get_node_lvl(1)))){
+	if(n && (n->_node_depth == 1) && (n != (looping_node = s->_node->get_node_depth(1)))){
 		// step after looping step (n->_step) will points to first step
 		LinkedList<node *> *tmp_list = n->_parent->_children;
 		// tmp_list should not be NULL

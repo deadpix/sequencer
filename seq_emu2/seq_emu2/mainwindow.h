@@ -10,6 +10,8 @@
 #include <QTimer>
 #include <QLabel>
 #include <QtDebug>
+#include <QFileDialog>
+#include <QMessageBox>
 
 #include "configuration.h"
 
@@ -30,9 +32,12 @@ class MainWindow : public QMainWindow
 public:
 	explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
+    void loadFile(const QString &fileName);
 
 private slots:
-	void handleBtnPress(int);
+    void openFile();
+    void saveFile();
+    void handleBtnPress(int);
 	void handleBtnRelease(int);
 	void handleTimerUI();
 	void handleParamBtn();
@@ -43,8 +48,14 @@ private:
 
 	QSignalMapper signalMatrixMapperPress;
 	QSignalMapper signalMatrixMapperRelease;
-	
-	QTimer *uiTimer;	
+
+    QMenuBar *menu;
+    QMenu *file;
+    QAction *openAct;
+    QAction *saveAct;
+
+
+    QTimer *uiTimer;
 	
 	QPushButton* btnMatrix[MATRIX_NR_BTN];
 	QPushButton* btnMenu;
@@ -63,6 +74,7 @@ private:
 
 	void checkBtnMatrix();
 	void setup();
+    void createActions();
 	
 
 };

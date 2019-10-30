@@ -52,6 +52,10 @@ class sequencer : public prog {
 		
 		void set_track_start(bool);
 		void reset_all();	
+
+		void serialize_current_track(struct serialized_tree_t * st);
+		void deserialize_current_track(struct serialized_tree_t * st);
+
 		
 		void add_fct(fct_clbk*, uint8_t);
 		fct_clbk* get_fct(uint8_t);

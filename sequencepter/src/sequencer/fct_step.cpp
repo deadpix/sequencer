@@ -40,7 +40,7 @@ void fct_step::on_push(uint8_t btn_id){
 				t->get_led_matrix()->save_n_toogle(n->_step->get_step_color(), btn_id, FOREGROUND1);
 			}
 			// clear from lvl + 1 interface
-			t->mask_npo_nodes(n->_node_lvl);
+			t->mask_npo_nodes(n->_node_depth);
 		}
 		// node case 
 		else {
@@ -95,7 +95,7 @@ void fct_step::on_release(uint8_t btn_id){
 			// delete "start node" children
 			delete_children_nodes(start->_children);
 			// Fix GUI
-			clear_mtx_to_node_from_level(t, start->_node_lvl);
+			clear_mtx_to_node_from_level(t, start->_node_depth);
 			// create _step at "start node"
 			start->_node_is_step = true;
 			// restore zombies if exists in "start node" parent
@@ -131,7 +131,7 @@ void fct_step::on_release(uint8_t btn_id){
 			tmp_prev->set_next_step(start->_step);
 
 
-			t->mask_npo_nodes(start->_node_lvl);
+			t->mask_npo_nodes(start->_node_depth);
 			clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
 //			t->get_led_matrix()->clr_n_restore(errata_btn[start->_mtx_id], BACKGROUND);
 			if(start->_step->is_step_active()){
@@ -200,7 +200,7 @@ void fct_step::on_release(uint8_t btn_id){
 
 		// create x nodes and steps
 		t->create_tree(start, len, new_numerator, 
-			new_denominator, start->_node_lvl * DEFAULT_STEP_PER_SEQ);
+			new_denominator, start->_node_depth * DEFAULT_STEP_PER_SEQ);
 		// chain steps
 //		track::chain_step_from_node_list(start->_children,
 //				  start->_children->get(0)->_step,
@@ -268,7 +268,7 @@ void fct_step::on_long_push(uint8_t btn_id){
 				bool flg_lvl = true;
 				for(int i=0; i<_lp_cnt; i++){
 					node *tmp = t->get_node_from_matrix(errata_btn[_lp_ui[i]._id]);
-					if( (tmp->_node_lvl != n->_node_lvl) || (tmp == n) ){
+					if( (tmp->_node_depth != n->_node_depth) || (tmp == n) ){
 						flg_lvl = false;
 						break;
 					}

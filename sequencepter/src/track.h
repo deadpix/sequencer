@@ -71,6 +71,8 @@ class track {
 
 		node* _mtx_to_node[NR_STEP];
 		node* get_node_from_matrix(uint8_t);
+		node* get_root_node(){ return &head; };
+
 		void  set_node_in_matrix(uint8_t, node*);
 		static void chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end);
 //		static void set_loop(step* first, step* last);

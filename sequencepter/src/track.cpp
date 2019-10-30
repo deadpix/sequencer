@@ -37,38 +37,13 @@ bool track::delete_step(LinkedList<step *> *l, step* s){
 
 void track::chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end){
 	bool flg_chain = false;
-/*
-	for(int i = 0; i<list->size();i++){
-		dbg::printf("step %d\n",list->get(i)->_step->_step_ui_id);
 
-		if(list->get(i)->_node_is_step){
-			if(list->get(i)->_step == start){
-				flg_chain = true;
-			}
-			if(list->get(i)->_step == end){
-				flg_chain = false;
-			}
-			if(flg_chain){
-				list->get(i)->_step->set_next_step(list->get(i+1)->_step);
-			
-			}
-			else {
-				list->get(i)->_step->set_next_step(start);
-			}
-		}
-	}
-*/
 	step* tmp = NULL, *prev = NULL;
 	for(int i = 0; i<list->size();i++){
-		dbg::printf("step %d\n",list->get(i)->_step->_step_ui_id);
+//		dbg::printf("step %d\n",list->get(i)->_step->_step_ui_id);
 		if(list->get(i)->_node_is_step){
 			tmp = list->get(i)->_step;
-			if(tmp == start){
-//				flg_chain = true;
-//				tmp->set_prev_step(end);
-			}
-			else if(tmp == end){
-//				tmp->set_next_step(start);
+			if(tmp == end){
 				tmp->set_prev_step(prev);
 			}
 			else {
@@ -76,18 +51,6 @@ void track::chain_step_from_node_list(LinkedList<node *> *list, step* start, ste
 				tmp->set_prev_step(prev);
 			}
 			prev = tmp;
-			
-
-//			if(list->get(i)->_step == end){
-//				flg_chain = false;
-//			}
-//			if(flg_chain){
-//				list->get(i)->_step->set_next_step(list->get(i+1)->_step);
-//			
-//			}
-//			else {
-//				list->get(i)->_step->set_next_step(start);
-//			}
 		}
 	}
 
@@ -105,7 +68,7 @@ void track::create_tree(node* parent, uint8_t max_steps, uint8_t num,
 		n = new node;
 		s = new step;
 		
-		n->_node_lvl = parent->_node_lvl + 1;
+		n->_node_depth = parent->_node_depth + 1;
 		n->_parent = parent;
 		n->_step = s;
 		n->_node_id = i;
@@ -115,7 +78,7 @@ void track::create_tree(node* parent, uint8_t max_steps, uint8_t num,
 //		s->upd_step_gate_len(_c.clk_get_ms());	
 	
 		n->_mtx_id = mtx_off + i;
-		s->_step_ui_id = mtx_off + i;
+//		s->_step_ui_id = mtx_off + i;
 		_mtx_to_node[mtx_off + i] = n;
 		n->_node_is_step = true;
 
@@ -129,9 +92,10 @@ void track::create_tree(node* parent, uint8_t max_steps, uint8_t num,
 	parent->_children = ll;
 }
 
+
 static void set_mtx_to_node(node** arr, node* n, step* s, uint8_t id){
 	n->_mtx_id = id;
-	s->_step_ui_id = id;
+//	s->_step_ui_id = id;
 //	s->set_step_id(id);
  
 	arr[id] = n;
@@ -155,7 +119,7 @@ void track::set_first_in_loop(step* new_first, uint8_t loop_id){
 	uint8_t id = (first->_node->_node_id + _max_step - 1) % _max_step; 
 	//TODO add assertion on parent
 	node* tmp = parent->_children->get(id);
-	first->set_prev_step(tmp->get_last_step(NODE_TREE_MAX_LVL(_max_step)));
+	first->set_prev_step(tmp->get_last_step(NODE_TREE_MAX_DEPTH(_max_step)));
 	
 	// chain the new first step
 	new_first->set_prev_step(last);
@@ -172,7 +136,7 @@ void track::set_last_in_loop(step* new_last, uint8_t loop_id){
 	uint8_t id = (last->_node->_node_id + 1) % _max_step; 
 	//TODO add assertion on parent
 	node* tmp = parent->_children->get(id);
-	last->set_next_step(tmp->get_first_step(NODE_TREE_MAX_LVL(_max_step)));
+	last->set_next_step(tmp->get_first_step(NODE_TREE_MAX_DEPTH(_max_step)));
 	
 	// chain the new first step
 	new_last->set_next_step(first);
@@ -262,7 +226,7 @@ void track::show_children_node(node* parent){
 			}
 		}
 		for(i;i<DEFAULT_STEP_PER_SEQ;i++){
-			uint8_t idx =  errata_btn[parent->_node_lvl * DEFAULT_STEP_PER_SEQ + i];
+			uint8_t idx =  errata_btn[parent->_node_depth * DEFAULT_STEP_PER_SEQ + i];
 			_mtx_to_node[idx] = NULL;
 			get_led_matrix()->clr_n_restore(idx, BACKGROUND);
 		}
@@ -277,8 +241,8 @@ void track::show_parent_nodes(node* child, node* parent){
 	
 	// redraw is not needed if the case of direct parent
 	if(tmp != parent){	
-		dbg::printf("parent level %d child->_node_lvl=%d\n",parent->_node_lvl,tmp->_node_lvl);
-		for(int i=0; i<(tmp->_node_lvl - parent->_node_lvl); i++){
+		dbg::printf("parent level %d child->_node_depth=%d\n",parent->_node_depth,tmp->_node_depth);
+		for(int i=0; i<(tmp->_node_depth - parent->_node_depth); i++){
 			show_children_node(tmp);
 			tmp = tmp->_parent;
 		}
@@ -459,15 +423,15 @@ void track::_init_animate_parents(step* cur){
 		color = get_track_color();
 	}
 	while(tmp != &head){
-		_step_animation[(tmp->_node_lvl-1)].init_clk_animation(&_lm, errata_step[tmp->_mtx_id], color);
-		_step_animation[(tmp->_node_lvl-1)].start_animation((_c.clk_get_ms_lock() * CLK_LEN_PER / 100.));
+		_step_animation[(tmp->_node_depth-1)].init_clk_animation(&_lm, errata_step[tmp->_mtx_id], color);
+		_step_animation[(tmp->_node_depth-1)].start_animation((_c.clk_get_ms_lock() * CLK_LEN_PER / 100.));
 		tmp = tmp->_parent;
 	}
 }
 void track::_upd_animate_parents(step *cur){
 	node* tmp = cur->_node;
 	while(tmp != &head){
-		_step_animation[(tmp->_node_lvl-1)].end_animation_n_restore();
+		_step_animation[(tmp->_node_depth-1)].end_animation_n_restore();
 		tmp = tmp->_parent;
 	}
 }

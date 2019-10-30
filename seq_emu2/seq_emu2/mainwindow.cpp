@@ -103,6 +103,73 @@ void MainWindow::setup(){
 	dbg::printf("end setup\n");
 }
 
+void MainWindow::loadFile(const QString &fileName){
+    QFile file(fileName);
+    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+        QMessageBox::warning(this, tr("Application"),
+                             tr("Cannot read file %1:\n%2.")
+                             .arg(QDir::toNativeSeparators(fileName), file.errorString()));
+        return;
+    }
+    QByteArray line = file.readLine();
+    if(!file.atEnd()) {
+        qDebug("multi line file in %s????\n",__FUNCTION__);
+    }
+    qDebug("line size %d\n",line.size());
+
+    if(line.size() > HW_EEPROM_BYTE_SIZE){
+        qDebug("not enough memory...\n");
+        return;
+    }
+    u_int16_t * buffer = new uint16_t[line.size()-1];
+    for(int i=0;i<line.size()-1;i++){
+        buffer[i] = static_cast<uint16_t>(line.at(i));
+        qDebug("%c",buffer[i]);
+    }
+
+    file.close();
+}
+void MainWindow::openFile()
+{
+    QString fileName = QFileDialog::getOpenFileName(this);
+    if (!fileName.isEmpty()){
+        qDebug("open file\n");
+        loadFile(fileName);
+    }
+}
+void MainWindow::saveFile()
+{
+    struct serialized_tree_t st;
+    st.nr_byte = HW_EEPROM_BYTE_SIZE;
+    st.buf = new uint16_t[HW_EEPROM_BYTE_SIZE];
+    sequenception.midi_seq.serialize_current_track(&st);
+    delete st.buf;
+    QString fileName = QFileDialog::getSaveFileName(this,
+           tr("Save sequencer track"), "", "");
+    if (fileName.isEmpty()){
+
+        return;
+    }
+/*
+    else {
+        QFile file(fileName);
+        if (!file.open(QIODevice::WriteOnly)) {
+            QMessageBox::information(this, tr("Unable to open file"),
+                file.errorString());
+            return;
+        }
+        qDebug("file will be saved!\n");
+
+    }
+*/
+}
+
+void MainWindow::createActions(){
+    openAct = new QAction(tr("&Load sequence"), this);
+    saveAct = new QAction(tr("&Save sequence"), this);
+    connect(openAct, &QAction::triggered, this, &MainWindow::openFile);
+    connect(saveAct, &QAction::triggered, this, &MainWindow::saveFile);
+}
 
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -113,6 +180,18 @@ MainWindow::MainWindow(QWidget *parent) :
 	QString str = "";
 	bool fail = false;
 
+    menu = this->findChild<QMenuBar *>(QString("menuBar"));
+    file = this->findChild<QMenu *>(QString("menuSequenception"));
+
+
+
+//    file->addMenu("&Load sequence");
+//    file->addMenu("&Save sequence");
+    createActions();
+
+    file->addAction(openAct);
+    file->addAction(saveAct);
+    menu->addMenu(file);
 
 	for(int i=0;i<MATRIX_NR_BTN;i++){
 		str = QString("pushButton_%1").arg(i);
@@ -129,7 +208,7 @@ MainWindow::MainWindow(QWidget *parent) :
 			signalMatrixMapperRelease.setMapping(btnMatrix[i], i);			
 		}
 	}
-	
+
 	if(!fail){
 		connect(&signalMatrixMapperPress, SIGNAL(mapped(int)), this, SLOT(handleBtnPress(int)));
 		connect(&signalMatrixMapperRelease, SIGNAL(mapped(int)), this, SLOT(handleBtnRelease(int)));
@@ -362,3 +441,4 @@ void MainWindow::handleMenuBtn(){
 	}
 
 }
+

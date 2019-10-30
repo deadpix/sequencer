@@ -67,6 +67,29 @@ void sequencer::reset_all(){
 	}
 }
 
+static void dump_serialized_track(const struct serialized_tree_t * st){
+    dbg::printf("Dump tracks:\n");
+	for(int i=0; i<st->nr_byte; i++){
+        dbg::printf("%u ",st->buf[i]);
+	}
+    dbg::printf("\n");
+}
+
+void sequencer::serialize_current_track(struct serialized_tree_t * st){
+	step * s = get_current_track()->get_first_step();
+
+	step::serialize_tree(s, st);
+	dump_serialized_track(st);
+
+}
+void sequencer::deserialize_current_track(struct serialized_tree_t * st){
+	node * n = get_current_track()->get_root_node();
+
+	step::deserialize_tree(n, st);
+}
+
+
+
 void sequencer::menu_enter(){
 }
 void sequencer::menu_leave(){
