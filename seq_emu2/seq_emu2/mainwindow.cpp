@@ -32,7 +32,7 @@
 
 #include <hw_debug.h>
 
-#define TRACE_PERF	0
+#define TRACE_PERF              0
 
 const char* red     = "background-color: red";
 const char* green   = "background-color: green";
@@ -121,11 +121,40 @@ void MainWindow::loadFile(const QString &fileName){
         qDebug("not enough memory...\n");
         return;
     }
-    u_int16_t * buffer = new uint16_t[line.size()-1];
-    for(int i=0;i<line.size()-1;i++){
-        buffer[i] = static_cast<uint16_t>(line.at(i));
-        qDebug("%c",buffer[i]);
+    // get header
+    struct serialized_tree_t st = {.nr_byte = HW_EEPROM_BYTE_SIZE };
+    st.header.magic = line.at(SERIALIZATION_HEADER_MAGIC_BYTE_OFFSET);
+    st.header.nr_nodes = static_cast<uint16_t>(
+                (line.at(SERIALIZATION_HEADER_NR_NODES_BYTE_OFFSET) << 8)
+              | (line.at(SERIALIZATION_HEADER_NR_NODES_BYTE_OFFSET + 1)));
+    st.header.nr_steps = static_cast<uint16_t>(
+                (line.at(SERIALIZATION_HEADER_NR_STEPS_BYTE_OFFSET) << 8)
+              | (line.at(SERIALIZATION_HEADER_NR_STEPS_BYTE_OFFSET + 1)));
+    st.header.tree_byte_sz = static_cast<uint16_t>(
+                (line.at(SERIALIZATION_HEADER_TREE_SZ_BYTE_OFFSET) << 8)
+              | (line.at(SERIALIZATION_HEADER_TREE_SZ_BYTE_OFFSET + 1)));
+
+    dbg::printf("magic=%u nr_nodes=%u nr_steps=%u tree_byte_sz=%u header size=%u\n",
+                st.header.magic,st.header.nr_nodes,st.header.nr_steps,
+                st.header.tree_byte_sz,sizeof(st.header));
+
+    uint8_t * buffer = new uint8_t[line.size()-SERIALIZATION_HEADER_BYTE_SIZE];
+    for(int i=0;i<(line.size()-SERIALIZATION_HEADER_BYTE_SIZE);i++){
+        buffer[i] = line.at(SERIALIZATION_HEADER_BYTE_SIZE+i);
+        dbg::printf("buf[%d] = %u ",i,buffer[i]);
     }
+    st.buf = buffer;
+
+    flgProcess = false;
+
+    int ret = sequenception.midi_seq.deserialize_current_track(&st);
+    if(ret == SERIALIZATION_OK){
+        // delete tree
+//      sequenception.midi_seq.get_current_track()->get_root_node()->delete_tree();
+    }
+
+    flgProcess = true;
+
 
     file.close();
 }
@@ -139,29 +168,48 @@ void MainWindow::openFile()
 }
 void MainWindow::saveFile()
 {
-    struct serialized_tree_t st;
-    st.nr_byte = HW_EEPROM_BYTE_SIZE;
-    st.buf = new uint16_t[HW_EEPROM_BYTE_SIZE];
-    sequenception.midi_seq.serialize_current_track(&st);
-    delete st.buf;
+    struct serialized_tree_t st = {.nr_byte = HW_EEPROM_BYTE_SIZE };
+//    st.nr_byte = HW_EEPROM_BYTE_SIZE;
+    st.buf = new uint8_t[HW_EEPROM_BYTE_SIZE];
+    uint16_t s_data_sz;
+    sequenception.midi_seq.serialize_current_track(&st, &s_data_sz);
     QString fileName = QFileDialog::getSaveFileName(this,
            tr("Save sequencer track"), "", "");
+    dbg::printf("serialized data size=%d\n",s_data_sz);
     if (fileName.isEmpty()){
-
         return;
     }
-/*
     else {
-        QFile file(fileName);
-        if (!file.open(QIODevice::WriteOnly)) {
+
+        QFile file1(fileName);
+
+        if (!file1.open(QIODevice::WriteOnly)) {
             QMessageBox::information(this, tr("Unable to open file"),
-                file.errorString());
+                file1.errorString());
             return;
         }
-        qDebug("file will be saved!\n");
+        dbg::printf("file %s will be saved!\n",fileName.toUtf8().constData());
+
+        QDataStream out1(&file1);
+
+        out1 << st.header.magic;
+        out1 << st.header.nr_nodes;
+        out1 << st.header.nr_steps;
+        out1 << st.header.tree_byte_sz;
+
+//        dbg::printf("test");
+//        dbg::printf("%u %u %u %u\n",st.header.magic,st.header.nr_nodes,
+//                    st.header.nr_steps,st.header.tree_byte_sz);
+
+        for(int i=0;i<s_data_sz;i++){
+            out1 << st.buf[i];
+            dbg::printf("%u ",st.buf[i]);
+        }
+        file1.close();
 
     }
-*/
+    delete st.buf;
+
 }
 
 void MainWindow::createActions(){
@@ -245,6 +293,24 @@ MainWindow::MainWindow(QWidget *parent) :
 		connect(btnParam, SIGNAL (released()), this, SLOT (handleParamBtn()));
 	}
 	
+    btnStart = this->findChild<QPushButton *>("start");
+    btnStop  = this->findChild<QPushButton *>("stop");
+    btnPause = this->findChild<QPushButton *>("pause");
+    btnReset = this->findChild<QPushButton *>("reset");
+
+    if(!btnStart || !btnStop || !btnPause || !btnReset){
+        qDebug("unable to find transport buttons...");
+        fail = true;
+    }
+    else {
+        connect(btnStart, SIGNAL (released()), this, SLOT (handleStartBtn()));
+        connect(btnStop,  SIGNAL (released()), this, SLOT (handleStopBtn()));
+        connect(btnPause, SIGNAL (released()), this, SLOT (handlePauseBtn()));
+        connect(btnReset, SIGNAL (released()), this, SLOT (handleResetBtn()));
+    }
+
+
+
 	btnMenuStatus = BTN_RELEASED;
 	btnParamStatus = BTN_RELEASED;
 #if HW_ADAFRUIT_NEOTRELLIS == 1
@@ -290,7 +356,7 @@ void MainWindow::checkBtnMatrix(){
 		}
 	}
 }
-static void updBtnColorRow(uint16_t* bmp_ret, uint16_t bmp, const char* color, int row_id, QPushButton *matrix_btn[MATRIX_NR_BTN]){
+static void updBtnColorRow(uint8_t* bmp_ret, uint8_t bmp, const char* color, int row_id, QPushButton *matrix_btn[MATRIX_NR_BTN]){
 	int bit = 0;
 	for_eachset_bit(bit, &bmp, 8){
 		if(!BIT::is_bit_set(*bmp_ret, bit)){
@@ -309,8 +375,8 @@ static void rstBtnColorRow(const char* color, int row_id, QPushButton *matrix_bt
 static void updBtnColor(hw_sr* hw, QPushButton* matrix_btn[MATRIX_NR_BTN]){
 	led_t* leds = hw->get_led_arr();
 	
-	uint16_t tmp = 0x0;
-	uint16_t set_led_bmp = 0x0;
+    uint8_t tmp = 0x0;
+    uint8_t set_led_bmp = 0x0;
 	for(int i=0;i<LED_MATRIX_NR_GROUND;i++){
 
 		rstBtnColorRow(gray, i, matrix_btn);
@@ -354,31 +420,23 @@ void MainWindow::handleTimerUI(){
 #if TRACE_PERF == 1
 	p.start_ms_counter();
 #endif
-	sequenception.do_isr();
-	sequenception.loop(0);
-
-//	uint32_t clk_res = sequenception.eval_mst_clk();
-//
-//	if(sequenception.current_prog == sequenception.prog_arr[sequenception.nr_prog]){
-//		sequenception.menu_ctrl.menu_update();
-//	} 
-//	else {
-//		sequenception.current_prog->update_ui(clk_res, sequenception.mst_clk->clk_get_step_cnt());
-//	}
-//	sequenception.loop(clk_res);
+    if(flgProcess){
+        sequenception.do_isr();
+        sequenception.loop(0);
 
 #if HW_SHIFT_REGISTER == 1
-//	updBtnColor(sequenception.lm_ptr, btnMatrix);
-	updBtnColor(_hw_emulator, btnMatrix);
+//      updBtnColor(sequenception.lm_ptr, btnMatrix);
+        updBtnColor(_hw_emulator, btnMatrix);
 #endif
-	checkBtnMatrix();
+        checkBtnMatrix();
 #if TRACE_PERF == 1
-	p.stop_ms_counter();
-	if(p.get_perf_cnt() >= 1000){
-		p.print_perf();
-		p.reset_ms_counter();
-	}
+        p.stop_ms_counter();
+        if(p.get_perf_cnt() >= 1000){
+            p.print_perf();
+            p.reset_ms_counter();
+        }
 #endif
+    }
 }
 void MainWindow::handleParamBtn(){
 	led_matrix* prev = sequenception.current_prog->get_led_matrix();
@@ -441,4 +499,19 @@ void MainWindow::handleMenuBtn(){
 	}
 
 }
-
+void MainWindow::handleStartBtn(){
+    qDebug("push start button");
+    sequenception.midi_seq.start_all_tracks();
+}
+void MainWindow::handleStopBtn(){
+    qDebug("push stop button");
+    sequenception.midi_seq.stop_all_tracks();
+}
+void MainWindow::handlePauseBtn(){
+    qDebug("push pause button");
+    sequenception.midi_seq.pause_all_tracks();
+}
+void MainWindow::handleResetBtn(){
+    qDebug("push reset button");
+    sequenception.midi_seq.reset_all();
+}

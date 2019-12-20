@@ -2,6 +2,7 @@
 #include "led_matrix.h"
 #include <hw_debug.h>
 #include "bit.h"
+#include "types.h"
 
 step::step(){
 	flag_active = false;
@@ -82,70 +83,214 @@ void step::upd_step_gate_len(uint32_t ms_ref){
 	gate_len_ms = ms_ref * gate_len_per / 100;
 }
 
-#define SERIALIZATION_BUFFER_MAX_SIZE		64
-#define SERIALIZATION_TREE_START_BYTE_INDEX	1
 #define SERIALIZATION_SUCCESS				0
-static void set_bits(uint8_t *word, uint8_t from, uint8_t len){
-	int i;
-	for(i = from; i < from + len; i++) {
-		*word |= (1 << i);
-	}
+#define SERIALIZATION_ERR_MEM_SPACE			1
+#define SERIALIZATION_BIT_PER_BYTE			8
+#define SERIALIZATION_MAGIC                 0x1
+
+static void set_post_order_list(LinkedList<node *> * list, node * parent, node * child){
+    node * n = child->_parent;
+    while(n != parent){
+        list->add(n);
+        n = n->_parent;
+    }
+}
+static void set_pre_order_list(LinkedList<node *> * from, LinkedList<node *> * to){
+    int list_sz = from->size();
+    for(int i=0; i<list_sz;i++){
+        to->add(from->pop());
+    }
+    // Assert
+    //    ASSERT(from->size() == 0);
+    if(from->size() > 0)
+        dbg::printf("Problem: from list is not empty...\n");
 }
 
+static void save_node_data(struct serialization_data_t * sd, node * n){
+    if(n->_node_is_step){
+        sd->gate_len = n->_step->get_step_gate_len();
+        sd->velocity = n->_step->_note.velocity;
+        sd->pitch = n->_step->_note.pitch;
+        sd->clk.numerator = n->_step->_clk_def.numerator;
+        sd->clk.numerator = n->_step->_clk_def.denominator;
+        sd->color = n->_step->get_step_color();
+        sd->mtx_id = n->_mtx_id;
+    }
+    else {
+        sd->gate_len = 0;
+        sd->velocity = 0;
+        sd->pitch = 0;
+        sd->clk.numerator = 0;
+        sd->clk.numerator = 0;
+        sd->color = 0;
+        sd->mtx_id = n->_mtx_id;
+    }
+}
 
-void step::serialize_tree(step* s, struct serialized_tree_t* s_tree){
-//	uint8_t buf[SERIALIZATION_BUFFER_MAX_SIZE];
-//	int ret = SERIALIZATION_SUCCESS;
+static void dump_node_list(LinkedList<node *> *nl){
+    for(int i=0;i<nl->size();i++){
+        node * n = nl->get(i);
+        dbg::printf("node_id=%d depth=%d\n",n->_node_id, n->_node_depth);
+    }
+}
+
+static void init_step_from_serialized_data(step * s, struct serialization_data_t * data_ptr){
+    s->set_step_gate_len_per(data_ptr->gate_len);
+    s->step_set_note(data_ptr->velocity, data_ptr->pitch);
+    s->_clk_def.numerator = data_ptr->clk.numerator;
+    s->_clk_def.denominator = data_ptr->clk.denominator;
+    s->set_step_color(data_ptr->color);
+}
+
+int step::serialize_tree(step* s, node * root, struct serialized_tree_t* s_tree,
+                         uint16_t * serialized_data_sz){
+    int ret = SERIALIZATION_SUCCESS;
 	step * next = s->get_next_step();
 	step * cur = s;
-	uint8_t bit_idx = s->_node->_node_depth % 16;
-	uint8_t byte_idx = bit_idx / 16;
-	memset(s_tree->buf, 0, SERIALIZATION_BUFFER_MAX_SIZE);
+    LinkedList<node *> *tmp_list = new LinkedList<node *>;
+    LinkedList<node *> *serialization_list = new LinkedList<node *>;
+    *serialized_data_sz = 0;
 
-	// must be sure that node depth ≤ 8
-	BIT::set_bits(&(s_tree->buf[SERIALIZATION_TREE_START_BYTE_INDEX]), 0, s->_node->_node_depth);
-	
+
+    uint16_t nr_steps = 0; // needed????
+
+    uint8_t bit_idx = (s->_node->_node_depth+1) % SERIALIZATION_BIT_PER_BYTE;
+    uint16_t byte_idx = bit_idx / SERIALIZATION_BIT_PER_BYTE;
+    memset(s_tree->buf, 0, s_tree->nr_byte);
+
+    // must be sure that node depth ≤ 8
+    BIT::set_bits(s_tree->buf, 0, s->_node->_node_depth+1);
+    uint16_t nr_nodes = s->_node->_node_depth+1;
+
+    set_post_order_list(tmp_list, root, s->_node);
+    serialization_list->add(root);
+    set_pre_order_list(tmp_list, serialization_list);
+    serialization_list->add(s->_node);
+
 	while(next != s){
+        // verify that remaining memory space
+        if(byte_idx >= s_tree->nr_byte){
+            ret = SERIALIZATION_ERR_MEM_SPACE;
+            break;
+        }
+
 		// get node parent
 		node* common_parent = node::get_common_parent(cur->_node, next->_node);
-		// go up to current node depth minus common_parent depth
+
+        // go up to current node depth minus common_parent depth
 		uint8_t tmp = cur->_node->_node_depth - common_parent->_node_depth;
-		byte_idx += (tmp + bit_idx) / 16;
-		bit_idx = (bit_idx + tmp) % 16;
+        byte_idx += (tmp + bit_idx) / SERIALIZATION_BIT_PER_BYTE;
+        bit_idx = (bit_idx + tmp) % SERIALIZATION_BIT_PER_BYTE;
 
 		// go down to next node depth minus common_parent_depth
 		tmp = next->_node->_node_depth - common_parent->_node_depth;
 		BIT::set_bits(&(s_tree->buf[byte_idx]), bit_idx, tmp);
-		byte_idx += (tmp + bit_idx) / 16;
-		bit_idx = (bit_idx + tmp) % 16;
-		
+        byte_idx += (tmp + bit_idx) / SERIALIZATION_BIT_PER_BYTE;
+        bit_idx = (bit_idx + tmp) % SERIALIZATION_BIT_PER_BYTE;
+        nr_nodes += tmp;
+
+        // fill the serializaztion list
+        set_post_order_list(tmp_list, common_parent, next->_node);
+        set_pre_order_list(tmp_list, serialization_list);
+        serialization_list->add(next->_node);
+
+
 		cur = next;
-		next = s->get_next_step();
+        next = cur->get_next_step();
+
+        nr_steps++;
 	}
 
-	byte_idx += (8 + bit_idx) / 16;
-	bit_idx = (bit_idx + 8) % 16;
+    if(!ret){
+        // is it needed???
+        // last step is reached
+        if(bit_idx == 0 || (bit_idx + cur->_node->_node_depth) > SERIALIZATION_BIT_PER_BYTE)
+            ++byte_idx;
 
-	s_tree->nr_byte = byte_idx;
+        s_tree->header.tree_byte_sz = byte_idx;
+        s_tree->header.magic = SERIALIZATION_MAGIC;
+        s_tree->header.nr_nodes = nr_nodes;
+        s_tree->header.nr_steps = nr_steps + 1;
+
+        // serialize data for each nodes in the serialization list
+        for(int i=0;i<serialization_list->size();i++){
+
+            if( (byte_idx + sizeof(struct serialization_data_t)) >= s_tree->nr_byte){
+                ret = SERIALIZATION_ERR_MEM_SPACE;
+                break;
+            }
+
+            struct serialization_data_t tmp;
+            uint8_t * ptr = (uint8_t *) &tmp;
+            save_node_data(&tmp, serialization_list->get(i));
+            for(int j=0;j<sizeof(struct serialization_data_t);j++){
+                s_tree->buf[byte_idx+j] = ptr[j];
+            }
+            byte_idx += sizeof(struct serialization_data_t);
+        }
+
+        dump_node_list(serialization_list);
+        if(tmp_list->size() > 0){
+            dbg::printf("tmp list not null... problem in algo\n");
+        }
+    }
+    delete tmp_list;
+    delete serialization_list;
+
+    if(ret){
+        dbg::printf("%s serialization error: %d\n",__FUNCTION__,ret);
+    }
+    else {
+//        *serialized_data_sz = byte_idx + sizeof(serialization_header_t);
+        *serialized_data_sz = byte_idx;
+        dbg::printf("serialization done: size %d bytes\n",byte_idx+sizeof(serialization_header_t));
+    }
+
+    return ret;
 }
 
-void step::deserialize_tree(node * root, struct serialized_tree_t * s_tree){
-	node * node_ptr = root;
-	step * prev_step = NULL;
-	uint8_t byte_cnt = 0;
+int step::deserialize_tree(node * root, struct serialized_tree_t * s_tree){
+    node * node_ptr = new node;
+    root = node_ptr;
+    step * prev_step = NULL;
 	bool break_flg = false;
 	uint8_t i;
-	for(i=0;i<s_tree->nr_byte;i+=2){
-		uint16_t data = s_tree->buf[i];
-		for(uint8_t j=0;j<16;j++){
-			if(data & 0x1){
-				// bit is set: create a node and attach to node_ptr children list
-				node * n = new node;
+    uint16_t node_cnt = 0, step_cnt = 0;
+
+    const struct serialization_data_t * serialized_data = (struct serialization_data_t *) s_tree->buf + s_tree->header.tree_byte_sz;
+    struct serialization_data_t * data_ptr;
+
+    LinkedList<node *> *tNodeList = new LinkedList<node *>;
+
+    int ret = SERIALIZATION_OK;
+
+    for(i=0;i<s_tree->header.tree_byte_sz;i++){
+        uint8_t data = s_tree->buf[i];
+
+        if(i == 0 && !(data & 0x1)){
+            dbg::printf("Sanity check at %s fails: first bit of serialized tree 0x%x should be set...",__FUNCTION__,data);
+            return SERIALIZATION_ERROR;
+        }
+
+        dbg::printf("byte: %d\n",data);
+        for(uint8_t j=0;j<SERIALIZATION_BIT_PER_BYTE;j++){
+            if(data & 0x1){
+                node * n;
+                if(i == 0 && j == 0){
+                    n = node_ptr;
+                }
+                else {
+                    n = new node;
+                    tNodeList->add(n);
+                }
+                data_ptr = (struct serialization_data_t *)(serialized_data + node_cnt * sizeof(struct serialization_data_t));
+                n->_mtx_id = data_ptr->mtx_id;
 				if(!node_ptr->_children){
 					LinkedList<node *> *ll = new LinkedList<node *>;
 					node_ptr->_children = ll;
 				}
 				node_ptr->_children->add(n);
+                ++node_cnt;
 				// do we need node_id
 				// when n->_mtx_id should be set???
 
@@ -155,22 +300,29 @@ void step::deserialize_tree(node * root, struct serialized_tree_t * s_tree){
 					s->_node = n;
 					n->_step = s;
 					n->_node_is_step = true;
-					if(prev_step){
+                    init_step_from_serialized_data(s,data_ptr);
+                    if(prev_step){
 						prev_step->set_next_step(s);
 						s->set_prev_step(prev_step);
 						prev_step = s;
 					}
+                    ++step_cnt;
 				}
+                n->_parent = node_ptr;
+                node_ptr = n;
 			}
 			else {
+//                node_ptr = node_ptr->_parent;
+
 				// bit is not set: get parent node
 				if(node_ptr == root){
-					printf("root has been reached\n");
+                    dbg::printf("root has been reached\n");
 					break_flg = true;
 				}
 				else {
 					node_ptr = node_ptr->_parent;
 				}
+
 			}
 			data = data >> 1;
 			if(break_flg)
@@ -181,7 +333,28 @@ void step::deserialize_tree(node * root, struct serialized_tree_t * s_tree){
 			break;
 
 	}
-	if(break_flg && i != s_tree->nr_byte){
-		printf("Warning: deserialization has been aborded before reaching last bytes...\n");
+    if(break_flg && i != s_tree->header.tree_byte_sz-1){
+        dbg::printf("Warning: deserialization has been abort (%d bytes) before reaching last bytes %d...\n",i,s_tree->header.tree_byte_sz);
+        ret = SERIALIZATION_ERROR;
 	}
+    if( node_cnt != s_tree->header.nr_nodes){
+        dbg::printf("error in deserialization: %d nodes has been counted but %d nodes in header",
+               node_cnt, s_tree->header.nr_nodes);
+        ret = SERIALIZATION_ERROR;
+    }
+    if( step_cnt != s_tree->header.nr_steps){
+        printf("error in deserialization: %d steps has been counted but %d steps in header",
+               step_cnt, s_tree->header.nr_steps);
+        ret = SERIALIZATION_ERROR;
+    }
+    if(ret != SERIALIZATION_OK){
+        int sz = tNodeList->size();
+        for(int i=0;i<sz;i++){
+            node * n = tNodeList->pop();
+            delete n;
+        }
+        delete tNodeList;
+        root = NULL;
+    }
+    return ret;
 }

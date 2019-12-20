@@ -41,7 +41,12 @@ void tempo::init(void (*fct)(uint32_t), sequencer* seq, bool play){
 //		lm->set_led_x(PAUSE_BTN_COLOR, START_BTN_ID);
 		lm->save_n_set(PAUSE_BTN_COLOR, START_BTN_ID, BACKGROUND);
 	}
-	_seq->set_track_start(_play);
+    if(play){
+        _seq->start_all_tracks();
+    }
+    else {
+        _seq->pause_all_tracks();
+    }
 //	lm->set_led_x(LED_R_IDX, RESET_BTN_ID);
 	lm->save_n_set(LED_R_IDX, RESET_BTN_ID, BACKGROUND);
 	
@@ -137,12 +142,13 @@ int tempo::menu_on_push(uint8_t func_id, uint8_t opt_id){
 	} 
 	else if(opt_id == START_BTN_ID){
 		_play = !_play;
-		_seq->set_track_start(_play);
-		if(_play){
-			get_menu_lm()->save_n_ovw(PLAY_BTN_COLOR, opt_id, BACKGROUND);
+        if(_play){
+            _seq->start_all_tracks();
+            get_menu_lm()->save_n_ovw(PLAY_BTN_COLOR, opt_id, BACKGROUND);
 		}
 		else {
-			get_menu_lm()->save_n_ovw(PAUSE_BTN_COLOR, opt_id, BACKGROUND);
+            _seq->pause_all_tracks();
+            get_menu_lm()->save_n_ovw(PAUSE_BTN_COLOR, opt_id, BACKGROUND);
 		}
 	}
 	else if(opt_id == RESET_BTN_ID){

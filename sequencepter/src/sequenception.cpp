@@ -132,48 +132,12 @@ uint32_t sequenception::eval_mst_clk(){
 } 
 void sequenception::loop(uint32_t ms){
 
-/*
-	// check if midi_clk_flg has been set
-	track* t = midi_seq.get_current_track(); 
-	if( (t->get_led_matrix() == lm_ptr)){
-		if(track_upd & (1<<t->get_track_id())){
-			t->init_animate_parents_no_irq();
-			track_upd = 0;
-		}
-		else {
-			t->upd_animate_parents_no_irq();
-		}
-	}
-
-	// read the clk_ms in CS
-	unsigned char reg = disable_irq();
-	uint32_t tmp = clk_ms;
-	clk_ms = 0;
-	enable_irq(reg);
-
-
-	// if menu prog is running, call menu update function
-	if(current_prog == prog_arr[nr_prog]){
-		menu_ctrl.menu_update();
-	}
-	else {
-		current_prog->update_ui(tmp, mst_clk->clk_get_step_cnt());
-	}
-//	midi_seq.check_clks(ms, mst_clk->clk_get_step_cnt());
-*/
 	// disable the irq to get the first evt 
 	DISABLE_IRQ();
 	int nr_evt = evt_list.size();
 
-//	if(nr_evt > 0){
-//		Serial.print("nr_evt ");
-//		Serial.println(nr_evt);
-//	}
-
 	for(int i=0;i<nr_evt;i++){
-//		unsigned char reg = disable_irq();
 		event* tmp = evt_list.shift();
-//		enable_irq(reg);
 
 		tmp->do_evt();
 		delete tmp;

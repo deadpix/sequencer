@@ -162,23 +162,25 @@ track::track(){
 //	curr_step_id = 0;
 	_hw_fct = _dummy_fct;
 	_max_step = DEFAULT_STEP_PER_SEQ;
-	_play = false;
 	_clk_def.numerator = 1;
 	_clk_def.denominator = 1;
 	_mst_clk_cnt = 1;
 	track_color_ = LED_R_IDX;
+    _state = TRACK_PLAY_STATE;
 
-	create_tree(&head, _max_step, 1, 1, 0);
-	reset_mtx_to_node(_mtx_to_node, &head);
+    head = new node;
 
-	_cur_step = head._children->get(0)->_step;
+    create_tree(head, _max_step, 1, 1, 0);
+    reset_mtx_to_node(_mtx_to_node, head);
+
+    _cur_step = head->_children->get(0)->_step;
 //	_first_step = _cur_step;
 //	_last_step = head._children->get(head._children->size() - 1)->_step;
 //	set_loop(_first_step, _last_step);
 //	chain_step_from_node_list(head._children, _first_step, _last_step);
 	for(int i=0;i<SEQ_NR_LOOP_SETTING;i++){
 		loop_step_[i].first = _cur_step;
-		loop_step_[i].last = head._children->get(head._children->size() - 1)->_step;
+        loop_step_[i].last = head->_children->get(head->_children->size() - 1)->_step;
 	}
 	cur_loop_ = 0;
 	set_loop(loop_step_[0].first, loop_step_[0].last);
@@ -186,7 +188,7 @@ track::track(){
 	
 }
 track::~track(){
-
+    delete head;
 	// need to do clean delete of track
 
 
@@ -409,20 +411,22 @@ clk* track::get_clk(){
 //void track::toogle_play(){
 //	_play = !_play;
 //}
+
+/*
 void track::set_play(bool play){
-	_play = play;
+    _play = play;
 }
 bool track::is_playing(){
 	return _play;
 }
-
+*/
 void track::_init_animate_parents(step* cur){
 	node* tmp = cur->_node;
 	uint8_t color = 0;
 	if(!cur->is_step_active()){
 		color = get_track_color();
 	}
-	while(tmp != &head){
+    while(tmp != head){
 		_step_animation[(tmp->_node_depth-1)].init_clk_animation(&_lm, errata_step[tmp->_mtx_id], color);
 		_step_animation[(tmp->_node_depth-1)].start_animation((_c.clk_get_ms_lock() * CLK_LEN_PER / 100.));
 		tmp = tmp->_parent;
@@ -430,7 +434,7 @@ void track::_init_animate_parents(step* cur){
 }
 void track::_upd_animate_parents(step *cur){
 	node* tmp = cur->_node;
-	while(tmp != &head){
+    while(tmp != head){
 		_step_animation[(tmp->_node_depth-1)].end_animation_n_restore();
 		tmp = tmp->_parent;
 	}
@@ -461,28 +465,19 @@ uint8_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 	
 	if(res){
 		bool is_active;
-		if(_play){	
+        if(track_is_playing()){
 			if((is_active = next_step(ms))){
 				if(_cur_step->reset_gate()){
-//					Serial.print(" _cur_step->_note.pitch ");
-//					Serial.print(_cur_step->_note.pitch);
 					_hw_fct(_cur_step->_note.pitch, _cur_step->_note.velocity, _out_id);
 				}
 			}
 		}
-		// TODO should not be here!!!
-//		_init_animate_parents(_cur_step);
-//		init_animate_parents_no_irq();
 		return 1;
 
 	} else {
 		if(_cur_step->upd_gate()){
 			_hw_fct(_cur_step->_note.pitch, 0, _out_id);
 		}
-		// TODO should not be here!!!
-//		_upd_animate_parents(_cur_step);
-//		upd_animate_parents_no_irq();
 		return 0;
 	}
-//	return res;
 }

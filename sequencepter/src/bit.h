@@ -9,12 +9,20 @@
 #include <stdint.h>
 
 namespace BIT {
-	int  is_bit_set(uint16_t reg, int bit_pos);
+/*
+    int  is_bit_set(uint16_t reg, int bit_pos);
 	int  find_next_bit (uint16_t *word, uint16_t limit, uint16_t from);
 	void clear_bits(uint16_t *word, uint16_t from, uint16_t len);
 	void set_bits(uint16_t *word, uint16_t from, uint16_t len);
 	int  check_bit(uint16_t *word, int bit);
-	uint8_t get_highest_bit_set(unsigned int);
+*/
+    int  is_bit_set(uint8_t reg, int bit_pos);
+    int  find_next_bit (uint8_t *word, uint16_t limit, uint16_t from);
+    void clear_bits(uint8_t *word, uint16_t from, uint16_t len);
+    void set_bits(uint8_t *word, uint16_t from, uint16_t len);
+    int  check_bit(uint8_t *word, int bit);
+
+    uint8_t get_highest_bit_set(unsigned int);
 }
 
 

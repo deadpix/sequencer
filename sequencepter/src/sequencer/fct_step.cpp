@@ -45,7 +45,7 @@ void fct_step::on_push(uint8_t btn_id){
 		// node case 
 		else {
 			dbg::printf("show children nodes\n");
-			if(!t->is_playing()){
+            if(!t->track_is_playing()){
 				t->show_children_node(n);
 			}
 		}
@@ -68,6 +68,92 @@ static void clear_mtx_to_node_from_level(track *t, uint8_t level){
 	}  
 }
 
+#define ERR_NODE_IS_NOT_A_STEP  1
+#define ERR_NODE_IS_LOOP_START  2
+#define ERR_NODE_IS_LOOP_END    3
+
+static int step_is_loop_start(step * s, track * t){
+    int ret = 0;
+    for(uint8_t i=0;i<SEQ_NR_LOOP_SETTING;i++){
+        if(t->get_first_step(i) == s){
+            ret = 1;
+            break;
+        }
+    }
+    return ret;
+}
+static int step_is_loop_end(step * s, track * t){
+    int ret = 0;
+    for(uint8_t i=0;i<SEQ_NR_LOOP_SETTING;i++){
+        if(t->get_last_step(i) == s){
+            ret = 1;
+            break;
+        }
+    }
+    return ret;
+}
+static int sanity_check(track * t, const uint8_t start_id, const uint8_t end_id){
+    const node * n = t->get_node_from_matrix(errata_btn[start_id]);
+    const node * end_node = t->get_node_from_matrix(errata_btn[end_id]);
+    uint8_t idx = start_id;
+    int ret = 0;
+    // verify thet node start is also a step
+    if(!n->_node_is_step){
+        ret = ERR_NODE_IS_NOT_A_STEP;
+        dbg::printf("node %d depth %d is not a step\n",n->_node_id,n->_node_depth);
+    }
+    // verify that node start is not last step in the loops
+    if(step_is_loop_end(n->_step, t)){
+        ret = ERR_NODE_IS_LOOP_END;
+        dbg::printf("node %d depth %d is on the end of the loops\n",n->_node_id,n->_node_depth);
+    }
+
+    // get next node
+    ++idx;
+    if(idx == DEFAULT_STEP_PER_SEQ) idx = 0;
+    n = t->get_node_from_matrix(errata_btn[idx]);
+
+    // loop until reahing end node
+    while(n != end_node){
+        // verify that node is also a step
+        if(!n->_node_is_step){
+            ret = ERR_NODE_IS_NOT_A_STEP;
+            dbg::printf("node %d depth %d is not a step\n",n->_node_id,n->_node_depth);
+            break;
+        }
+        // verify that node is not the first step in the loops
+        if(step_is_loop_start(n->_step, t)){
+            ret = ERR_NODE_IS_LOOP_START;
+            dbg::printf("node %d depth %d is on the start of the loops\n",n->_node_id,n->_node_depth);
+        }
+
+        // verify that node is not the last step in the loops
+        if(step_is_loop_end(n->_step, t)){
+            ret = ERR_NODE_IS_LOOP_END;
+            dbg::printf("node %d depth %d is on the end of the loops\n",n->_node_id,n->_node_depth);
+        }
+
+        // get next node
+        ++idx;
+        if(idx == DEFAULT_STEP_PER_SEQ) idx = 0;
+        n = t->get_node_from_matrix(errata_btn[idx]);
+    }
+
+    // verify thet node end is also a step
+    if(!n->_node_is_step){
+        ret = ERR_NODE_IS_NOT_A_STEP;
+        dbg::printf("node %d depth %d is not a step\n",n->_node_id,n->_node_depth);
+    }
+
+    // verify that node end is not the first step in the loops
+    if(step_is_loop_start(n->_step, t)){
+        ret = ERR_NODE_IS_LOOP_START;
+        dbg::printf("node %d depth %d is on the start of the loops\n",n->_node_id,n->_node_depth);
+    }
+
+    return ret;
+}
+
 void fct_step::on_release(uint8_t btn_id){
 	uint8_t id = errata_btn[btn_id];
 	track* t = _seq->get_current_track();
@@ -80,11 +166,11 @@ void fct_step::on_release(uint8_t btn_id){
 	if(_lp_cnt == 1){
 
 		// check if we want to delete a subsequence
-		if(btn_id == _lp_ui[0]._id && !t->is_playing() && !t->get_node_from_matrix(errata_btn[_lp_ui[0]._id])->_node_is_step){
+        if(btn_id == _lp_ui[0]._id && !t->track_is_playing() && !t->get_node_from_matrix(errata_btn[_lp_ui[0]._id])->_node_is_step){
 
 
 
-			DISABLE_IRQ();
+            DISABLE_IRQ();
 
 			node* start = t->get_node_from_matrix(errata_btn[_lp_ui[0]._id]);
 			node* p = start->_parent;
@@ -152,87 +238,80 @@ void fct_step::on_release(uint8_t btn_id){
 	} 
 	else if(_lp_cnt == 2){
 		// FIXME Must be executed when track is paused...
+        int ret;
 
-		DISABLE_IRQ();
-
-		// TODO create substep
-//		s->_clk_def.numerator = (to-from);
-//		s->_clk_def.denominator = nr_new_step;	
 		uint8_t len = (id % t->get_max_step()) + 1;
 		
 		// TODO: first_step might be deleted
-//		node* tmp = t->get_first_step()->_node;
 		node* start = t->get_node_from_matrix(errata_btn[_lp_ui[0]._id]);
 		node* end = t->get_node_from_matrix(errata_btn[_lp_ui[1]._id]);
-		node* parent = start->_parent;
-		uint8_t new_numerator = start->_step->_clk_def.numerator * (end->_node_id - start->_node_id); 
-		uint8_t new_denominator = start->_step->_clk_def.denominator * len; 
 
-		// limit substep to freq less than 20Hz???	
+        // foreach nodes,   - verify that there are not the first or last step
+        //                  - verify that there is no sub-steps
 
-		// delete node between start and end
-//		for(uint8_t i=(start->_node_id+1);i<end->_node_id;i++){
-//			node* tmp = parent->_children->remove(i);
-//			t->set_node_in_matrix(tmp->_mtx_id, NULL);
-//			// should we delete node???
-//			delete tmp;
-//		}
-		
-		// put nodes between "start node" and "end node" in "start node" zombies list
-		
-		
-		if((start->_node_id+1) < end->_node_id){
-			LinkedList<node *> *ll = new LinkedList<node *>;
-			
-			for(uint8_t i=(start->_node_id+1);i<end->_node_id;i++){
-				node* tmp = parent->_children->remove(i);
-				ll->add(tmp);
-				// must be sure that nodes are visible!!!
-				t->set_node_in_matrix(tmp->_mtx_id, NULL);
-			}
-			start->_zombies = ll;
-		}
+        ret = sanity_check(t, _lp_ui[0]._id, _lp_ui[1]._id);
+        if(ret){
+            dbg::printf("unable to create subnode: err %d\n",ret);
+            // clear ui
+            clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
+        }
+        else {
 
-		// delete step of start node
-//		delete start->_step;
-//		start->_step = NULL;
-		start->_node_is_step = false;
+            uint8_t loop_start_flg = step_is_loop_start(start->_step, t);
+//            uint8_t loop_end_flg = step_is_loop_end(end->_step, t);
 
-		// create x nodes and steps
-		t->create_tree(start, len, new_numerator, 
-			new_denominator, start->_node_depth * DEFAULT_STEP_PER_SEQ);
-		// chain steps
-//		track::chain_step_from_node_list(start->_children,
-//				  start->_children->get(0)->_step,
-//				  start->_children->get(len-1)->_step);
-		step* tmp_prev = start->_step->get_prev_step();
-		step* tmp_next = start->_children->get(0)->_step;
-		tmp_prev->set_next_step(tmp_next);
-		tmp_next->set_prev_step(tmp_prev);
+            DISABLE_IRQ();
 
-		tmp_next = end->get_first_step(NR_STEP/DEFAULT_STEP_PER_SEQ);
-		tmp_prev = start->_children->get(len-1)->_step;
-		tmp_prev->set_next_step(tmp_next);
-		tmp_next->set_prev_step(tmp_prev);
-		
+            node* parent = start->_parent;
+            uint8_t new_numerator = start->_step->_clk_def.numerator * (end->_node_id - start->_node_id);
+            uint8_t new_denominator = start->_step->_clk_def.denominator * len;
 
-		// FIXME: end might not have a step => should find the first step 
-//		start->_children->get(len-1)->_step->set_next_step(end->get_first_step(NR_STEP/DEFAULT_STEP_PER_SEQ));
-//		start->_children->get(len-1)->_step->set_prev_step(end->get_first_step(NR_STEP/DEFAULT_STEP_PER_SEQ));
+            // limit substep to freq less than 20Hz???
 
-		ENABLE_IRQ();
+            // put nodes between "start node" and "end node" in "start node" zombies list
+            if((start->_node_id+1) < end->_node_id){
+                LinkedList<node *> *ll = new LinkedList<node *>;
 
-		dbg::printf("new steps / nodes have been created: num=%d denom=%d\n",new_numerator,new_denominator);
-		// create tree
-	
+                for(uint8_t i=(start->_node_id+1);i<end->_node_id;i++){
+                    node* tmp = parent->_children->remove(i);
+                    ll->add(tmp);
+                    // must be sure that nodes are visible!!!
+                    t->set_node_in_matrix(tmp->_mtx_id, NULL);
+                }
+                start->_zombies = ll;
+            }
 
-		// clear ui
-		clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
-		
-//		t->get_led_matrix()->clr_n_restore(errata_btn[start->_mtx_id], BACKGROUND);
-		t->get_led_matrix()->save_n_ovw(LED_GBR_IDX, errata_btn[start->_mtx_id], BACKGROUND); 
+            // delete step of start node
+            start->_node_is_step = false;
 
-		t->show_children_node(start);	
+            // create x nodes and steps
+            t->create_tree(start, len, new_numerator,
+                new_denominator, start->_node_depth * DEFAULT_STEP_PER_SEQ);
+
+            // chain steps
+            step* tmp_prev = start->_step->get_prev_step();
+            step* tmp_next = start->_children->get(0)->_step;
+            tmp_prev->set_next_step(tmp_next);
+            tmp_next->set_prev_step(tmp_prev);
+
+            if(loop_start_flg)
+                t->set_first_step(tmp_next);
+
+            tmp_next = end->get_first_step(NR_STEP/DEFAULT_STEP_PER_SEQ);
+            tmp_prev = start->_children->get(len-1)->_step;
+            tmp_prev->set_next_step(tmp_next);
+            tmp_next->set_prev_step(tmp_prev);
+
+            ENABLE_IRQ();
+
+            dbg::printf("new steps / nodes have been created: num=%d denom=%d\n",new_numerator,new_denominator);
+
+            // clear ui
+            clear_all_long_pushed_ui(t, &_lp_cnt, _lp_ui);
+            t->get_led_matrix()->save_n_ovw(LED_GBR_IDX, errata_btn[start->_mtx_id], BACKGROUND);
+            t->show_children_node(start);
+        }
+
 	
 	} 
 	else {			
@@ -243,8 +322,6 @@ void fct_step::on_release(uint8_t btn_id){
 				t->get_led_matrix()->clr_n_restore(btn_id, BACKGROUND);
 			} else {
 				s->set_step_active();
-//				Serial.print("step_color_ ");
-//				Serial.println(step_color_);
 				s->set_step_color(step_color_);
 				t->get_led_matrix()->save_n_set(step_color_, btn_id, BACKGROUND); 
 			}

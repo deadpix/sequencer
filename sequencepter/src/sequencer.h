@@ -49,12 +49,14 @@ class sequencer : public prog {
 		void set_current_track(uint8_t track_id);
 		void set_current_param(uint8_t);
 		uint8_t get_current_param();
-		
-		void set_track_start(bool);
-		void reset_all();	
 
-		void serialize_current_track(struct serialized_tree_t * st);
-		void deserialize_current_track(struct serialized_tree_t * st);
+        void start_all_tracks();
+        void pause_all_tracks();
+        void stop_all_tracks();
+        void reset_all();
+
+        void serialize_current_track(struct serialized_tree_t * st, uint16_t * serialized_data_sz);
+        int deserialize_current_track(struct serialized_tree_t * st);
 
 		
 		void add_fct(fct_clbk*, uint8_t);

@@ -24,7 +24,8 @@ class node {
 
 		node();
 		~node();		
-		void delete_tree(node * root);
+//		void delete_tree(node * root);
+        void delete_tree();
 
 		node* get_node_depth(uint8_t depth);
 		step* get_first_step(uint8_t max_depth);

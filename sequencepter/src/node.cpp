@@ -34,9 +34,11 @@ node::~node(){
 	_parent = NULL;
 }
 
-void node::delete_tree(node * root){
+/* delete all node in a tree except parent node */
+void node::delete_tree(/*node * root*/){
 	LinkedList<node *> *del_list = new LinkedList<node *>; 
-	del_list->add(root);
+//	del_list->add(root);
+    del_list->add(this);
 
 	while(del_list->size() != 0){
 		node * del = del_list->pop();

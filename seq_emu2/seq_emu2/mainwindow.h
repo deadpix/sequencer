@@ -30,7 +30,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget *parent = 0);
+    explicit MainWindow(QWidget *parent = 0);
 	~MainWindow();
     void loadFile(const QString &fileName);
 
@@ -42,6 +42,11 @@ private slots:
 	void handleTimerUI();
 	void handleParamBtn();
 	void handleMenuBtn();
+
+    void handleStartBtn();
+    void handleStopBtn();
+    void handlePauseBtn();
+    void handleResetBtn();
 
 private:
 	Ui::MainWindow *ui;
@@ -60,7 +65,13 @@ private:
 	QPushButton* btnMatrix[MATRIX_NR_BTN];
 	QPushButton* btnMenu;
 	QPushButton* btnParam;
-//	QLabel*	     oled[OLED_LINE];
+
+    QPushButton* btnStart;
+    QPushButton* btnStop;
+    QPushButton* btnPause;
+    QPushButton* btnReset;
+
+    //	QLabel*	     oled[OLED_LINE];
 
 	uint8_t btnMatrixStatus[MATRIX_NR_BTN];
 	elapsedMillis btnMatrixMs[MATRIX_NR_BTN];
@@ -71,6 +82,8 @@ private:
 #elif HW_SHIFT_REGISTER == 1
 	hw_sr* _hw_emulator;
 #endif
+
+    bool flgProcess = true;
 
 	void checkBtnMatrix();
 	void setup();

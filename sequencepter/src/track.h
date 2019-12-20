@@ -14,6 +14,12 @@
 
 #define SEQ_NR_LOOP_SETTING	6
 
+#define TRACK_PLAY_STATE    (1<<0)
+#define TRACK_PAUSE_STATE   (1<<1)
+#define TRACK_STOP_STATE    (1<<2)
+
+
+
 /*
 struct signature_change {
 	uint8_t num;
@@ -37,7 +43,7 @@ class track {
 
 		//TODO _out_id should be accessed via midi controller
 		uint8_t _out_id;
-		bool	_play;	
+        uint8_t _state;
 
 		step*	_cur_step;
 		step*	_prev_step;
@@ -56,7 +62,7 @@ class track {
 		led_matrix _lm;
 //		bool mute_flg;
 //		LinkedList<track *> sub_track_list;
-		node head;
+        node * head;
 		uint8_t track_color_;
 		led_toogle _step_animation[DEFAULT_STEP_PER_SEQ];
 
@@ -65,13 +71,14 @@ class track {
 		void _upd_animate_parents(step* cur);
 
 	public:
-		void set_track_color(uint8_t color){track_color_ = color;};
-		uint8_t get_track_color(){ return track_color_;};
+        void set_track_color(uint8_t color){ track_color_ = color; }
+        uint8_t get_track_color(){ return track_color_; }
 //		LinkedList<struct signature_change*> _signature_change_list;
 
 		node* _mtx_to_node[NR_STEP];
 		node* get_node_from_matrix(uint8_t);
-		node* get_root_node(){ return &head; };
+        node* get_root_node(){ return head; }
+        void  set_root_node(node * n){ head = n; }
 
 		void  set_node_in_matrix(uint8_t, node*);
 		static void chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end);
@@ -102,11 +109,13 @@ class track {
 		void set_out_id(uint8_t id);
 		uint8_t get_out_id();
 
-		step* get_first_step(){ return loop_step_[cur_loop_].first; };
-		step* get_last_step(){	return loop_step_[cur_loop_].last; };
-		void  set_first_step(step * s){	loop_step_[cur_loop_].first = s; };
-		uint8_t get_current_loop_id(){	return cur_loop_;};
-		void  set_last_step(step * s){ loop_step_[cur_loop_].last = s; };
+        step* get_first_step(){ return loop_step_[cur_loop_].first; }
+        step* get_last_step(){	return loop_step_[cur_loop_].last; }
+        step* get_first_step(uint8_t loop_id){ return loop_step_[loop_id].first; }
+        step* get_last_step(uint8_t loop_id){ return loop_step_[loop_id].last; }
+        void  set_first_step(step * s){	loop_step_[cur_loop_].first = s; }
+        uint8_t get_current_loop_id(){	return cur_loop_;}
+        void  set_last_step(step * s){ loop_step_[cur_loop_].last = s; }
 
 		void set_all_step_note(uint16_t);
 		
@@ -119,11 +128,20 @@ class track {
 //		void unmute();
 //		void toogle_mute();
 //		void toogle_play();	
-		void set_play(bool);
-		bool is_playing();
+//        void set_play(bool);
+        void set_state(uint8_t state) { _state = state; }
+        uint8_t get_state() { return _state; }
+        uint8_t track_is_playing() { return _state & TRACK_PLAY_STATE; }
+        uint8_t track_is_stopped() { return _state & TRACK_STOP_STATE; }
+        uint8_t track_is_paused() { return _state & TRACK_PAUSE_STATE; }
+        void play_track(){ _state = TRACK_PLAY_STATE; }
+        void stop_track(){ _state = TRACK_STOP_STATE; }
+        void pause_track(){ _state = TRACK_PAUSE_STATE; }
+
+//        bool is_playing();
 
 		void set_current_loop(uint8_t loop_id);
-		uint8_t get_current_loop(){ return cur_loop_; };
+        uint8_t get_current_loop(){ return cur_loop_; }
 
 		void upd_animate_parents_no_irq();
 		void init_animate_parents_no_irq();

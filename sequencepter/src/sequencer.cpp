@@ -55,12 +55,22 @@ uint8_t sequencer::check_events(uint32_t mst_ms, uint16_t mst_step, event** e){
 	return res;
 }
 
-
-void sequencer::set_track_start(bool play){
-	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
-		track_arr[i].set_play(play);
-	}
+void sequencer::start_all_tracks(){
+    for(int i=0;i<SEQUENCER_NR_TRACK;i++){
+        track_arr[i].play_track();
+    }
 }
+void sequencer::pause_all_tracks(){
+    for(int i=0;i<SEQUENCER_NR_TRACK;i++){
+        track_arr[i].pause_track();
+    }
+}
+void sequencer::stop_all_tracks(){
+    for(int i=0;i<SEQUENCER_NR_TRACK;i++){
+        track_arr[i].stop_track();
+    }
+}
+
 void sequencer::reset_all(){
 	for(int i=0;i<SEQUENCER_NR_TRACK;i++){
 		track_arr[i].step_reset();
@@ -68,24 +78,47 @@ void sequencer::reset_all(){
 }
 
 static void dump_serialized_track(const struct serialized_tree_t * st){
-    dbg::printf("Dump tracks:\n");
-	for(int i=0; i<st->nr_byte; i++){
-        dbg::printf("%u ",st->buf[i]);
+    dbg::printf("Dump tracks %d bytes:\n",st->header.tree_byte_sz);
+    dbg::printf("header: magic %u number of nodes %d number of steps %d :\n"
+                ,st->header.magic,st->header.nr_nodes,st->header.nr_steps);
+
+    for(int i=0; i<st->header.tree_byte_sz; i++){
+        dbg::printf("%02x-",st->buf[i]);
 	}
+    int idx = st->header.tree_byte_sz;
+    dbg::printf("\nDump node data (size %d) idx=%d\n",sizeof(struct serialization_data_t),idx);
+    for(int i=0; i<st->header.nr_nodes; i++){
+        dbg::printf("node %d\n",i);
+        dbg::printf("\t- gate length: %u\n",st->buf[idx+0]);
+        dbg::printf("\t- velocity   : %u\n",st->buf[idx+1]);
+        dbg::printf("\t- pitch      : %u%u\n",st->buf[idx+3],st->buf[idx+2]);
+        dbg::printf("\t- numerator  : %u\n",st->buf[idx+4]);
+        dbg::printf("\t- denominator: %u\n",st->buf[idx+5]);
+        dbg::printf("\t- color      : %u\n",st->buf[idx+6]);
+        dbg::printf("\t- matrix id  : %u\n",st->buf[idx+7]);
+        dbg::printf("\n");
+        idx += sizeof(struct serialization_data_t);
+    }
     dbg::printf("\n");
 }
 
-void sequencer::serialize_current_track(struct serialized_tree_t * st){
+void sequencer::serialize_current_track(struct serialized_tree_t * st, uint16_t* serialized_data_sz){
 	step * s = get_current_track()->get_first_step();
+    node * n = get_current_track()->get_root_node();
 
-	step::serialize_tree(s, st);
+    step::serialize_tree(s, n, st, serialized_data_sz);
 	dump_serialized_track(st);
 
 }
-void sequencer::deserialize_current_track(struct serialized_tree_t * st){
-	node * n = get_current_track()->get_root_node();
-
-	step::deserialize_tree(n, st);
+int sequencer::deserialize_current_track(struct serialized_tree_t * st){
+    node * old_head = get_current_track()->get_root_node();
+    node * new_head;
+    int ret = step::deserialize_tree(new_head, st);
+    if(ret == SERIALIZATION_OK){
+        get_current_track()->set_root_node(new_head);
+        old_head->delete_tree();
+    }
+    return ret;
 }
 
 
@@ -151,25 +184,21 @@ led_matrix* sequencer::get_led_matrix(){
 }
 
 void next_step_evt::do_evt(){
-	uint8_t res = 0;
-	
-//	if(_s->get_led_matrix()->get_hw())
-//		Serial.println("ok");
-//	else 
-//		Serial.println("ko");
+    track* t;
 
-	track* t;
-	for(int i=0;i<SEQUENCER_NR_TRACK;i++){	
-		t = _s->get_track(i);
-		if(t == _s->get_current_track()){
-		
-			if(step_evt_bmp & (1<<i)){
-				t->show_current_step_nodes_no_irq();
-				t->init_animate_parents_no_irq();
-			}
-			else {
-				t->upd_animate_parents_no_irq();
-			}
-		}
-	}
+    for(uint8_t i=0;i<SEQUENCER_NR_TRACK;i++){
+        t = _s->get_track(i);
+        dbg::printf("track is stopped? %d\n",t->track_is_stopped());
+        if(!t->track_is_stopped()){
+            if(t == _s->get_current_track()){
+                if(step_evt_bmp & (1<<i)){
+                    t->show_current_step_nodes_no_irq();
+                    t->init_animate_parents_no_irq();
+                }
+                else {
+                    t->upd_animate_parents_no_irq();
+                }
+            }
+        }
+    }
 }
