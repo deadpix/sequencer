@@ -81,10 +81,13 @@ class track {
         void  set_root_node(node * n){ head = n; }
 
 		void  set_node_in_matrix(uint8_t, node*);
-		static void chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end);
+        void  rebuild_matrix_nodes(node*);
+
+        static void chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end);
 //		static void set_loop(step* first, step* last);
 		void set_first_in_loop(step* new_first, uint8_t loop_id);
 		void set_last_in_loop(step* new_last, uint8_t loop_id);
+        void reset_loop_settings(step* first, step* last);
 
 		void create_tree(node*, uint8_t, uint8_t, uint8_t, uint8_t);
 		volatile struct clk_def _clk_def;
@@ -135,7 +138,7 @@ class track {
         uint8_t track_is_stopped() { return _state & TRACK_STOP_STATE; }
         uint8_t track_is_paused() { return _state & TRACK_PAUSE_STATE; }
         void play_track(){ _state = TRACK_PLAY_STATE; }
-        void stop_track(){ _state = TRACK_STOP_STATE; }
+        void stop_track(){ _state = TRACK_STOP_STATE; step_reset(); }
         void pause_track(){ _state = TRACK_PAUSE_STATE; }
 
 //        bool is_playing();
@@ -145,6 +148,7 @@ class track {
 
 		void upd_animate_parents_no_irq();
 		void init_animate_parents_no_irq();
+        void stop_step_animation();
 };
 
 #endif

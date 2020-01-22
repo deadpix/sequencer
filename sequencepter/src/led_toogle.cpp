@@ -84,6 +84,11 @@ int led_toogle::end_animation_n_restore(){
 	
 	return ret;
 }
+void led_toogle::force_end_animation_n_restore(){
+    turn_off_n_restore_led();
+    _time_cnt = 0;
+    _state = STOPPED;
+}
 
 int led_toogle::stop_animation(){
 	_state = STOPPED;

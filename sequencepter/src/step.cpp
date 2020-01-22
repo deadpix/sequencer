@@ -112,7 +112,7 @@ static void save_node_data(struct serialization_data_t * sd, node * n){
         sd->velocity = n->_step->_note.velocity;
         sd->pitch = n->_step->_note.pitch;
         sd->clk.numerator = n->_step->_clk_def.numerator;
-        sd->clk.numerator = n->_step->_clk_def.denominator;
+        sd->clk.denominator = n->_step->_clk_def.denominator;
         sd->color = n->_step->get_step_color();
         sd->mtx_id = n->_mtx_id;
     }
@@ -121,7 +121,7 @@ static void save_node_data(struct serialization_data_t * sd, node * n){
         sd->velocity = 0;
         sd->pitch = 0;
         sd->clk.numerator = 0;
-        sd->clk.numerator = 0;
+        sd->clk.denominator = 0;
         sd->color = 0;
         sd->mtx_id = n->_mtx_id;
     }
@@ -132,6 +132,27 @@ static void dump_node_list(LinkedList<node *> *nl){
         node * n = nl->get(i);
         dbg::printf("node_id=%d depth=%d\n",n->_node_id, n->_node_depth);
     }
+}
+static void deserialization_get_node_mtx_id(uint8_t* data_buf, uint16_t data_offset, uint8_t* mtx_id){
+    *mtx_id = data_buf[data_offset+SERIALIZATION_DATA_MTX_ID_OFFSET];
+}
+static void deserialization_get_step_data(uint8_t* data_buf, uint16_t data_offset, step* s){
+    uint16_t tmp = data_offset+SERIALIZATION_DATA_GATE_LEN_OFFSET;
+    s->set_step_gate_len_per(data_buf[tmp]);
+
+    tmp = data_offset+SERIALIZATION_DATA_PITCH_OFFSET;
+    uint16_t tmp_pitch = (data_buf[tmp+1] << 8) | data_buf[tmp];
+    tmp = data_offset+SERIALIZATION_DATA_VELOCITY_OFFSET;
+    s->step_set_note(data_buf[tmp], tmp_pitch);
+
+    tmp = data_offset+SERIALIZATION_DATA_COLOR_OFFSET;
+    s->set_step_color(data_buf[tmp]);
+
+    tmp = data_offset+SERIALIZATION_DATA_CLK_OFFSET;
+    s->_clk_def.numerator = data_buf[tmp];
+
+    tmp = data_offset+SERIALIZATION_DATA_CLK_OFFSET+sizeof(uint8_t);
+    s->_clk_def.denominator = data_buf[tmp];
 }
 
 static void init_step_from_serialized_data(step * s, struct serialization_data_t * data_ptr){
@@ -249,16 +270,19 @@ int step::serialize_tree(step* s, node * root, struct serialized_tree_t* s_tree,
     return ret;
 }
 
-int step::deserialize_tree(node * root, struct serialized_tree_t * s_tree){
+
+int step::deserialize_tree(node ** root, struct serialized_tree_t * s_tree, step ** first, step ** last){
     node * node_ptr = new node;
-    root = node_ptr;
+    *root = node_ptr;
     step * prev_step = NULL;
 	bool break_flg = false;
-	uint8_t i;
+    uint8_t i, depth_cnt;
     uint16_t node_cnt = 0, step_cnt = 0;
+    uint16_t tree_buffer_offset = s_tree->header.tree_byte_sz;
 
-    const struct serialization_data_t * serialized_data = (struct serialization_data_t *) s_tree->buf + s_tree->header.tree_byte_sz;
-    struct serialization_data_t * data_ptr;
+
+    __attribute__((packed)) const struct serialization_data_t * serialized_data = (struct serialization_data_t *) s_tree->buf + s_tree->header.tree_byte_sz;
+    __attribute__((packed)) struct serialization_data_t * data_ptr;
 
     LinkedList<node *> *tNodeList = new LinkedList<node *>;
 
@@ -274,48 +298,83 @@ int step::deserialize_tree(node * root, struct serialized_tree_t * s_tree){
 
         dbg::printf("byte: %d\n",data);
         for(uint8_t j=0;j<SERIALIZATION_BIT_PER_BYTE;j++){
+            uint8_t next_bit;
+            if(j == (SERIALIZATION_BIT_PER_BYTE - 1)){
+                if(i < (s_tree->header.tree_byte_sz-1)){
+                    next_bit = s_tree->buf[i+1] & 0x1;
+                }
+                else {
+                    dbg::printf("Warning: cannot get next bit in %s \n",__FUNCTION__);
+                    next_bit = 1;
+                }
+            }
+            else {
+                next_bit = (data >> 1) & 0x1;
+            }
+
+
             if(data & 0x1){
                 node * n;
                 if(i == 0 && j == 0){
                     n = node_ptr;
+                    depth_cnt = 0;
                 }
                 else {
                     n = new node;
                     tNodeList->add(n);
+                    ++depth_cnt;
                 }
-                data_ptr = (struct serialization_data_t *)(serialized_data + node_cnt * sizeof(struct serialization_data_t));
-                n->_mtx_id = data_ptr->mtx_id;
+                tree_buffer_offset = (s_tree->header.tree_byte_sz + node_cnt * sizeof(struct serialization_data_t));
+//                data_ptr = (struct serialization_data_t *)(serialized_data + node_cnt * sizeof(struct serialization_data_t));
+                deserialization_get_node_mtx_id(s_tree->buf, tree_buffer_offset, &n->_mtx_id);
+//                tree_buffer_offset += sizeof(struct serialization_data_t);
+                //                n->_mtx_id = data_ptr->mtx_id;
 				if(!node_ptr->_children){
 					LinkedList<node *> *ll = new LinkedList<node *>;
 					node_ptr->_children = ll;
 				}
-				node_ptr->_children->add(n);
+                if(node_ptr != n)
+                    node_ptr->_children->add(n);
                 ++node_cnt;
+
+                n->_node_depth = depth_cnt;
 				// do we need node_id
 				// when n->_mtx_id should be set???
 
 				// eventually create step if next bit = 0
-				if( !(data & 0x2) ){
-					step * s = new step;
+//				if( !(data & 0x2) ){
+                if( !next_bit ){
+                    step * s = new step;
 					s->_node = n;
 					n->_step = s;
 					n->_node_is_step = true;
-                    init_step_from_serialized_data(s,data_ptr);
+
+                    deserialization_get_step_data(s_tree->buf, tree_buffer_offset,s);
+
                     if(prev_step){
 						prev_step->set_next_step(s);
 						s->set_prev_step(prev_step);
-						prev_step = s;
 					}
+                    prev_step = s;
+                    if(step_cnt == 0) *first = s;
+                    *last = s;
+                    dbg::printf("first=%x last=%x\n",*first,*last);
                     ++step_cnt;
 				}
-                n->_parent = node_ptr;
-                node_ptr = n;
+                if(n != node_ptr){
+                    n->_parent = node_ptr;
+                    node_ptr = n;
+                }
+                else {
+                    n->_parent = NULL;
+                }
 			}
 			else {
 //                node_ptr = node_ptr->_parent;
 
+                --depth_cnt;
 				// bit is not set: get parent node
-				if(node_ptr == root){
+                if(node_ptr == *root){
                     dbg::printf("root has been reached\n");
 					break_flg = true;
 				}
@@ -343,18 +402,19 @@ int step::deserialize_tree(node * root, struct serialized_tree_t * s_tree){
         ret = SERIALIZATION_ERROR;
     }
     if( step_cnt != s_tree->header.nr_steps){
-        printf("error in deserialization: %d steps has been counted but %d steps in header",
+        dbg::printf("error in deserialization: %d steps has been counted but %d steps in header",
                step_cnt, s_tree->header.nr_steps);
         ret = SERIALIZATION_ERROR;
     }
     if(ret != SERIALIZATION_OK){
+        dbg::printf("error = %d\n",ret);
         int sz = tNodeList->size();
         for(int i=0;i<sz;i++){
             node * n = tNodeList->pop();
             delete n;
         }
         delete tNodeList;
-        root = NULL;
+        *root = NULL;
     }
     return ret;
 }

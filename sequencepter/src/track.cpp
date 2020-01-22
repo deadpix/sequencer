@@ -158,6 +158,16 @@ static void set_loop(step* first, step* last){
 //	}
 //}
 
+void track::reset_loop_settings(step * first, step * last){
+    dbg::printf("first 0x%x last 0x%x\n",first,last);
+    for(int i=0;i<SEQ_NR_LOOP_SETTING;i++){
+        loop_step_[i].first = first;
+        loop_step_[i].last = last;
+    }
+    cur_loop_ = 0;
+    set_loop(loop_step_[cur_loop_].first, loop_step_[cur_loop_].last);
+}
+
 track::track(){
 //	curr_step_id = 0;
 	_hw_fct = _dummy_fct;
@@ -178,12 +188,11 @@ track::track(){
 //	_last_step = head._children->get(head._children->size() - 1)->_step;
 //	set_loop(_first_step, _last_step);
 //	chain_step_from_node_list(head._children, _first_step, _last_step);
-	for(int i=0;i<SEQ_NR_LOOP_SETTING;i++){
-		loop_step_[i].first = _cur_step;
-        loop_step_[i].last = head->_children->get(head->_children->size() - 1)->_step;
-	}
-	cur_loop_ = 0;
-	set_loop(loop_step_[0].first, loop_step_[0].last);
+//    for(int i=0;i<SEQ_NR_LOOP_SETTING;i++){
+//		loop_step_[i].first = _cur_step;
+//        loop_step_[i].last = head->_children->get(head->_children->size() - 1)->_step;
+//	}
+    reset_loop_settings(_cur_step, head->_children->get(head->_children->size() - 1)->_step);
 //	dump_step(_first_step);
 	
 }
@@ -306,6 +315,14 @@ node* track::get_node_from_matrix(uint8_t id){
 void  track::set_node_in_matrix(uint8_t id, node* n){
 	_mtx_to_node[id] = n;
 }
+
+void track::rebuild_matrix_nodes(node* parent){
+    for(int i=0;i<parent->_children->size();i++){
+        node * n = parent->_children->get(i);
+        _mtx_to_node[n->_mtx_id] = n;
+    }
+}
+
 
 uint8_t track::get_max_step(){
 	return _max_step;
@@ -456,6 +473,10 @@ void track::upd_animate_parents_no_irq(){
 	ENABLE_IRQ();
 
 	_upd_animate_parents(tmp);
+}
+
+void track::stop_step_animation(){
+    get_led_matrix()->reset();
 }
 
 //static uint32_t trig_cnt = 0;

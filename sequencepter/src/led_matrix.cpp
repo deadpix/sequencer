@@ -202,3 +202,17 @@ int led_matrix::clr_n_restore(uint16_t nr, uint8_t ground){
 	return  _led_status_arr[nr].bmp;
 //	return ret;	
 }
+
+void led_matrix::reset(){
+    for(int i=0;i<NR_LEDS;i++){
+        for(int j=0;j<NR_LEVELS;j++){
+            _led_status_arr[i].color[j] = 0;
+        }
+        _led_status_arr[i].bmp = 0x0;
+        if(_hw){
+            _hw->upd_pxl(i, 0x0, 0);
+        }
+    }
+    if(_hw)
+        _hw->refresh_matrix(0);
+}

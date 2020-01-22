@@ -59,6 +59,8 @@ class led_matrix {
 		int  save_n_ovw(uint8_t, uint16_t, uint8_t);
 		int  save_n_set_dfl(uint8_t, uint16_t, uint8_t);
 		int  clr_n_restore(uint16_t, uint8_t);
+
+        void reset();
 };
 
 #endif

@@ -110,13 +110,22 @@ void sequencer::serialize_current_track(struct serialized_tree_t * st, uint16_t*
 	dump_serialized_track(st);
 
 }
+
 int sequencer::deserialize_current_track(struct serialized_tree_t * st){
     node * old_head = get_current_track()->get_root_node();
     node * new_head;
-    int ret = step::deserialize_tree(new_head, st);
+    step * first;
+    step * last;
+    int ret = step::deserialize_tree(&new_head, st, &first, &last);
     if(ret == SERIALIZATION_OK){
         get_current_track()->set_root_node(new_head);
         old_head->delete_tree();
+        get_current_track()->reset_loop_settings(first, last);
+        // rebuild the track btn matrix
+        get_current_track()->rebuild_matrix_nodes(new_head);
+        get_current_track()->step_reset();
+        // clear GUI
+//        get_current_track()->stop_step_animation();
     }
     return ret;
 }
@@ -188,16 +197,13 @@ void next_step_evt::do_evt(){
 
     for(uint8_t i=0;i<SEQUENCER_NR_TRACK;i++){
         t = _s->get_track(i);
-        dbg::printf("track is stopped? %d\n",t->track_is_stopped());
-        if(!t->track_is_stopped()){
-            if(t == _s->get_current_track()){
-                if(step_evt_bmp & (1<<i)){
-                    t->show_current_step_nodes_no_irq();
-                    t->init_animate_parents_no_irq();
-                }
-                else {
-                    t->upd_animate_parents_no_irq();
-                }
+        if(!(t->track_is_stopped()) && (t == _s->get_current_track())){
+            if(step_evt_bmp & (1<<i)){
+                t->show_current_step_nodes_no_irq();
+                t->init_animate_parents_no_irq();
+            }
+            else {
+                t->upd_animate_parents_no_irq();
             }
         }
     }

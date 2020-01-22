@@ -32,6 +32,13 @@ struct serialization_header_t {
     uint16_t tree_byte_sz;
 };
 
+#define SERIALIZATION_DATA_GATE_LEN_OFFSET  0
+#define SERIALIZATION_DATA_VELOCITY_OFFSET  sizeof(uint8_t)
+#define SERIALIZATION_DATA_PITCH_OFFSET     SERIALIZATION_DATA_VELOCITY_OFFSET + sizeof(uint8_t)
+#define SERIALIZATION_DATA_CLK_OFFSET       SERIALIZATION_DATA_PITCH_OFFSET + sizeof(uint16_t)
+#define SERIALIZATION_DATA_COLOR_OFFSET     SERIALIZATION_DATA_CLK_OFFSET + sizeof(struct clk_def)
+#define SERIALIZATION_DATA_MTX_ID_OFFSET    SERIALIZATION_DATA_COLOR_OFFSET + sizeof(uint8_t)
+
 struct __attribute__((__packed__)) serialization_data_t {
     uint8_t gate_len;
     uint8_t velocity;
@@ -91,7 +98,7 @@ class step {
 		void step_set_note(uint8_t, uint16_t);
 
         static int serialize_tree(step* s, node * root, struct serialized_tree_t* s_tree, uint16_t * serialized_data_sz);
-        static int deserialize_tree(node * root, struct serialized_tree_t * s_tree);
+        static int deserialize_tree(node ** root, struct serialized_tree_t * s_tree, step ** first, step ** last);
 };
 
 #endif

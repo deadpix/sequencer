@@ -165,36 +165,21 @@ void sequenception::do_isr(){
 		if(evt->get_event_id() == EVT_MASTER_TICK){
 			flg_mst_tick = true;
 		}
-		else if(evt->get_event_id() == EVT_NEXT_STEP){
+        else if(evt->get_event_id() == EVT_NEXT_STEP){
 			flg_next_step = true;
-		}
+        }
 	}
 
 	uint32_t ms = evt_master_tick(&evt);
 
-	if(evt_list.size() == 0 || ms > 0 || !flg_mst_tick){
+    if(evt_list.size() == 0 || (ms > 0 && !flg_mst_tick)){
 		evt_list.add(evt);
 	} else {
 		delete evt;
 	}
-/*
-	if(evt_list.size() > 0){
-		for(int i=0;i<evt_list.size();i++){
-			evt = evt_list.get(i);
-			if(evt->get_event_id() == EVT_MASTER_TICK){
-				flg_mst_tick = true;
-				break;
-			}
-		}
-		if(ms > 0 || !flg_mst_tick)
-			evt_list.add(evt);
-	}
-	else {
-		evt_list.add(evt);
-	}
-*/
-	tmp = midi_seq.check_events(ms, mst_clk->clk_get_step_cnt(), &evt);	
-	if(evt_list.size() == 0 || tmp || !flg_next_step){
+
+    tmp = midi_seq.check_events(ms, mst_clk->clk_get_step_cnt(), &evt);
+    if(evt_list.size() == 0 || tmp || !flg_next_step){
 		evt_list.add(evt);
 	} 
 	else {
