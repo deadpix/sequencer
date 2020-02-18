@@ -66,7 +66,7 @@ int hw_sr::set_led_x(uint8_t color, uint16_t nr){
 	uint16_t y = nr % LED_MATRIX_NR_LEDS;
 	uint16_t idx;
 
-	for_eachset_bit(idx,(uint16_t *) &color, LED_MATRIX_NR_COLORS){
+	for_eachset_bit(idx,(uint8_t *) &color, LED_MATRIX_NR_COLORS){
 		set_led_x_coor(idx,x,y);
 	}
 
@@ -78,7 +78,7 @@ int hw_sr::clr_led_x(uint8_t color, uint16_t nr){
 	uint16_t y = nr % LED_MATRIX_NR_LEDS;
 	uint16_t idx;
 
-	for_eachset_bit(idx,(uint16_t *) &color, LED_MATRIX_NR_COLORS){
+	for_eachset_bit(idx,(uint8_t *) &color, LED_MATRIX_NR_COLORS){
 		clr_led_x_coor(idx,x,y);
 	}
 	return 1;
@@ -95,7 +95,7 @@ int hw_sr::toogle_led_x(uint8_t color, uint16_t nr){
 	uint16_t y = nr % LED_MATRIX_NR_LEDS;
 	uint16_t idx;
 
-	for_eachset_bit(idx,(uint16_t *) &color, LED_MATRIX_NR_COLORS){
+	for_eachset_bit(idx,(uint8_t *) &color, LED_MATRIX_NR_COLORS){
 		toogle_led_x_coor(idx,x,y);
 	}
 	return 1;

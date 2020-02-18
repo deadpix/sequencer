@@ -21,7 +21,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */ 
-#include <i2c_t3.h>
+//#include <i2c_t3.h>
 #include <Adafruit_MCP23017.h>
 //#include <Wire.h>
 #include <LinkedList.h>

@@ -53,6 +53,8 @@ static void init_menu_btn(prog* p){
 
 	pinMode(PIN_MENU_BTN,INPUT_PULLUP);
 	pinMode(PIN_PARAM_BTN,INPUT_PULLUP);
+
+
 	menu_btn.attach(PIN_MENU_BTN);
 	menu_btn.interval(MENU_BTN_BOUNCE_TIME);
 	param_btn.attach(PIN_PARAM_BTN);
@@ -125,10 +127,12 @@ static void scan_menu_btn(){
 //	led_matrix* prev = sequenception.lm_ptr;
 	if(menu_btn.update()){
 		if(menu_btn.fell()){
-			menu_btn_status = FCT_BTN_RELEASED;
+//			menu_btn_status = FCT_BTN_RELEASED;
+			menu_btn_status = FCT_BTN_PUSHED;
 		} 
 		else {
-			menu_btn_status = FCT_BTN_PUSHED;
+//			menu_btn_status = FCT_BTN_PUSHED;
+			menu_btn_status = FCT_BTN_RELEASED;
 		}
 	}
 	if(menu_btn_status == FCT_BTN_RELEASED){
@@ -159,6 +163,28 @@ static void scan_menu_btn(){
 static void scan_param_btn(){
 	led_matrix* prev = sequenception.lm_ptr;
 	if(param_btn.update()){
+
+		if(param_btn.fell()){
+			param_ptr = sequenception.current_prog->get_param();
+			if(param_ptr){
+				param_btn_status = FCT_BTN_PUSHED;
+//				//TODO print selected options
+			}
+
+
+
+		}
+		else {
+			if(param_ptr){
+
+
+				param_btn_status = FCT_BTN_RELEASED; 
+			}
+
+
+		}
+
+/*
 		if(param_btn.fell() && param_ptr){
 			param_btn_status = FCT_BTN_RELEASED; 
 		} 
@@ -169,9 +195,11 @@ static void scan_param_btn(){
 //				//TODO print selected options
 			}
 		}
+*/
 	}
 
 	if(param_btn_status == FCT_BTN_RELEASED){
+		
 		if(param_on_release()){
 			param_btn_status = FCT_BTN_IDLE;
 		}

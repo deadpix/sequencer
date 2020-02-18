@@ -23,14 +23,28 @@
  */
 
 
-#ifndef __CONFIGURATION_H__
-#define __CONFIGURATION_H__
+#ifndef __SRC_HW_HW_LCD_ILI9341_H__
+#define __SRC_HW_HW_LCD_ILI9341_H__
 
-#define HW_SHIFT_REGISTER		0
-#define HW_ADAFRUIT_NEOTRELLIS	0
-#define HW_SPARKFUN_LUMINI		0
-#define HW_LCD_ILI9341			1
+#include "../hw.h"
+#include "../types.h" 
+#include <ILI9341_t3.h>
 
-#define CMD_BTN_MATRIX  		0
+
+#define NR_COLORS	8
+class hw_lcd_ILI9341 : public hw {
+	private:
+		ILI9341_t3* _tft;
+		uint32_t _sqcpt_to_lcd_color[3][NR_COLORS];
+
+	public:
+		hw_lcd_ILI9341(ILI9341_t3* tft);
+		~hw_lcd_ILI9341(){};
+		led_t get_led(uint8_t){};
+		void refresh_matrix(uint16_t id) {};
+		void upd_pxl(uint16_t id, uint8_t color, uint8_t brightness);
+		void resetLcd();
+};
+
 
 #endif

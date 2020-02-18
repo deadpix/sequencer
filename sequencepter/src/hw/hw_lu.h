@@ -20,17 +20,28 @@
  *  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
- */
+ */ 
 
 
-#ifndef __CONFIGURATION_H__
-#define __CONFIGURATION_H__
+#ifndef __SRC_HW_HW_LU_H__
+#define __SRC_HW_HW_LU_H__
 
-#define HW_SHIFT_REGISTER		0
-#define HW_ADAFRUIT_NEOTRELLIS	0
-#define HW_SPARKFUN_LUMINI		0
-#define HW_LCD_ILI9341			1
+#include "../hw.h"
+#include "../types.h" 
+#include <FastLED.h>
 
-#define CMD_BTN_MATRIX  		0
+#define NR_COLORS	8
+class hw_lu : public hw {
+	private:
+		CRGB* _lu_matrix;
+		uint32_t _sqcpt_to_lu_color[3][NR_COLORS];
+
+	public:
+		hw_lu(CRGB* lu_matrix);
+		~hw_lu(){};
+		led_t get_led(uint8_t){};
+		void refresh_matrix(uint16_t id);
+		void upd_pxl(uint16_t id, uint8_t color, uint8_t brightness);
+};
 
 #endif

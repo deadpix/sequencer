@@ -125,7 +125,7 @@ int sequencer::deserialize_current_track(struct serialized_tree_t * st){
         get_current_track()->rebuild_matrix_nodes(new_head);
         get_current_track()->step_reset();
         // clear GUI
-//        get_current_track()->stop_step_animation();
+        get_current_track()->stop_step_animation();
     }
     return ret;
 }

@@ -21,7 +21,7 @@
  *  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  *  SOFTWARE.
  */
-#include <i2c_t3.h>
+//#include <i2c_t3.h>
 //#include <Adafruit_MCP23017.h>
 
 #include "configuration.h"
@@ -248,10 +248,6 @@ static uint8_t btn_matrix_digitalRead(uint8_t pin){
 	return mcp.digitalRead(pin);
 }
 
-static void refresh_matrix(uint16_t led_id, uint8_t color){
-	
-}
-
 static void setup_matrix(){
 	int i;
 	pinMode(latchPin, OUTPUT);
@@ -260,8 +256,6 @@ static void setup_matrix(){
 
 	write_shift_reg(0x0);
 	grd_cnt = 0;
-
-//	led_matrix::set_refresh_clbck(refresh_matrix);
 
 	btn_col_idx = 0;
 	flag_btn_active = false;
@@ -387,8 +381,12 @@ Adafruit_NeoTrellis t_array[BTN_NUM_ROW/4][BTN_NUM_COL/4] = {
  // { Adafruit_NeoTrellis(NT_ADDR1, &Wire), Adafruit_NeoTrellis(NT_ADDR2, &Wire) },
  // { Adafruit_NeoTrellis(NT_ADDR3, &Wire), Adafruit_NeoTrellis(NT_ADDR4, &Wire) }
    
-  { Adafruit_NeoTrellis(NT_ADDR1, &Wire1), Adafruit_NeoTrellis(NT_ADDR2, &Wire1) },
-  { Adafruit_NeoTrellis(NT_ADDR3, &Wire1), Adafruit_NeoTrellis(NT_ADDR4, &Wire1) }
+//  { Adafruit_NeoTrellis(NT_ADDR1, &Wire1), Adafruit_NeoTrellis(NT_ADDR2, &Wire1) },
+//  { Adafruit_NeoTrellis(NT_ADDR3, &Wire1), Adafruit_NeoTrellis(NT_ADDR4, &Wire1) }
+
+  { Adafruit_NeoTrellis(NT_ADDR1), Adafruit_NeoTrellis(NT_ADDR2) },
+  { Adafruit_NeoTrellis(NT_ADDR3), Adafruit_NeoTrellis(NT_ADDR4) }
+
 
 };
 
@@ -438,11 +436,6 @@ TrellisCallback trellis_btn_clbck(keyEvent evt){
 //	}
 
 	return 0;
-}
-
-
-static void refresh_matrix(uint16_t led_id, uint8_t color){
-	
 }
 
 static void setup_matrix(){
@@ -508,7 +501,101 @@ static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
 	}
 }
 
+#elif HW_SPARKFUN_LUMINI == 1
+#include "src/hw/hw_lu.h"
+#include <FastLED.h>
+
+#define DATA_PIN 	11
+#define CLOCK_PIN 	14
+
+CRGB matrix[NR_LEDS];
+static hw_lu hw(matrix);
+
+static void scan(prog* p){
+	// TODO
+	Serial.println("TODO");
+}
+static void upd_shift_reg(led_matrix* lm){
+	// EMPTY
+}
+static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
+	prev->set_hw(NULL);
+	next->set_hw(&hw);
+
+	for(int i=0; i<NR_LEDS; i++){
+		struct led_status* tmp = next->get_led_status(i);
+		if(tmp->bmp){
+			uint8_t idx = BIT::get_highest_bit_set(tmp->bmp);
+			hw.upd_pxl(i, tmp->color[idx], idx);
+		}
+		else {
+			hw.upd_pxl(i, 0, 0);
+		}
+	}
+	hw.refresh_matrix(0);
+}
+static void setup_matrix(){
+	
+	Serial.println("setup lumini matrix");
+	
+	LEDS.addLeds<APA102, DATA_PIN, CLOCK_PIN, BGR>(matrix, NR_LEDS);
+	LEDS.setBrightness(20);
+
+	delay(1000);
+}
+
+#elif HW_LCD_ILI9341 == 1
+
+#include <SPI.h>
+#include <ILI9341_t3.h>
+#include "src/hw/hw_lcd_ILI9341.h"
+
+#define TFT_DC  9
+#define TFT_CS 10
+
+ILI9341_t3 tft = ILI9341_t3(TFT_CS, TFT_DC);
+static hw_lcd_ILI9341 hw(&tft);
+
+static void scan(prog* p){
+}
+static void upd_shift_reg(led_matrix* lm){
+}
+static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
+	prev->set_hw(NULL);
+	next->set_hw(&hw);
+
+	for(int i=0; i<NR_LEDS; i++){
+		struct led_status* tmp = next->get_led_status(i);
+		if(tmp->bmp){
+			uint8_t idx = BIT::get_highest_bit_set(tmp->bmp);
+			hw.upd_pxl(i, tmp->color[idx], idx);
+		}
+		else {
+			hw.upd_pxl(i, 0, 0);
+		}
+	}
+	hw.refresh_matrix(0);
+}
+static void setup_matrix(){
+	tft.begin();
+	tft.fillScreen(ILI9341_BLACK);
+	uint8_t x = tft.readcommand8(ILI9341_RDMODE);
+	Serial.print("Display Power Mode: 0x"); Serial.println(x, HEX);
+	x = tft.readcommand8(ILI9341_RDMADCTL);
+	Serial.print("MADCTL Mode: 0x"); Serial.println(x, HEX);
+	x = tft.readcommand8(ILI9341_RDPIXFMT);
+	Serial.print("Pixel Format: 0x"); Serial.println(x, HEX);
+	x = tft.readcommand8(ILI9341_RDIMGFMT);
+	Serial.print("Image Format: 0x"); Serial.println(x, HEX);
+	x = tft.readcommand8(ILI9341_RDSELFDIAG);
+	Serial.print("Self Diagnostic: 0x"); Serial.println(x, HEX);
+
+	hw.resetLcd();
+}
+
+
 #else
+
 static void scan(prog* p){
 }
 static void upd_shift_reg(led_matrix* lm){
@@ -519,6 +606,5 @@ static void setup_matrix(){
 	Serial.println("empty matrix");
 	delay(1000);
 }
-static void refresh_matrix(uint16_t led_id, uint8_t color){
-}
+
 #endif
