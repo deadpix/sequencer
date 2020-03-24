@@ -34,6 +34,7 @@ node::~node(){
 	_parent = NULL;
 }
 
+
 /* delete all node in a tree except parent node */
 void node::delete_tree(/*node * root*/){
 	LinkedList<node *> *del_list = new LinkedList<node *>; 

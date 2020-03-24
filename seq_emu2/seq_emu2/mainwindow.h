@@ -12,6 +12,7 @@
 #include <QtDebug>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QPlainTextEdit>
 
 #include "configuration.h"
 
@@ -48,6 +49,8 @@ private slots:
     void handlePauseBtn();
     void handleResetBtn();
 
+    void handleRefreshBtn();
+
 private:
 	Ui::MainWindow *ui;
 
@@ -71,6 +74,8 @@ private:
     QPushButton* btnPause;
     QPushButton* btnReset;
 
+    QPlainTextEdit* logs;
+    QPushButton* btnRefresh;
     //	QLabel*	     oled[OLED_LINE];
 
 	uint8_t btnMatrixStatus[MATRIX_NR_BTN];

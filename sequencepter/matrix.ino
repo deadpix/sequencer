@@ -534,6 +534,7 @@ static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
 	}
 	hw.refresh_matrix(0);
 }
+
 static void setup_matrix(){
 	
 	Serial.println("setup lumini matrix");
@@ -552,9 +553,21 @@ static void setup_matrix(){
 
 #define TFT_DC  9
 #define TFT_CS 10
-
+#define MCP1_ADDR		0x0
+Adafruit_MCP23017 mcp1;
 ILI9341_t3 tft = ILI9341_t3(TFT_CS, TFT_DC);
 static hw_lcd_ILI9341 hw(&tft);
+
+static uint8_t btn_select_pins[BTN_NUM_COL] = {0,1,2,3,4,5,6,7}; // ground switch
+static uint8_t btn_read_pins[BTN_NUM_ROW] = {8,9,10,11,12,13,14,15};
+
+static ArrBounce btn_row[BTN_NUM_COL];
+static uint8_t grd_cnt;
+
+
+static uint8_t btn_matrix_digitalRead(uint8_t pin){
+	return mcp1.digitalRead(pin);
+}
 
 static void scan(prog* p){
 }
@@ -591,6 +604,41 @@ static void setup_matrix(){
 	Serial.print("Self Diagnostic: 0x"); Serial.println(x, HEX);
 
 	hw.resetLcd();
+
+
+
+
+
+	mcp1.begin(MCP1_ADDR);
+	Wire.setClock(I2C_RATE_800);
+
+
+	int i;
+	grd_cnt = 0;
+
+	btn_col_idx = 0;
+	flag_btn_active = false;
+
+	init_rd_cbck(&btn_matrix_digitalRead, 0);
+
+	for(i=0;i<BTN_NUM_COL;i++){
+		btn_row[i].init_ArrBounce(btn_read_pins, BOUNCE_TIME, BTN_NUM_ROW, &mcp_digitalRead, 0);
+		btn_status.pushed_bmp[i] = 0x0;
+		btn_status.long_pushed_bmp[i] = 0x0;
+	}
+
+	for (i=0;i<BTN_NUM_COL;i++){
+		mcp1.pinMode(btn_select_pins[i], OUTPUT);
+		mcp1.digitalWrite(btn_select_pins[i], HIGH);
+	}
+
+	// button row input lines
+	for (i=0;i<BTN_NUM_ROW;i++){
+		mcp1.pinMode(btn_read_pins[i], INPUT);
+		mcp1.pullUp(btn_read_pins[i], HIGH);
+	}
+
+
 }
 
 

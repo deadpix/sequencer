@@ -30,6 +30,10 @@
 #include "../../sequencepter/src/gui.h"
 #include "../../sequencepter/src/perf.h"
 
+#include <iostream>
+#include <sstream> // for ostringstream
+#include <string>
+
 #include <hw_debug.h>
 
 #define TRACE_PERF              0
@@ -80,6 +84,48 @@ static void refresh_oled(char** line_arr){
 
 }
 
+static void printTree(node * n, QPlainTextEdit * out, QString * str){
+    const QString space = "           ";
+    //QTextCursor::Right
+    // movePosition(QTextCursor::Right, QTextCursor::KeepAnchor, col_space)
+    if(!n->_children || n->_children->size() == 0){
+        // node is a leaf
+        if(!n->_step){
+            dbg::printf("ERROR: leaf does not contain step...\n");
+            return;
+        }
+        QString tmp;
+        tmp.sprintf("-(%2u/%2u,%2u)"
+                    ,n->_step->_clk_def.numerator
+                    ,n->_step->_clk_def.denominator
+                    ,n->_mtx_id);
+        if(str->isNull()){
+            for(int i=0;i<n->_node_depth;i++){
+                str->append(space);
+            }
+        }
+        str->append(tmp);
+        out->appendPlainText(*str);
+        str->clear();
+    } else {
+        QString tmp;
+        tmp.sprintf("-(XX/XX,%2u)"
+                    ,n->_mtx_id);
+        if(str->isNull()){
+            for(int i=0;i<n->_node_depth;i++){
+                str->append(space);
+            }
+        }
+        str->append(tmp);
+
+        for(int i=0; i<n->_children->size();i++){
+            printTree(n->_children->get(i), out, str);
+        }
+    }
+
+}
+
+
 #define BTN_RELEASED	0
 #define BTN_PUSHED	1
 #define BTN_LONG_PUSHED	2
@@ -90,7 +136,7 @@ static void refresh_oled(char** line_arr){
 //}
 
 void MainWindow::setup(){
-	dbg::printf("start setup\n");
+    dbg::printf("start setup\n");
 //	led_matrix::set_hw(_hw_emulator);
 	oled_gui.init_gui(refresh_oled);
 	sequenception.fct_midi = midi_note_on;
@@ -231,7 +277,14 @@ MainWindow::MainWindow(QWidget *parent) :
     menu = this->findChild<QMenuBar *>(QString("menuBar"));
     file = this->findChild<QMenu *>(QString("menuSequenception"));
 
+    logs = this->findChild<QPlainTextEdit *>(QString("logWindow"));
+    logs->setReadOnly(true);
+    QTextDocument *doc = logs->document();
+    QFont font = doc->defaultFont();
+    font.setFamily("Courier New");
+    doc->setDefaultFont(font);
 
+    logs->appendPlainText("**** sequencepter simulator logs ****\n");
 
 //    file->addMenu("&Load sequence");
 //    file->addMenu("&Save sequence");
@@ -309,6 +362,13 @@ MainWindow::MainWindow(QWidget *parent) :
         connect(btnReset, SIGNAL (released()), this, SLOT (handleResetBtn()));
     }
 
+    btnRefresh = this->findChild<QPushButton *>("refresh");
+    if(!btnRefresh){
+        qDebug("unable to find refresh button...");
+    } else {
+        connect(btnRefresh, SIGNAL (released()), this, SLOT (handleRefreshBtn()));
+    }
+
 
 
 	btnMenuStatus = BTN_RELEASED;
@@ -319,6 +379,9 @@ MainWindow::MainWindow(QWidget *parent) :
 	_hw_emulator = new hw_sr();
 #endif
 	setup();
+
+    QString tmp;
+    printTree(sequenception.midi_seq.get_current_track()->get_root_node(),logs, &tmp);
 
 }
 
@@ -514,4 +577,9 @@ void MainWindow::handlePauseBtn(){
 void MainWindow::handleResetBtn(){
     qDebug("push reset button");
     sequenception.midi_seq.reset_all();
+}
+void MainWindow::handleRefreshBtn(){
+    qDebug("refresh tree");
+    QString tmp;
+    printTree(sequenception.midi_seq.get_current_track()->get_root_node(),logs, &tmp);
 }

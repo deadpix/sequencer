@@ -33,13 +33,15 @@
 #define TFT_CELL_PIX_OFFSET		2
 #define TFT_ELEMENT_PIX_SIZE	(TFT_CELL_PIX_SIZE - 2*TFT_CELL_PIX_OFFSET)
 
+//#define DEBUG
+
 void hw_lcd_ILI9341::resetLcd(){
 	_tft->fillScreen(ILI9341_BLACK);
 	uint16_t x_start = TFT_X_OFFSET;
 	uint16_t x_end = TFT_MATRIX_PIX_SIZE+TFT_X_OFFSET;
 
 	uint16_t y_start = TFT_Y_OFFSET;
-	uint16_t y_end = TFT_Y_OFFSET+TFT_Y_OFFSET;
+	uint16_t y_end = TFT_MATRIX_PIX_SIZE+TFT_Y_OFFSET;
 
 	for(int i=0; i<MATRIX_NR_COL+1; i++){
 		int inc = (TFT_CELL_PIX_SIZE * i);
@@ -52,7 +54,7 @@ hw_lcd_ILI9341::hw_lcd_ILI9341(ILI9341_t3* tft){
 	_tft = tft;
 	for(int i=0;i<3; i++){
 		_sqcpt_to_lcd_color[i][0] = ILI9341_BLACK;
-		_sqcpt_to_lcd_color[i][1] = ILI9341_MAGENTA;
+		_sqcpt_to_lcd_color[i][1] = ILI9341_RED;
 		_sqcpt_to_lcd_color[i][2] = ILI9341_BLUE;
 		_sqcpt_to_lcd_color[i][3] = ILI9341_MAGENTA;
 		_sqcpt_to_lcd_color[i][4] = ILI9341_GREEN;
@@ -66,8 +68,17 @@ void hw_lcd_ILI9341::upd_pxl(uint16_t id, uint8_t color, uint8_t brightness){
 	// draw pixel with color _sqcpt_to_lcd_color[brightness][color] 
 	int x 	= TFT_X_OFFSET + TFT_CELL_PIX_OFFSET 
 			+ (id % MATRIX_NR_COL) * TFT_CELL_PIX_SIZE;
-	int y 	= TFT_X_OFFSET + TFT_CELL_PIX_OFFSET
-			+ (id % MATRIX_NR_COL) * TFT_CELL_PIX_SIZE;
+	int y 	= TFT_Y_OFFSET + TFT_CELL_PIX_OFFSET
+			+ (id / MATRIX_NR_COL) * TFT_CELL_PIX_SIZE;
+
+#ifdef DEBUG
+	dbg::print("id: ");
+	dbg::print(id);
+	dbg::print(" x=");
+	dbg::print(x);
+	dbg::print(" y=");
+	dbg::println(y);
+#endif
 
 	_tft->fillRect(x, y, TFT_ELEMENT_PIX_SIZE, TFT_ELEMENT_PIX_SIZE, 
 				  _sqcpt_to_lcd_color[brightness][color]);
