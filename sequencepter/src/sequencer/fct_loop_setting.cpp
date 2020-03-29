@@ -58,48 +58,6 @@ void fct_loop_setting::on_push(uint8_t btn_id){
 		// button flag
 		loop_cnt_ = (loop_cnt_ + 1) % 2;
 	}
-/*
-	node* n = t->get_node_from_matrix(id);
-	step* s = t->get_last_step();
-	step* first = t->get_first_step();
-	node* looping_node;
-	
-	upd_display(_seq, id);
-
-	// last step is the looping point
-	// if push a button whose id is different from last step id
-
-	if(n && (n->_node_depth == 1) && (n != (looping_node = s->_node->get_node_depth(1)))){
-		// step after looping step (n->_step) will points to first step
-		LinkedList<node *> *tmp_list = n->_parent->_children;
-		// tmp_list should not be NULL
-		int i = 0;
-		for(i; i<tmp_list->size(); i++){
-			if(tmp_list->get(i) == n) break;
-		}
-		for(i; i<tmp_list->size(); i++){
-//			if(tmp_list->get(i)->_step != NULL){
-			if(tmp_list->get(i)->_node_is_step){
-				tmp_list->get(i)->_step->set_next_step(first);
-				tmp_list->get(i)->_step->set_prev_step(s);
-			}
-			else {
-				dbg::printf("setting loop on subseq not implemented yet\n");
-			}
-		}
-		track::chain_step_from_node_list(tmp_list, first, n->_step);
-		// do step chaining
-		
-		// do step clearing?
-		
-		dbg::printf("looping_node->_mtx_id=%d btn_id=%d\n",looping_node->_mtx_id,btn_id);
-
-		t->get_led_matrix()->clr_n_restore(errata_step[looping_node->_mtx_id],FOREGROUND1);	
-		t->get_led_matrix()->save_n_set(LED_G_IDX, btn_id, FOREGROUND1);
-		t->set_last_step(n->_step);
-
-	}
-*/
 }
 void fct_loop_setting::on_release(uint8_t btn_id){
 	UNUSED(btn_id);

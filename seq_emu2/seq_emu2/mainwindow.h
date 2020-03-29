@@ -78,6 +78,7 @@ private:
     QPushButton* btnRefresh;
     //	QLabel*	     oled[OLED_LINE];
 
+    int     lastLongedPush = -1;
 	uint8_t btnMatrixStatus[MATRIX_NR_BTN];
 	elapsedMillis btnMatrixMs[MATRIX_NR_BTN];
 	uint8_t btnMenuStatus;

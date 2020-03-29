@@ -17,6 +17,7 @@ test_proj_two sequenception::p2;
 seq_param sequenception::seq_param_ui;
 fct_step sequenception::seq_option1;
 fct_loop_setting sequenception::seq_option2;
+fct_normalization sequenception::seq_option3;
 prog* sequenception::current_prog;
 led_matrix* sequenception::lm_ptr;
 clk* sequenception::mst_clk;
@@ -53,16 +54,21 @@ void sequenception::init_prog(prog* p, int prog_id, char* str){
 void sequenception::init_sequencer(){
 	seq_option1.init(&midi_seq, "step");
 	seq_option2.init(&midi_seq, "looplen");
-	
+    seq_option3.init(&midi_seq, "norma");
+
 	midi_seq.add_fct(&seq_option1, SEQ_PARAM_STEP_RED_BTN_ID);
 	midi_seq.add_fct(&seq_option1, SEQ_PARAM_STEP_BLUE_BTN_ID);
 	midi_seq.add_fct(&seq_option1, SEQ_PARAM_STEP_GREEN_BTN_ID);
-	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_RED_BTN_ID);
+
+    midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_RED_BTN_ID);
 	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_BLUE_BTN_ID);
 	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_GREEN_BTN_ID);
 	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_RED_BLUE_BTN_ID);
 	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_RED_GREEN_BTN_ID);
 	midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_BLUE_GREEN_BTN_ID);
+    midi_seq.add_fct(&seq_option2, SEQ_PARAM_LOOP_BLUE_GREEN_BTN_ID);
+
+    midi_seq.add_fct(&seq_option3, SEQ_PARAM_STEP_NORMALIZATION_BTN_ID);
 
 	midi_seq.set_current_param(0);
 	midi_seq.prog::display_str("step", 1);

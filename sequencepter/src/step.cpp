@@ -127,6 +127,36 @@ static void save_node_data(struct serialization_data_t * sd, node * n){
     }
 }
 
+static uint8_t eval_gcd(int n, int m){
+    uint8_t gcd, remainder;
+    while (n != 0){
+        remainder = m % n;
+        m = n;
+        n = remainder;
+    }
+    gcd = m;
+    return gcd;
+}
+
+void step::normalize_steps(uint8_t num, uint8_t denom){
+    step * s = this->get_next_step();
+    this->_clk_def.numerator   *= denom;
+    this->_clk_def.denominator *= num;
+    while(this != s){
+        s->_clk_def.numerator   *= denom;
+        s->_clk_def.denominator *= num;
+
+        uint8_t tmp_num   = s->_clk_def.numerator;
+        uint8_t tmp_denom = s->_clk_def.denominator;
+
+        uint8_t gcd = eval_gcd(tmp_num, tmp_denom);
+        s->_clk_def.numerator   = tmp_num   / gcd;
+        s->_clk_def.denominator = tmp_denom / gcd;
+
+        s = s->get_next_step();
+    }
+}
+
 static void dump_node_list(LinkedList<node *> *nl){
     for(int i=0;i<nl->size();i++){
         node * n = nl->get(i);

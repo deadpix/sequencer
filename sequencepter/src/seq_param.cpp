@@ -63,6 +63,11 @@ void seq_param::init(sequencer* const s, clk* const c){
 	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_STEP_GREEN_BTN_ID]
 			, SEQ_PARAM_STEP_GREEN_BTN_ID, BACKGROUND);
 
+    param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_STEP_NORMALIZATION_BTN_ID]
+            , SEQ_PARAM_STEP_NORMALIZATION_BTN_ID, BACKGROUND);
+
+
+
 	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_LOOP_RED_BTN_ID]
 			, SEQ_PARAM_LOOP_RED_BTN_ID, BACKGROUND);
 	param::_lm.save_n_set(seq_param_btn_to_color[SEQ_PARAM_LOOP_BLUE_BTN_ID]

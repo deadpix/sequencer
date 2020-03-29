@@ -40,7 +40,8 @@ SOURCES += main.cpp \
 	../../sequencepter/src/node.cpp \
 	../../sequencepter/src/led_matrix.cpp \
 	../../sequencepter/src/sequencer/fct_loop_setting.cpp \
-	../../sequencepter/src/sequencer/fct_step.cpp 
+        ../../sequencepter/src/sequencer/fct_normalization.cpp \
+        ../../sequencepter/src/sequencer/fct_step.cpp
 
 HEADERS  += mainwindow.h \
 	configuration.h \
@@ -70,6 +71,7 @@ HEADERS  += mainwindow.h \
 	../../sequencepter/src/led_matrix.h \
 	../../sequencepter/src/sequencer/fct_loop_setting.h \
 	../../sequencepter/src/sequencer/fct_step.h \
-	hw_nt.h \ 
+        ../../sequencepter/src/sequencer/fct_normalization.h \
+        hw_nt.h \
 	hw_sr.h 
 FORMS    += mainwindow.ui

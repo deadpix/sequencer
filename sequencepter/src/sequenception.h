@@ -23,6 +23,7 @@
 #include "clk.h"
 #include "sequencer/fct_step.h"
 #include "sequencer/fct_loop_setting.h"
+#include "sequencer/fct_normalization.h"
 #include "seq_param.h"
 #include "event.h"
 
@@ -51,6 +52,7 @@ class sequenception {
 		static seq_param seq_param_ui;
 		static fct_step seq_option1;
 		static fct_loop_setting seq_option2;
+        static fct_normalization seq_option3;
 
 		static prog* current_prog;
 		static led_matrix* lm_ptr;

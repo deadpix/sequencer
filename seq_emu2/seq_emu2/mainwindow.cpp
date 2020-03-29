@@ -413,7 +413,7 @@ void MainWindow::checkBtnMatrix(){
 	for(int i=0;i<MATRIX_NR_BTN;i++){
 		if(btnMatrixStatus[i] == BTN_PUSHED){
 			if(btnMatrixMs[i] > LONG_PRESS_TIME_MS){
-				btnMatrixStatus[i] = BTN_LONG_PUSHED;
+                btnMatrixStatus[i] = BTN_LONG_PUSHED;
 				sequenception.current_prog->on_long_push(i);
 			}
 		}

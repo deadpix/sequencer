@@ -30,12 +30,12 @@ class fct_loop_setting: public fct_clbk {
 		struct loop_animation loop_animation_[2];
 
 	public:
-		fct_loop_setting(){};
-		~fct_loop_setting(){};
+        fct_loop_setting(){}
+        ~fct_loop_setting(){}
 		
 		void init(sequencer*, char* name);
 		void on_push(uint8_t btn_id);
-		void on_long_push(uint8_t btn_id){ UNUSED(btn_id); };
+        void on_long_push(uint8_t btn_id){ UNUSED(btn_id); }
 		void on_release(uint8_t btn_id);
 		void on_long_release(uint8_t btn_id);
 		void update_ui(uint32_t mst_ms, uint16_t mst_step);

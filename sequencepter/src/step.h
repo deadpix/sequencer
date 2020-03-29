@@ -96,6 +96,7 @@ class step {
 		uint8_t get_step_color();
 		
 		void step_set_note(uint8_t, uint16_t);
+        void normalize_steps(uint8_t num, uint8_t denom);
 
         static int serialize_tree(step* s, node * root, struct serialized_tree_t* s_tree, uint16_t * serialized_data_sz);
         static int deserialize_tree(node ** root, struct serialized_tree_t * s_tree, step ** first, step ** last);
