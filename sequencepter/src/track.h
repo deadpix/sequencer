@@ -80,7 +80,9 @@ class track {
         node* get_root_node(){ return head; }
         void  set_root_node(node * n){ head = n; }
 
-		void  set_node_in_matrix(uint8_t, node*);
+        step* get_step_by_btn_id(uint16_t btn_id);
+        node* get_node_by_btn_id(uint16_t btn_id);
+        void  set_node_in_matrix(uint8_t, node*);
         void  rebuild_matrix_nodes(node*);
 
         static void chain_step_from_node_list(LinkedList<node *> *list, step* start, step* end);

@@ -7,11 +7,13 @@
 #include "../fct_clbk.h"
 #include "../sequencer.h"
 #include "../led_toogle.h"
+#include "../blink.h"
 
 class fct_normalization: public fct_clbk {
     private:
-        sequencer* _seq;
-        uint8_t _norm_step;
+        sequencer*  _seq;
+        uint8_t     _norm_step;
+        blink       step_blink_;
 
     public:
         fct_normalization(){}

@@ -502,3 +502,16 @@ uint8_t track::check_event(uint32_t ms, uint16_t mst_step_cnt){
 		return 0;
 	}
 }
+
+step* track::get_step_by_btn_id(uint16_t btn_id){
+    step* s = NULL;
+    if(_mtx_to_node[btn_id] && _mtx_to_node[btn_id]->_node_is_step)
+        s = _mtx_to_node[btn_id]->_step;
+    return s;
+}
+node* track::get_node_by_btn_id(uint16_t btn_id){
+    node* n = NULL;
+    if(_mtx_to_node[btn_id])
+        n = _mtx_to_node[btn_id];
+    return n;
+}

@@ -38,12 +38,13 @@ SOURCES += main.cpp \
 	../../sequencepter/src/step.cpp \
 	../../sequencepter/src/track.cpp \
 	../../sequencepter/src/node.cpp \
-	../../sequencepter/src/led_matrix.cpp \
+        ../../sequencepter/src/led_matrix.cpp \
 	../../sequencepter/src/sequencer/fct_loop_setting.cpp \
         ../../sequencepter/src/sequencer/fct_normalization.cpp \
         ../../sequencepter/src/sequencer/fct_step.cpp
 
 HEADERS  += mainwindow.h \
+	../../sequencepter/src/blink.h \
 	configuration.h \
 	../../sequencepter/src/hw.h \ 
 	../../sequencepter/src/perf.h \
@@ -67,7 +68,8 @@ HEADERS  += mainwindow.h \
 	../../sequencepter/src/prog.h \
 	../../sequencepter/src/step.h \
 	../../sequencepter/src/track.h \
-	../../sequencepter/src/node.h \
+        ../../sequencepter/src/blink.h \
+        ../../sequencepter/src/node.h \
 	../../sequencepter/src/led_matrix.h \
 	../../sequencepter/src/sequencer/fct_loop_setting.h \
 	../../sequencepter/src/sequencer/fct_step.h \
