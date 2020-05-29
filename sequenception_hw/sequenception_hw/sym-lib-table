@@ -1,0 +1,4 @@
+(sym_lib_table
+  (lib (name teensy)(type Legacy)(uri /Users/vdupre/Documents/vincent/dev/sequencer/sequenception_hw/lib/symbols/teensy_library/teensy.lib)(options "")(descr ""))
+  (lib (name sequenception_hw-rescue)(type Legacy)(uri ${KIPRJMOD}/sequenception_hw-rescue.lib)(options "")(descr ""))
+)
