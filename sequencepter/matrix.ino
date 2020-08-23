@@ -610,7 +610,7 @@ static void setup_matrix(){
 
 
 	mcp1.begin(MCP1_ADDR);
-	Wire.setClock(I2C_RATE_800);
+//	Wire.setClock(I2C_RATE_800);
 
 
 	int i;

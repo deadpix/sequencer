@@ -1,26 +1,6 @@
 EESchema-LIBRARY Version 2.4
 #encoding utf-8
 #
-# Connector_Conn_01x02_Male
-#
-DEF Connector_Conn_01x02_Male J 0 40 Y N 1 F N
-F0 "J" 0 100 50 H V C CNN
-F1 "Connector_Conn_01x02_Male" 0 -200 50 H V C CNN
-F2 "" 0 0 50 H I C CNN
-F3 "" 0 0 50 H I C CNN
-$FPLIST
- Connector*:*_1x??_*
-$ENDFPLIST
-DRAW
-S 34 -95 0 -105 1 1 6 F
-S 34 5 0 -5 1 1 6 F
-P 2 1 1 6 50 -100 34 -100 N
-P 2 1 1 6 50 0 34 0 N
-X Pin_1 1 200 0 150 L 50 50 1 1 P
-X Pin_2 2 200 -100 150 L 50 50 1 1 P
-ENDDRAW
-ENDDEF
-#
 # Connector_Conn_01x03_Male
 #
 DEF Connector_Conn_01x03_Male J 0 40 Y N 1 F N
@@ -431,6 +411,21 @@ X VCC 8 300 200 100 L 50 50 1 1 P
 ENDDRAW
 ENDDEF
 #
+# Mechanical_MountingHole
+#
+DEF Mechanical_MountingHole H 0 40 Y Y 1 F N
+F0 "H" 0 200 50 H V C CNN
+F1 "Mechanical_MountingHole" 0 125 50 H V C CNN
+F2 "" 0 0 50 H I C CNN
+F3 "" 0 0 50 H I C CNN
+$FPLIST
+ MountingHole*
+$ENDFPLIST
+DRAW
+C 0 0 50 0 1 50 N
+ENDDRAW
+ENDDEF
+#
 # Switch_SW_Push
 #
 DEF Switch_SW_Push SW 0 40 N N 1 F N
@@ -563,7 +558,6 @@ X 32_Touch_PWM 49 1000 750 200 L 50 50 1 1 B
 X 3_TX_PWM 5 -1000 950 200 R 50 50 1 1 B
 X 33_Touch 50 1000 850 200 L 50 50 1 1 B
 X A13 51 1000 1050 200 L 50 50 1 1 B
-X Reset 52 1000 1150 200 L 50 50 1 1 I
 X 4_RX_PWM 6 -1000 850 200 R 50 50 1 1 B
 X 5_TX1_PWM 7 -1000 750 200 R 50 50 1 1 B
 X 6_PWM 8 -1000 650 200 R 50 50 1 1 B
