@@ -39,8 +39,8 @@ class seq_param: public param {
 		void clk_multiplier_ui(uint32_t, uint16_t);
 
 	public:
-		seq_param(){};
-		~seq_param(){};
+        seq_param(){}
+        ~seq_param(){}
 		
 		void init(sequencer* const s, clk* const c);
 		

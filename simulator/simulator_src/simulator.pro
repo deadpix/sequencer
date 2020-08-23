@@ -8,7 +8,7 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = seq_emu2
+TARGET = simulator
 TEMPLATE = app
 INCLUDEPATH += ./include
 DEFINES += IB_USE_STD_STRING
