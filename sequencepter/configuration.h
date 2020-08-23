@@ -26,11 +26,26 @@
 #ifndef __CONFIGURATION_H__
 #define __CONFIGURATION_H__
 
+#define PROTO1 	1
+
+#if PROTO1 == 1
+
 #define HW_SHIFT_REGISTER		0
 #define HW_ADAFRUIT_NEOTRELLIS	0
 #define HW_SPARKFUN_LUMINI		0
 #define HW_LCD_ILI9341			1
-
 #define CMD_BTN_MATRIX  		0
+
+
+
+#else
+
+#define HW_SHIFT_REGISTER		0
+#define HW_ADAFRUIT_NEOTRELLIS	0
+#define HW_SPARKFUN_LUMINI		0
+#define HW_LCD_ILI9341			1
+#define CMD_BTN_MATRIX  		0
+
+#endif
 
 #endif

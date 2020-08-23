@@ -30,6 +30,7 @@
 #include "src/led_matrix.h"
 #include "src/bit.h"
 #include "Bounce_array.h"
+#include "PinInterface.hpp"
 
 #define BTN_NUM_COL		8
 #define BTN_NUM_ROW		8
@@ -38,10 +39,32 @@
 #define LONG_PRESS_TIME_MS	1000
 #define NR_CBCK			3
 
+class CpuPinReader: public PinInterface {
+	public:
+//		CpuPinReader(){};
+//		~CpuPinReader(){};
+		uint8_t readPin(uint8_t pin){ return digitalRead(pin); }
+};
+
+class McpPinReader: public PinInterface {
+private:
+	Adafruit_MCP23017* _mcp;
+
+public:
+//	McpPinReader(){};
+//	~McpPinReader(){};
+	void attachMcp(Adafruit_MCP23017* mcp){ _mcp = mcp; }
+	uint8_t readPin(uint8_t pin){ return _mcp->digitalRead(pin); }
+};
+
+CpuPinReader cpuPinReader;
 
 Adafruit_MCP23017 mcp;
+McpPinReader	  mcpPinReader0;
+
 #if CMD_BTN_MATRIX == 1 
 Adafruit_MCP23017 mcp1;
+McpPinReader	  mcpPinReader1;
 #endif
 
 struct _btn_status {
@@ -64,6 +87,7 @@ int init_rd_cbck(cbck_fct_rd fct_ptr, uint8_t fct_id){
 uint8_t mcp_digitalRead(uint8_t pin, uint8_t fct_id){
 	return cbck_fct_rd_arr[fct_id](pin);
 }
+
 
 
 #if CMD_BTN_MATRIX == 1
@@ -110,7 +134,10 @@ static void setup_cmd_btn_matrix(){
 	for (i=0;i<CMD_BTN_MATRIX_NR_COL;i++){
 		cmd_btn_action_bmp[i] = 0x0;
 		cmd_btn_status_bmp[i] = 0x0;
-                cmd_btn_matrix_status[i].init_ArrBounce(cmd_btn_matrix_read_pins, BOUNCE_TIME, CMD_BTN_MATRIX_NR_ROW, &mcp_digitalRead, CMD_BTN_MATRIX_CLBK);
+        cmd_btn_matrix_status[i].init_ArrBounce(cmd_btn_matrix_read_pins, 
+        										BOUNCE_TIME, 
+        										CMD_BTN_MATRIX_NR_ROW, 
+        										(PinInterface *) &mcpPinReader1);
 		mcp1.pinMode(cmd_btn_matrix_select_pins[i], OUTPUT);
 		mcp1.digitalWrite(cmd_btn_matrix_select_pins[i], HIGH);
 	}
@@ -265,7 +292,7 @@ static void setup_matrix(){
 	Wire.setClock(1000000);
 
 	for(i=0;i<BTN_NUM_COL;i++){
-		btn_row[i].init_ArrBounce(btn_read_pins, BOUNCE_TIME, BTN_NUM_ROW, &mcp_digitalRead, 0);
+		btn_row[i].init_ArrBounce(btn_read_pins, BOUNCE_TIME, BTN_NUM_ROW, (PinInterface *) &mcpPinReader0);
 		btn_status.pushed_bmp[i] = 0x0;
 		btn_status.long_pushed_bmp[i] = 0x0;
 	}
@@ -362,6 +389,7 @@ static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
 	
 }
 
+#if 0
 #elif HW_ADAFRUIT_NEOTRELLIS == 1
 
 #include <Adafruit_NeoTrellis.h>
@@ -500,7 +528,7 @@ static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
 		hw.refresh_matrix(0);
 	}
 }
-
+#endif
 #elif HW_SPARKFUN_LUMINI == 1
 #include "src/hw/hw_lu.h"
 #include <FastLED.h>
@@ -558,19 +586,55 @@ Adafruit_MCP23017 mcp1;
 ILI9341_t3 tft = ILI9341_t3(TFT_CS, TFT_DC);
 static hw_lcd_ILI9341 hw(&tft);
 
-static uint8_t btn_select_pins[BTN_NUM_COL] = {0,1,2,3,4,5,6,7}; // ground switch
-static uint8_t btn_read_pins[BTN_NUM_ROW] = {8,9,10,11,12,13,14,15};
+static uint8_t btn_select_pins[BTN_NUM_COL] = { A13, 24, 25, 26, 31, 32, 33, A11 };
+static uint8_t btn_read_pins[BTN_NUM_ROW] 	= { 23, 22, 28, 27, 24, 23, 22, 21};
 
 static ArrBounce btn_row[BTN_NUM_COL];
 static uint8_t grd_cnt;
 
 
 static uint8_t btn_matrix_digitalRead(uint8_t pin){
-	return mcp1.digitalRead(pin);
+	return digitalRead(pin);
 }
 
 static void scan(prog* p){
+	uint8_t i;
+
+	digitalWrite(btn_select_pins[btn_col_idx], LOW);
+
+	for (i=0; i<BTN_NUM_ROW; i++){
+		if(btn_row[btn_col_idx].update(i)){
+			if(btn_row[btn_col_idx].read(i) == HIGH){
+				flag_btn_active = false;
+				if(btn_status.long_pushed_bmp[btn_col_idx] & (1<<i)){
+					// release
+					p->on_long_release(btn_col_idx*BTN_NUM_COL + i);
+				} 
+				else {
+					p->on_release(btn_col_idx*BTN_NUM_COL + i);
+				}
+				btn_status.pushed_bmp[btn_col_idx] &= ~(1<<i);
+				btn_status.long_pushed_bmp[btn_col_idx] &= ~(1<<i);
+				
+			} else {
+				p->on_push(btn_col_idx*BTN_NUM_COL + i);
+				flag_btn_active = true;
+				btn_ms_cnt[btn_col_idx*BTN_NUM_COL + i] = 0;
+				btn_status.pushed_bmp[btn_col_idx] |= (1<<i);
+			}
+		}
+		if( (btn_status.pushed_bmp[btn_col_idx] & (1<<i)) 
+		&& !(btn_status.long_pushed_bmp[btn_col_idx] & (1<<i))){
+			if(btn_ms_cnt[btn_col_idx*BTN_NUM_COL + i] > LONG_PRESS_TIME_MS){
+				btn_status.long_pushed_bmp[btn_col_idx] |= (1<<i);
+				p->on_long_push(btn_col_idx*BTN_NUM_COL + i);
+			}
+		}
+	}
+	digitalWrite(btn_select_pins[btn_col_idx], HIGH);	
+	btn_col_idx = (btn_col_idx+1)%BTN_NUM_COL;
 }
+
 static void upd_shift_reg(led_matrix* lm){
 }
 static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
@@ -605,14 +669,6 @@ static void setup_matrix(){
 
 	hw.resetLcd();
 
-
-
-
-
-	mcp1.begin(MCP1_ADDR);
-//	Wire.setClock(I2C_RATE_800);
-
-
 	int i;
 	grd_cnt = 0;
 
@@ -622,23 +678,21 @@ static void setup_matrix(){
 	init_rd_cbck(&btn_matrix_digitalRead, 0);
 
 	for(i=0;i<BTN_NUM_COL;i++){
-		btn_row[i].init_ArrBounce(btn_read_pins, BOUNCE_TIME, BTN_NUM_ROW, &mcp_digitalRead, 0);
+		btn_row[i].init_ArrBounce(btn_read_pins, BOUNCE_TIME, BTN_NUM_ROW, (PinInterface *) &cpuPinReader);
 		btn_status.pushed_bmp[i] = 0x0;
 		btn_status.long_pushed_bmp[i] = 0x0;
 	}
 
 	for (i=0;i<BTN_NUM_COL;i++){
-		mcp1.pinMode(btn_select_pins[i], OUTPUT);
-		mcp1.digitalWrite(btn_select_pins[i], HIGH);
+		pinMode(btn_select_pins[i], OUTPUT);
+		digitalWrite(btn_select_pins[i], HIGH);
 	}
 
 	// button row input lines
 	for (i=0;i<BTN_NUM_ROW;i++){
-		mcp1.pinMode(btn_read_pins[i], INPUT);
-		mcp1.pullUp(btn_read_pins[i], HIGH);
+		pinMode(btn_read_pins[i], INPUT_PULLUP);
+//		pullUp(btn_read_pins[i], HIGH);
 	}
-
-
 }
 
 
