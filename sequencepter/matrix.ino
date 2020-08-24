@@ -30,7 +30,7 @@
 #include "src/led_matrix.h"
 #include "src/bit.h"
 #include "Bounce_array.h"
-#include "PinInterface.hpp"
+#include "PinInterface.h"
 
 #define BTN_NUM_COL		8
 #define BTN_NUM_ROW		8
@@ -529,6 +529,7 @@ static void switch_matrix_ui(led_matrix* next, led_matrix* prev){
 	}
 }
 #endif
+/*
 #elif HW_SPARKFUN_LUMINI == 1
 #include "src/hw/hw_lu.h"
 #include <FastLED.h>
@@ -572,7 +573,7 @@ static void setup_matrix(){
 
 	delay(1000);
 }
-
+*/
 #elif HW_LCD_ILI9341 == 1
 
 #include <SPI.h>

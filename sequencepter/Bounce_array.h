@@ -45,7 +45,7 @@
 //#define BOUNCE_WITH_PROMPT_DETECTION
 
 #include <inttypes.h>
-#include "PinInterface.hpp"
+#include "PinInterface.h"
 
 class ArrBounce
 {
