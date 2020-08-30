@@ -373,11 +373,14 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	btnMenuStatus = BTN_RELEASED;
 	btnParamStatus = BTN_RELEASED;
+
 #if HW_ADAFRUIT_NEOTRELLIS == 1
 	_hw_emulator = new hw_nt(btnMatrix);
 #elif HW_SHIFT_REGISTER == 1
 	_hw_emulator = new hw_sr();
 #endif
+
+    sequenception.attachHw(_hw_emulator);
 	setup();
 
     QString tmp;
@@ -509,7 +512,9 @@ void MainWindow::handleParamBtn(){
 		btnMenu->setEnabled(false);
 	
 		qDebug ("handle param button");
-	
+
+        sequenception.enterParamMode();
+        /*
 		param_ptr = sequenception.current_prog->get_param();
 		if(param_ptr){
 			sequenception.lm_ptr = param_ptr->get_led_matrix();
@@ -517,6 +522,7 @@ void MainWindow::handleParamBtn(){
 			_hw_emulator->switch_matrix(sequenception.lm_ptr, prev);
 			param_ptr->param_on_enter();
 		}
+        */
 
 	} else {
 		btnParam->setStyleSheet(white);
@@ -524,14 +530,15 @@ void MainWindow::handleParamBtn(){
 		btnMenu->setEnabled(true);
 
 		qDebug ("param menu button");
-		
+        sequenception.leaveParamMode();
+        /*
 		if(param_ptr){
 			sequenception.current_prog = param_ptr->get_prog();
 			sequenception.lm_ptr = sequenception.current_prog->get_led_matrix();
 			_hw_emulator->switch_matrix(sequenception.lm_ptr, prev);
 			param_ptr->param_on_leave();
 		}
-
+*/
 	}
 }
 
@@ -543,23 +550,28 @@ void MainWindow::handleMenuBtn(){
 		btnParam->setEnabled(false);
 		qDebug ("handle menu button");
 
+        sequenception.enterMenuMode();
+        /*
 		sequenception.lm_ptr = sequenception.menu_ctrl.get_menu_led_matrix();
 		sequenception.current_prog = sequenception.prog_arr[sequenception.nr_prog];
 		_hw_emulator->switch_matrix(sequenception.lm_ptr, prev);
 		sequenception.menu_ctrl.menu_enter();
-
+*/
 	} else {
 		btnMenu->setStyleSheet(white);
 		btnMenuStatus = BTN_RELEASED;
 		btnParam->setEnabled(true);
 		qDebug ("release menu button");
 
+        sequenception.leaveMenuMode();
+        /*
 		sequenception.current_prog = sequenception.menu_ctrl.get_next_prog();
 		sequenception.current_prog->display_title();
 		sequenception.lm_ptr = sequenception.current_prog->get_led_matrix();
 		_hw_emulator->switch_matrix(sequenception.lm_ptr, prev);
 		sequenception.menu_ctrl.menu_leave();
-	}
+*/
+    }
 
 }
 void MainWindow::handleStartBtn(){

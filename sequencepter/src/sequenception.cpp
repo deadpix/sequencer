@@ -3,6 +3,7 @@
 //#include "../interrupts.h"
 #include <interrupts.h>
 #include "midi_cst.h"
+#include "bit.h"
 
 //static const uint8_t MIDI_DRUM_GM[8] = {37, 36, 42, 82, 40, 38, 46, 44};
 
@@ -23,6 +24,7 @@ led_matrix* sequenception::lm_ptr;
 clk* sequenception::mst_clk;
 uint32_t sequenception::clk_ms;
 volatile uint8_t sequenception::track_upd;
+param* sequenception::param_ptr;
 
 void (*sequenception::fct_midi)(uint16_t, uint8_t, uint8_t);
 void (*sequenception::fct_tempo_change)(uint32_t);
@@ -129,7 +131,57 @@ void sequenception::init_all_prog(gui *g){
 
 	set_default_prog((prog *) &midi_seq);
 }
+void sequenception::enterMenuMode(){
+    led_matrix* prev = lm_ptr;
+	menu_ctrl.menu_enter();
+	lm_ptr = menu_ctrl.get_menu_led_matrix();
+	switchMatrixUi(lm_ptr, prev);
+	current_prog = prog_arr[nr_prog];
+}
+void sequenception::leaveMenuMode(){
+	led_matrix* prev = lm_ptr;
+	current_prog = menu_ctrl.get_next_prog();
+	current_prog->display_title();
+	lm_ptr = current_prog->get_led_matrix();
+	switchMatrixUi(lm_ptr, prev);
+	menu_ctrl.menu_leave();
+}
+void sequenception::enterParamMode(){
+    param_ptr = current_prog->get_param();
+    if(param_ptr){
+        led_matrix* prev = lm_ptr;
+        current_prog = param_ptr;
+        lm_ptr = param_ptr->get_led_matrix();
+        param_ptr->param_on_enter();
+        switchMatrixUi(lm_ptr, prev);
+    }
+}
+void sequenception::leaveParamMode(){
+    led_matrix* prev = lm_ptr;
+    if(param_ptr){
+        current_prog = param_ptr->get_prog();
+        lm_ptr = current_prog->get_led_matrix();
+        switchMatrixUi(lm_ptr, prev);
+        param_ptr->param_on_leave();
+    }
+}
 
+void sequenception::switchMatrixUi(led_matrix* next, led_matrix* prev){
+	prev->set_hw(NULL);
+	next->set_hw(hw_);
+
+	for(int i=0; i<NR_LEDS; i++){
+		struct led_status* tmp = next->get_led_status(i);
+		if(tmp->bmp){
+			uint8_t idx = BIT::get_highest_bit_set(tmp->bmp);
+			hw_->upd_pxl(i, tmp->color[idx], idx);
+		}
+		else {
+			hw_->upd_pxl(i, 0, 0);
+		}
+		hw_->refresh_matrix(0);
+	}
+}
 void sequenception::init(gui *g){
 	init_all_prog(g);
 }

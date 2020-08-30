@@ -26,6 +26,7 @@
 #include "sequencer/fct_normalization.h"
 #include "seq_param.h"
 #include "event.h"
+#include "hw.h"
 
 class sequenception {
 	private:
@@ -35,6 +36,7 @@ class sequenception {
 		void init_midi_seq();
 		void init_midi_controller();
 		void set_default_prog(prog*);
+		hw* hw_;
 
 	public:
 		static menu menu_ctrl;
@@ -57,6 +59,7 @@ class sequenception {
 		static prog* current_prog;
 		static led_matrix* lm_ptr;
 		static clk* mst_clk;
+        static param* param_ptr;
 
 		static uint32_t clk_ms;
 		static volatile uint8_t track_upd; 
@@ -66,6 +69,15 @@ class sequenception {
 		
 		sequenception();
 		~sequenception();
+
+		void attachHw(hw* hw) { hw_ = hw; }
+		// should it be private / protected method?
+		void switchMatrixUi(led_matrix* next, led_matrix* prev);
+
+        void enterParamMode();
+        void leaveParamMode();
+        void enterMenuMode();
+        void leaveMenuMode();
 
 		void init(gui*);
 	

@@ -40,10 +40,10 @@
 #define NR_CBCK			3
 
 class CpuPinReader: public PinInterface {
-	public:
+public:
 //		CpuPinReader(){};
 //		~CpuPinReader(){};
-		uint8_t readPin(uint8_t pin){ return digitalRead(pin); }
+	uint8_t readPin(uint8_t pin){ return digitalRead(pin); }
 };
 
 class McpPinReader: public PinInterface {
@@ -153,40 +153,25 @@ static int cmd_btn_matrix_do_something(uint8_t cmd_btn, bool is_pushed){
 	int ret = 0;
 	switch(cmd_btn){
 		case 0:
-			if(is_pushed){
-				ret = menu_on_push();	
-			} else {
-				ret = menu_on_release();
-			}
+			if(is_pushed) ret = menu_on_push();	
+			else ret = menu_on_release();
 			break;
 
 		case 1:
 			if(is_pushed){
-				if( (param_ptr = sequenception.current_prog->get_param()) ){
-					ret = param_on_push();	
-				}
-				else {
-					ret = 1;
-				}
+				if( (sequenception.param_ptr = sequenception.current_prog->get_param()) ) ret = param_on_push();	
+				else ret = 1;
 			} else {
-				if(param_ptr){
-					ret = param_on_release();
-				}
-				else { 
-					ret = 1;
-				}
+				if(sequenception.param_ptr) ret = param_on_release();
+				else ret = 1;
 			}
 			break;
 
 		default:
 			Serial.print("btn ");
 			Serial.print(cmd_btn);
-			if(is_pushed){
-				Serial.println(" has no pushed cmd");
-			} 
-			else {
-				Serial.println(" has no released cmd");
-			}
+			if(is_pushed) Serial.println(" has no pushed cmd");
+			else Serial.println(" has no released cmd");
 			ret = 1;
 			break;
 	}
@@ -315,7 +300,8 @@ static void scan(prog* p){
 // 	Select current columns
 	mcp.digitalWrite(btn_select_pins[btn_col_idx], LOW);
 
-
+//FIXME: evaluation of flag must be done at the end of line scanning
+//       on all buttons of row
 // 	Read the button inputs
 	for (i=0; i<BTN_NUM_ROW; i++){
 		if(btn_row[btn_col_idx].update(i)){
@@ -587,8 +573,8 @@ Adafruit_MCP23017 mcp1;
 ILI9341_t3 tft = ILI9341_t3(TFT_CS, TFT_DC);
 static hw_lcd_ILI9341 hw(&tft);
 
-static uint8_t btn_select_pins[BTN_NUM_COL] = { A13, 24, 25, 26, 31, 32, 33, A11 };
-static uint8_t btn_read_pins[BTN_NUM_ROW] 	= { 23, 22, 28, 27, 24, 23, 22, 21};
+const static uint8_t btn_select_pins[BTN_NUM_COL] = { A13, 24, 25, 26, 31, 32, 33, A11 };
+const static uint8_t btn_read_pins[BTN_NUM_ROW]   = { 23, 22, 28, 27, 24, 23, 22, 21};
 
 static ArrBounce btn_row[BTN_NUM_COL];
 static uint8_t grd_cnt;
@@ -668,6 +654,7 @@ static void setup_matrix(){
 	x = tft.readcommand8(ILI9341_RDSELFDIAG);
 	Serial.print("Self Diagnostic: 0x"); Serial.println(x, HEX);
 
+	sequenception.attachHw(&hw);
 	hw.resetLcd();
 
 	int i;
@@ -675,8 +662,6 @@ static void setup_matrix(){
 
 	btn_col_idx = 0;
 	flag_btn_active = false;
-
-	init_rd_cbck(&btn_matrix_digitalRead, 0);
 
 	for(i=0;i<BTN_NUM_COL;i++){
 		btn_row[i].init_ArrBounce(btn_read_pins, BOUNCE_TIME, BTN_NUM_ROW, (PinInterface *) &cpuPinReader);
